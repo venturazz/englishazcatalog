@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <div class="page-header" style="text-align: center">
+    I'm The Header
+    <br/>
+    <button type="button" onClick="window.print()" style="background: pink">
+      PRINT ME!
+    </button>
+  </div>
+
+  <div class="page-footer">
+    I'm The Footer
+  </div>
+
+  <table>
+
+    <thead>
+      <tr>
+        <td>
+          <!--place holder for the fixed-position header-->
+          <div class="page-header-space"></div>
+        </td>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td>
+          <!--*** CONTENT GOES HERE ***-->
+            <div class="page" style="line-height: 3;">
+            <div>
+        <div id='h5p-container'></div>
+    	<script type="text/javascript">
+			const el = document.getElementById('h5p-container');
+			const options = {
+			h5pJsonPath:  './workspace/content-example-5',
+			frameJs: './js/frame.bundle.js',
+			frameCss: './styles/h5p.css',
+			embed: true,
+			embedCode:'<iframe width=":w" height=":h" src="https://venturazz.github.io/englishazcatalog/h5p-standalone/content-example.html" frameBorder="0" scrolling="no" styles="width:100%"></iframe>',
+
+}
+new H5PStandalone.H5P(el, options);
+    </script>   
+        </div>
+          </div>
+          </td>
+      </tr>
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td>
+          <!--place holder for the fixed-position footer-->
+          <div class="page-footer-space"></div>
+        </td>
+      </tr>
+    </tfoot>
+
+  </table>
+
+</body>
+
+</html>
