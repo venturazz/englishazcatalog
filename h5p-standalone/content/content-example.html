@@ -10,10 +10,13 @@
     <h1>Content Example</h1>
     <div id='h5p-container'></div>
     <script type="text/javascript">
-        const el = document.getElementById('h5p-container');
-        const h5pLocation = './h5p-standalone/workspace/content-example';
-
-        const h5p = new H5PStandalone.H5P(el, h5pLocation);
+			const el = document.getElementById('h5p-container');
+			const options = {
+			h5pJsonPath:  './h5p-standalone/workspace/content-example',
+			frameJs: './h5p-standalone/frame.bundle.js',
+			frameCss: './h5p-standalone/styles/h5p.css',
+}
+new H5PStandalone.H5P(el, options);
     </script>
 </body>
 
