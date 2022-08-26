@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="../css/bootstrap.min.css">
     <link rel="stylesheet" href="../fontawesome/css/all.min.css">
     <link rel="stylesheet" href="../css/templatemo-style.css">
+    <script src="./js/print.min.js"></script>
+    <script src="./js/studentinformation.js"></script>
+    <link rel="stylesheet" type="text/css" href="./css/print.min.css">
+
 <!--
     
 TemplateMo 556 Catalog-Z
@@ -15,6 +19,37 @@ TemplateMo 556 Catalog-Z
 https://templatemo.com/tm-556-catalog-z
 
 -->
+<div class="container">
+	<legend class="text-center"><b>Student Information</b></legend>
+    <form id="contactForm" data-sb-form-api-token="API_TOKEN">
+        <div class="form-floating">
+            <input class="form-control" id="name" type="text" placeholder="Name" data-sb-validations="required" />
+            <label for="name"></label>
+            <div class="invalid-feedback" data-sb-feedback="name:required">Name is required.</div>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" id="class" type="text" placeholder="Class" data-sb-validations="required" />
+            <label for="class"></label>
+            <div class="invalid-feedback" data-sb-feedback="class:required">Class is required.</div>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" id="studentNo" type="text" placeholder="Student No" data-sb-validations="required" />
+            <label for="studentNo"></label>
+            <div class="invalid-feedback" data-sb-feedback="studentNo:required">Student No is required.</div>
+        </div>
+        <div class="d-none" id="submitSuccessMessage">
+            <div class="text-center">
+                <div></div>
+                </div>
+        </div>
+        <div class="d-none" id="submitErrorMessage">
+            <div class="text-center text-danger">Error sending message!</div>
+        </div>
+        <div class="d-grid text-center">
+            <button class="btn btn-primary btn-lg disabled text-center mb-3" id="submitButton" type="submit">SAVE</button>
+        </div>
+    </form>
+    </div> 
 </head>
 <body>
     <!-- Page Loader -->
@@ -27,10 +62,10 @@ https://templatemo.com/tm-556-catalog-z
     </div>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="../index.html>
+            <a class="navbar-brand" href="../index.html">
                 <i class="fas fa-film mr-2"></i>
-                Analytical Exposition - Sort Paragraph
-            </a>
+                Analytical Exposition Crossword
+            </a> <!-- NAME of YOUR CONTENT -->
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
@@ -46,72 +81,26 @@ https://templatemo.com/tm-556-catalog-z
                     <a class="nav-link nav-link-3" href="../about.html">About</a>
                 </li>
                 <li class="nav-item">
-			<a class="nav-link nav-link-4" href="../contact.html">Contact</a>
+                    <a class="nav-link nav-link-4" href="../contact.html">Contact</a>
                 </li>
             </ul>
             </div>
         </div>
     </nav>
 
-    <div>
-	<form class="form-horizontal">
-<fieldset>
-
-<!-- Form Name -->
-<legend text-align="center"><b>Student Information</b></legend>
-
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="1"><b>Name</b></label>  
-  <div class="col-md-4">
-  <input id="1" name="1" type="text" placeholder="" class="form-control input-md" required="">
-    
-  </div>
-</div>
-
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="2"><b>Class</b></label>  
-  <div class="col-md-4">
-  <input id="2" name="2" type="text" placeholder="" class="form-control input-md" required="">
-    
-  </div>
-</div>
-
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="3"><b>Student Number</b></label>  
-  <div class="col-md-4">
-  <input id="3" name="3" type="text" placeholder="" class="form-control input-md">
-    
-  </div>
-</div>
-</fieldset>
-</form>
-
-    </div>
-	
-
-    <div class="container-fluid tm-container-content tm-mt-60">
-        <div>
+        <div id="h5pcontent">
         <div id='h5p-container'></div>
     	<script type="text/javascript">
 			const el = document.getElementById('h5p-container');
 			const options = {
-			h5pJsonPath:  './workspace/content-example-2',
+			h5pJsonPath:  './workspace/content-example-2', <!-- LOCATION of YOUR CONTENT -->
 			frameJs: './js/frame.bundle.js',
 			frameCss: './styles/h5p.css',
-			embed: true,
-			embedCode:'<iframe width=":w" height=":h" src="https://venturazz.github.io/englishazcatalog/h5p-standalone/content-example.html" frameBorder="0" scrolling="no" styles="width:100%"></iframe>',
-
 }
 new H5PStandalone.H5P(el, options);
     </script>   
         </div>
-       
-    </div> <!-- container-fluid, tm-container-content -->
-
-    <footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer">
+    <footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer d-print-none">
 	<div class="container-fluid tm-container-small">
             <div class="row">
                 <div class="col-lg-8 col-md-7 col-12 px-5 text-mb3">
