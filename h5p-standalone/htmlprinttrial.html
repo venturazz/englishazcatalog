@@ -56,43 +56,37 @@ https://templatemo.com/tm-556-catalog-z
         </div>
     </nav>
 
-    <div>
-	<form class="form-horizontal">
-<fieldset>
-
-<!-- Form Name -->
-<legend text-align="center"><b>Student Information</b></legend>
-
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="1"><b>Name</b></label>  
-  <div class="col-md-4">
-  <input id="1" name="1" type="text" placeholder="" class="form-control input-md" required="">
-    
-  </div>
-</div>
-
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="2"><b>Class</b></label>  
-  <div class="col-md-4">
-  <input id="2" name="2" type="text" placeholder="" class="form-control input-md" required="">
-    
-  </div>
-</div>
-
-<!-- Text input-->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="3"><b>Student Number</b></label>  
-  <div class="col-md-4">
-  <input id="3" name="3" type="text" placeholder="" class="form-control input-md">
-    
-  </div>
-</div>
-</fieldset>
-</form>
-
-    </div>
+    <div class="container px-5 my-5">
+	<legend text-align="center"><b>Student Information</b></legend>
+    <form id="contactForm" data-sb-form-api-token="API_TOKEN">
+        <div class="form-floating mb-3">
+            <input class="form-control" id="name" type="text" placeholder="Name" data-sb-validations="required" />
+            <label for="name"></label>
+            <div class="invalid-feedback" data-sb-feedback="name:required">Name is required.</div>
+        </div>
+        <div class="form-floating mb-3">
+            <input class="form-control" id="class" type="text" placeholder="Class" data-sb-validations="required" />
+            <label for="class"></label>
+            <div class="invalid-feedback" data-sb-feedback="class:required">Class is required.</div>
+        </div>
+        <div class="form-floating mb-3">
+            <input class="form-control" id="studentNo" type="text" placeholder="Student No" data-sb-validations="required" />
+            <label for="studentNo"></label>
+            <div class="invalid-feedback" data-sb-feedback="studentNo:required">Student No is required.</div>
+        </div>
+        <div class="d-none" id="submitSuccessMessage">
+            <div class="text-center mb-3">
+                <div class="fw-bolder d-grid btn btn-primary btn-lg disabled">SAVED</div>
+                </div>
+        </div>
+        <div class="d-none" id="submitErrorMessage">
+            <div class="text-center text-danger mb-3">Error sending message!</div>
+        </div>
+        <div class="d-grid">
+            <button class="btn btn-primary btn-lg disabled" id="submitButton" type="submit">SAVE</button>
+        </div>
+    </form>
+    </div> 
 	
 
     <div class="container-fluid tm-container-content tm-mt-60">
