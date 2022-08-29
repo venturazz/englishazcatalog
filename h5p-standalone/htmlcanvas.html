@@ -124,13 +124,17 @@ new H5PStandalone.H5P(el, options);
             $('body').addClass('loaded');
         });
     </script>
-    <a href="javascript:genScreenshot()"> <button style="background:red; cursor:pointer">click me</button></a>
+    <input type='button' id='but_screenshot' value='Take screenshot' onclick='screenshot();'><br/>
     <!-- Script -->
      <script type='text/javascript'>
-      function genScreenshot() {
-    	html2canvas(document.body).then(function(canvas) {
-    	document.body.appendChild(canvas);
-});
+      function screenshot(){
+  html2canvas(document.body).then((canvas) => {
+    let a = document.createElement("a");
+    a.download = "ss.png";
+    a.href = canvas.toDataURL("image/png");
+    a.click(); // MAY NOT ALWAYS WORK!
+  });
+}
      </script>
 </body>
 </html>
