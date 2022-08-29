@@ -23,6 +23,7 @@ https://templatemo.com/tm-556-catalog-z
 -->
 </head>
 <body>
+<canvas id="printable">
     <!-- Page Loader -->
     <div id="loader-wrapper">
         <div id="loader"></div>
@@ -126,10 +127,11 @@ new H5PStandalone.H5P(el, options);
     <!-- Script -->
      <script type='text/javascript'>
       function screenshot(){
-        html2canvas(document.body).then(function(canvas) {
-           document.body.appendChild(canvas);
-        });
-     }	
+        var canvas = document.getElementById("printable");
+canvas.toBlob(function(blob) {
+    saveAs(blob, "pretty image.png");
+});
      </script>
+</canvas>
 </body>
 </html>
