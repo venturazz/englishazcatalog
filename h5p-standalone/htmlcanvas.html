@@ -130,24 +130,9 @@ new H5PStandalone.H5P(el, options);
       function genScreenshot() {
     html2canvas(document.body, {
       onrendered: function(canvas) {
-      $('#studentinfo').html("");
-			$('#studentinfo').append(canvas);
-      
-      if (navigator.userAgent.indexOf("MSIE ") > 0 || 
-					navigator.userAgent.match(/Trident.*rv\:11\./)) 
-			{
-      	var blob = canvas.msToBlob();
+        var blob = canvas.msToBlob();
         window.navigator.msSaveBlob(blob,'Test file.png');
-      }
-      else {
-        $('#h5pcontent').attr('href', canvas.toDataURL("image/png"));
-        $('#h5pcontent').attr('download','Test file.png');
-        $('#h5pcontent')[0].click();
-      }
-      
-      
-      }
-    });
+         });
 }
      </script>
 </body>
