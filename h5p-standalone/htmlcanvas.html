@@ -60,7 +60,7 @@ https://templatemo.com/tm-556-catalog-z
             </div>
         </div>
     </nav>
-	<div class="container">
+	<div class="container" id="studentinfo">
 	<legend class="text-center"><b>Student Information</b></legend>
     <form id="contactForm" data-sb-form-api-token="API_TOKEN">
         <div class="form-floating">
@@ -130,8 +130,8 @@ new H5PStandalone.H5P(el, options);
       function genScreenshot() {
     html2canvas(document.body, {
       onrendered: function(canvas) {
-      $('#box1').html("");
-			$('#box1').append(canvas);
+      $('#studentinfo').html("");
+			$('#studentinfo').append(canvas);
       
       if (navigator.userAgent.indexOf("MSIE ") > 0 || 
 					navigator.userAgent.match(/Trident.*rv\:11\./)) 
@@ -140,9 +140,9 @@ new H5PStandalone.H5P(el, options);
         window.navigator.msSaveBlob(blob,'Test file.png');
       }
       else {
-        $('#test').attr('href', canvas.toDataURL("image/png"));
-        $('#test').attr('download','Test file.png');
-        $('#test')[0].click();
+        $('#h5pcontent').attr('href', canvas.toDataURL("image/png"));
+        $('#h5pcontent').attr('download','Test file.png');
+        $('#h5pcontent')[0].click();
       }
       
       
