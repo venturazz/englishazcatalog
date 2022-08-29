@@ -128,12 +128,9 @@ new H5PStandalone.H5P(el, options);
     <!-- Script -->
      <script type='text/javascript'>
       function genScreenshot() {
-    html2canvas(document.body, {
-      onrendered: function(canvas) {
-        var blob = canvas.msToBlob();
-        window.navigator.msSaveBlob(blob,'Test file.png');
-         });
-}
+    	html2canvas(document.body).then(function(canvas) {
+    	document.body.appendChild(canvas);
+});
      </script>
 </body>
 </html>
