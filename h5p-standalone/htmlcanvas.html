@@ -129,10 +129,11 @@ new H5PStandalone.H5P(el, options);
         html2canvas(document.body).then(function(canvas) {
            document.body.appendChild(canvas);
         });
-     }
+     
      canvas.toBlob(function(blob) {
     saveAs(blob, "pretty image.png");
     });
+	      }
      </script>
 </body>
 </html>
