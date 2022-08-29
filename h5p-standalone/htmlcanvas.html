@@ -126,9 +126,8 @@ new H5PStandalone.H5P(el, options);
     <!-- Script -->
      <script type='text/javascript'>
      function screenshot(){
-     html2canvas(document.body, {
-
-onrendered: function(canvas)
+     html2canvas(document.body).then(function(canvas) {
+	     document.body.appendChild(canvas);
 
 {
 
