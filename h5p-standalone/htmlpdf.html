@@ -11,6 +11,7 @@
     <script src="./js/print.min.js"></script>
     <script src="./js/studentinformation.js"></script>
     <script src="../js/html2canvas.min.js" type="text/javascript"></script>
+    <script src="../js/jspdf.js" type="text/javascript"></script>
     <script src="../js/FileSaver.js" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -124,16 +125,14 @@ new H5PStandalone.H5P(el, options);
             $('body').addClass('loaded');
         });
     </script>
-    <input type='button' id='but_screenshot' value='Download for Submission' onclick='screenshot();'><br/>
+    <input type="button" value="save" onclick="javascript:saveAspdf()"/>
     <!-- Script -->
      <script type='text/javascript'>
-      function screenshot(){
-  html2canvas(document.body).then((canvas) => {
-    let a = document.createElement("a");
-    a.download = "mywork.png";
-    a.href = canvas.toDataURL("image/png");
-    a.click(); // MAY NOT ALWAYS WORK!
-  });
+      function saveAspdf() {
+var pdf = new jsPDF('p','pt','a4');
+pdf.addHTML(document.body,function() {
+    pdf.save('web.pdf');
+});
 }
      </script>
 </body>
