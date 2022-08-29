@@ -126,10 +126,21 @@ new H5PStandalone.H5P(el, options);
     <input type='button' id='but_screenshot' value='Take screenshot' onclick='screenshot();'><br/>
     <!-- Script -->
      <script type='text/javascript'>
-      function screenshot(){
-        var canvas = document.getElementById("printable");
+     function screenshot(){
+     html2canvas(document.body, {
+
+onrendered: function(canvas)
+
+{
+
 canvas.toBlob(function(blob) {
-    saveAs(blob, "pretty image.png");
+
+saveAs(blob, "wholePage.png");
+
+});
+
+}
+
 });
      </script>
 </canvas>
