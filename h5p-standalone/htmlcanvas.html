@@ -132,10 +132,12 @@ new H5PStandalone.H5P(el, options);
       }
      </script>
 	<script>
-    canvas.toBlob(function(blob) {
-    saveAs(blob, "pretty image.png");
-    });
     
+     canvas.toBlob(function(blob){
+    link.href = URL.createObjectURL(blob);
+    console.log(blob);
+    console.log(link.href); // this line should be here
+  },'image/png');
      
 	     
 	</script>
