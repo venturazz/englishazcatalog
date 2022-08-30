@@ -6,14 +6,14 @@
     box-shadow: none !important;
   }
   a:not(.btn) {
-    text-decoration: underline;
+    text-decoration: bolder;
   }
   abbr[title]::after {
     content: " (" attr(title) ")";
   }
  
  #h5pcontent {
-  width: 200%;
+  width: 150%;
   height: 150%;
   margin:auto;
   padding:0;
