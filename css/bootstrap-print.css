@@ -11,6 +11,13 @@
   abbr[title]::after {
     content: " (" attr(title) ")";
   }
+ 
+ #h5pcontent {
+  width: 300%;
+  height:auto;
+  margin:auto;
+  padding:0;
+}
   pre {
     white-space: pre-wrap !important;
   }
