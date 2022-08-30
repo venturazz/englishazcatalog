@@ -5,10 +5,7 @@ padding:0;
 
 @media print {
 #h5pcontent {
-width:200%;
-height:auto;
-margin:auto;
-padding:0;
+zoom: 54%;
 }
 
 #main_container { left:-278px !important; }
