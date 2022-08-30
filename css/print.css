@@ -4,7 +4,7 @@ padding:0;
 }
 
 @media print {
-#h5pcontents {
+#h5pcontent {
 width:250%;
 height:auto;
 margin:auto;
