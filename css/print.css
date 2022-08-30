@@ -1,11 +1,11 @@
 @page {
+zoom: 50%;
 margin:.25in;
 padding:0;
 }
 
 @media print {
 #h5pcontent {
-size: A3;
 width: auto;
 height:auto;
 margin:auto;
