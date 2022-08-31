@@ -60,8 +60,8 @@
     width: 1170px;
   }
   .container {
-    min-width: 992px !important;
-    width: 1170px;
+    min-width: 100% !important;
+    width: 100%;
     padding: 0;
     margin: 0;
   }
