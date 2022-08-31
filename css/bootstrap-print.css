@@ -48,12 +48,18 @@
     margin: 25px 50px;
   
   }
+ 
+  @media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  #h5pcontent {
+    width: 100%;
+  }
+  }
   body {
     min-width: 992px !important;
   }
   .container {
     min-width: 992px !important;
-    width: 1170px;
     padding: 0;
     margin: 0;
   }
