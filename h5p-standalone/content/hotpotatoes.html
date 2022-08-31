@@ -189,7 +189,7 @@ Once upon a time, there was a young girl <span class="GapSpan" id="GapSpan0"><in
                 <div class="col-lg-8 col-md-7 col-12 px-5 text-mb3">
 		<button onClick="window.print()"><b>Download for Submission</b></button>
 		<button onClick="screenshot()" id="but_screenshot"><b>Download Screenshot</b></button>
-		<button onClick="saveAspdf()"><b>Download PDF</b></button>
+		<button id="generatereport"><b>Download PDF</b></button>
 		</div>
                 <div class="col-lg-4 col-md-5 col-12 px-5 text-right">
                     Designed by <a href="" class="tm-text-gray" rel="sponsored" target="_parent">venturazz</a>
@@ -205,25 +205,16 @@ Once upon a time, there was a young girl <span class="GapSpan" id="GapSpan0"><in
         });
     </script>
     <script type='text/javascript'>
-      function saveAspdf() {
-      var doc = new jsPDF();
-     var elementHTML = $('#h5pcontent').html();
-     var specialElementHandlers = {
-    '#h5pcontet': function (element, renderer) {
-        return true;
-    }
-};
-doc.fromHTML(elementHTML, 15, 15, {
-    'width': 170,
-    'elementHandlers': specialElementHandlers
+     var doc = new jsPDF();
+$('#generatereport').click(function() {
+   doc.fromHTML($('#h5pcontent')[0], 15, 15, {
+      width: 170
+   }, function() {
+      doc.save('sample-file.pdf');
+   });
 });
-
-// Save the PDF
-doc.save('sample-document.pdf');
-});
-}
-		 </script>
-	<script type='text/javascript'>
+    </script>
+    <script type='text/javascript'>
       function screenshot(){
   html2canvas(document.body).then((canvas) => {
     let a = document.createElement("a");
