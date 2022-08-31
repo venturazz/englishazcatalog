@@ -29,7 +29,7 @@ https://templatemo.com/tm-556-catalog-z
 
 -->
 </head>
-<body>
+<body class="canvas_div_pdf">
     <!-- Page Loader -->
     <div id="loader-wrapper">
         <div id="loader"></div>
@@ -189,7 +189,7 @@ Once upon a time, there was a young girl <span class="GapSpan" id="GapSpan0"><in
                 <div class="col-lg-8 col-md-7 col-12 px-5 text-mb3">
 		<button onClick="window.print()"><b>Download for Submission</b></button>
 		<button onClick="screenshot()" id="but_screenshot"><b>Download Screenshot</b></button>
-		<button id="generatereport"><b>Download PDF</b></button>
+		<button onClick="getPDF()"><b>Download PDF</b></button>
 		</div>
                 <div class="col-lg-4 col-md-5 col-12 px-5 text-right">
                     Designed by <a href="" class="tm-text-gray" rel="sponsored" target="_parent">venturazz</a>
@@ -205,14 +205,38 @@ Once upon a time, there was a young girl <span class="GapSpan" id="GapSpan0"><in
         });
     </script>
     <script type='text/javascript'>
-     var doc = new jsPDF();
-$('#generatereport').click(function() {
-   doc.fromHTML($('#h5pcontent')[0], 15, 15, {
-      width: 170
-   }, function() {
-      doc.save('sample-file.pdf');
-   });
-});
+     function getPDF(){
+
+		var HTML_Width = $(".canvas_div_pdf").width();
+		var HTML_Height = $(".canvas_div_pdf").height();
+		var top_left_margin = 15;
+		var PDF_Width = HTML_Width+(top_left_margin*2);
+		var PDF_Height = (PDF_Width*1.5)+(top_left_margin*2);
+		var canvas_image_width = HTML_Width;
+		var canvas_image_height = HTML_Height;
+		
+		var totalPDFPages = Math.ceil(HTML_Height/PDF_Height)-1;
+		
+
+		html2canvas($(".canvas_div_pdf")[0],{allowTaint:true}).then(function(canvas) {
+			canvas.getContext('2d');
+			
+			console.log(canvas.height+"  "+canvas.width);
+			
+			
+			var imgData = canvas.toDataURL("image/jpeg", 1.0);
+			var pdf = new jsPDF('p', 'pt',  [PDF_Width, PDF_Height]);
+		    pdf.addImage(imgData, 'JPG', top_left_margin, top_left_margin,canvas_image_width,canvas_image_height);
+			
+			
+			for (var i = 1; i <= totalPDFPages; i++) { 
+				pdf.addPage(PDF_Width, PDF_Height);
+				pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height*i)+(top_left_margin*4),canvas_image_width,canvas_image_height);
+			}
+			
+		    pdf.save("HTML-Document.pdf");
+        });
+	};
     </script>
     <script type='text/javascript'>
       function screenshot(){
