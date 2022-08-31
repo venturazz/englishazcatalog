@@ -45,6 +45,11 @@
   }
   @page {
     size: a3;
+  @page {
+  @bottom-right {
+    content: "Page "counter(page);
+  }
+  }
   }
   body {
     min-width: 992px !important;
