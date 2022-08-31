@@ -51,7 +51,8 @@
     min-width: 992px !important;
   }
   .container {
-    min-width: 992px !important;
+    min-width: 50%;
+    max-width: 50%;
     padding: 0;
     margin: 0;
   }
