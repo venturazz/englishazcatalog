@@ -29,9 +29,6 @@
   padding:0;
   page-break-inside: auto;
 }
- #repeatednav {
-   position: fixed;
-}
   pre {
     white-space: pre-wrap !important;
   }
