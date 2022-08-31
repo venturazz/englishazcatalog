@@ -15,7 +15,6 @@
  #h5pcontent {
   min-width: 100%;
   max-width: 100%;
-  width: 1170px;
   height: auto;
   margin:0;
   padding:0;
@@ -57,7 +56,7 @@
   }
   body {
     min-width: 992px !important;
-    width: 1170px;
+    
   }
   .container {
     min-width: 100% !important;
