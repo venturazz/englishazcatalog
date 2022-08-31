@@ -44,7 +44,7 @@
     page-break-after: avoid;
   }
   @page {
-    size: a3;
+    size: 330mm 427mm;
     margin: 25px 50px;
   
   }
@@ -53,6 +53,7 @@
   }
   .container {
     min-width: 992px !important;
+    width: 1170px;
     padding: 0;
     margin: 0;
   }
