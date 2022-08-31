@@ -45,13 +45,15 @@
   }
   @page {
     size: a3;
-    margin: 0;
+  
   }
   body {
     min-width: 992px !important;
   }
   .container {
     min-width: 992px !important;
+    padding: 0;
+    margin: 0;
   }
   .badge {
     border: 1px solid #000;
