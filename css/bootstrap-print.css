@@ -44,7 +44,7 @@
     page-break-after: avoid;
   }
   @page {
-    size: 330mm 427mm;
+    size: a3;
     margin: 25px 50px;
   
   }
