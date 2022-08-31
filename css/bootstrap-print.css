@@ -12,7 +12,7 @@
     content: " (" attr(title) ")";
   }
  
- #h5pcontent {
+ #h5pcontent, #h5p-container {
   min-width: 100%;
   max-width: 100%;
   height: auto;
