@@ -26,7 +26,7 @@ https://templatemo.com/tm-556-catalog-z
 
 -->
 </head>
-<body>
+<body id="maincontent">
     <!-- Page Loader -->
     <div id="loader-wrapper">
         <div id="loader"></div>
@@ -129,8 +129,8 @@ new H5PStandalone.H5P(el, options);
  <script type='text/javascript'>
      function getPDF(){
 
-		var HTML_Width = $(".canvas_div_pdf").width();
-		var HTML_Height = $(".canvas_div_pdf").height();
+		var HTML_Width = $("#maincontent").width();
+		var HTML_Height = $("#maincontent").height();
 		var top_left_margin = 15;
 		var PDF_Width = HTML_Width+(top_left_margin*2);
 		var PDF_Height = (PDF_Width*1.5)+(top_left_margin*2);
@@ -140,7 +140,7 @@ new H5PStandalone.H5P(el, options);
 		var totalPDFPages = Math.ceil(HTML_Height/PDF_Height)-1;
 		
 
-		html2canvas($(".canvas_div_pdf")[0],{allowTaint:true}).then(function(canvas) {
+		html2canvas($("#maincontent")[0],{allowTaint:true}).then(function(canvas) {
 			canvas.getContext('2d');
 			
 			console.log(canvas.height+"  "+canvas.width);
