@@ -129,8 +129,8 @@ new H5PStandalone.H5P(el, options);
  <script type='text/javascript'>
      function getPDF(){
 
-		var HTML_Width = $("#maincontent").width();
-		var HTML_Height = $("#maincontent").height();
+		var HTML_Width = $("#h5p-container").width();
+		var HTML_Height = $("#h5p-container").height();
 		var top_left_margin = 15;
 		var PDF_Width = HTML_Width+(top_left_margin*2);
 		var PDF_Height = (PDF_Width*1.5)+(top_left_margin*2);
@@ -140,7 +140,7 @@ new H5PStandalone.H5P(el, options);
 		var totalPDFPages = Math.ceil(HTML_Height/PDF_Height)-1;
 		
 
-		html2canvas($("#maincontent")[0],{allowTaint:true}).then(function(canvas) {
+		html2canvas($("#h5p-container")[0],{allowTaint:true}).then(function(canvas) {
 			canvas.getContext('2d');
 			
 			console.log(canvas.height+"  "+canvas.width);
