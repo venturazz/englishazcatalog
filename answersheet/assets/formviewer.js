@@ -277,7 +277,6 @@ function checkOver(i) {
     inputs[i].dispatchEvent(new Event('mouseover'));
 }
 
-
 function antiCheat() {
   document.getElementById("form306_1").disabled = true;
   document.getElementById("form307_1").disabled = true;
