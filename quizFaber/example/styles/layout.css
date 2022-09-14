@@ -1,0 +1,121 @@
+
+    .copyright_msg
+    {
+    font-family:Arial;
+    font-size:10pt;
+    text-align:center;
+    color: #777777;
+    }
+
+    .unexpected_interruption_title,
+    .no_reloadable_title
+    {
+    font-family:Arial;
+    font-size:14pt;
+    text-align:center;
+    color: #FF0000;
+    }
+
+    .no_reloadable_text,
+    .unexpected_interruption_text
+    {
+    font-family:Arial;
+    font-size:12pt;
+    text-align:center;
+    color: #333333;
+    }
+
+    .question_feedback_ok_title,
+    .question_feedback_ko_title,
+    .question_feedback_neutral_title,
+    .question_feedback_partially_ok_title
+    {
+    font-family: Verdana,helvetica,arial,san-serif;
+    font-size: 14pt;
+    font-style:normal;
+    }
+
+    .question_feedback_ok_title
+    {
+    color: #000080;
+    }
+    .question_feedback_ko_title
+    {
+    color: #A52A2A;
+    }
+    .question_feedback_partially_ok_title,
+    .question_feedback_neutral_title
+    {
+    color: #696969;
+    }
+
+    .question_feedback_botton
+    {
+    font-family: Verdana,helvetica,arial,san-serif;
+    font-size: 8pt;
+    width: 50px;
+    }
+
+    .upper_frame_title
+    {
+    font-family: Arial;
+    font-size: 14pt;
+    font-weight:bold;
+    font-style:italic;
+    text-align:center;
+    }
+
+  body {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 15px;
+	margin-left: 0px;
+	padding: 0px;
+	color: #000000;
+	background-color: #FFFFFF;
+	background-image: url('../media/');
+	background-repeat: repeat;
+	background-attachment: scroll;
+	background-position: left top;
+	background-size: auto;
+	font-family: Times New Roman;
+	font-size: 12pt;
+}
+.class_title {
+	font-family: Verdana;
+	font-size: 10pt;
+	font-weight: bold;
+	font-style: italic;
+}
+.class_subtitle {
+}
+.class_remarks {
+	font-family: Times New Roman;
+	font-size: 12pt;
+	font-style: italic;
+	color: #000000;
+}
+.class_qst_format {
+	font-family: Arial;
+	font-size: 10pt;
+}
+.class_before_after_qst_format {
+}
+.class_ans_format {
+	font-family: Arial;
+	font-size: 10pt;
+}
+.class_feedback_format {
+	font-family: Arial;
+	font-size: 10pt;
+	background-color: #FFFFE0;
+}
+.class_feedback_table_format {
+	width: 386px;
+	border-width: 1px;
+	border-style: Solid;
+	border-color: #909000;
+	border-radius: 10px;
+	background-color: #FFFFE0;
+}
+
