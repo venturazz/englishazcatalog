@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English A-Z Catalog - Content Name</title>
+    <script src="./js/main.bundle.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../css/templatemo-style.css">
+    <link rel="stylesheet" href="../css/bootstrap-print.css">
+    <link rel="stylesheet" href="./js/print.min.css">
+    <script src="./js/print.min.js"></script>
+    <script src="./js/studentinformation.js"></script>
+    <link rel="stylesheet" type="text/css" href="./css/print.min.css">
+
+<!--
+    
+TemplateMo 556 Catalog-Z
+
+https://templatemo.com/tm-556-catalog-z
+
+-->
+</head>
+<body>
+    <!-- Page Loader -->
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+
+        <div class="loader-section section-left"></div>
+        <div class="loader-section section-right"></div>
+
+    </div>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="">
+                <i class="fas fa-film mr-2"></i>
+                Rename into Content Name
+            </a> <!-- NAME of YOUR CONTENT -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link nav-link-1 active" aria-current="page" href="">Refresh</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-2" href="../index.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-3" href="../about.html">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-4" href="../contact.html">Contact</a>
+                </li>
+            </ul>
+            </div>
+        </div>
+    </nav>
+	<legend class="text-center"><b>Student Information</b></legend>
+    <form id="contactForm" data-sb-form-api-token="API_TOKEN" action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST' id="rendered-form">
+        <div class="form-floating">
+            <input class="form-control" id="name" type="text" placeholder="Name" data-sb-validations="required" name="studentname" />
+            <label for="name"></label>
+            <div class="invalid-feedback" data-sb-feedback="name:required">Name is required.</div>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" id="class" type="text" placeholder="Class" data-sb-validations="required" name="studentid" />
+            <label for="class"></label>
+            <div class="invalid-feedback" data-sb-feedback="class:required">Class is required.</div>
+        </div>
+        <div class="form-floating">
+            <input class="form-control" id="studentNo" type="text" placeholder="Student No" data-sb-validations="required" name="studentclassno" />
+            <label for="studentNo"></label>
+            <div class="invalid-feedback" data-sb-feedback="studentNo:required">Student No is required.</div>
+        </div>
+        <div class="d-none" id="submitSuccessMessage">
+            <div class="text-center">
+                <div></div>
+                </div>
+        </div>
+        <div class="d-none" id="submitErrorMessage">
+            <div class="text-center text-danger">Error sending message!</div>
+        </div>
+        <div class="d-grid text-center">
+		<button id="anticheat" type="button" onClick="antiCheat()" class="btn-primary btn" name="save" style="primary" id="save">SAVE</button>
+		</div>
+<script>
+function antiCheat() {
+  document.getElementById("name").readOnly = true;
+  document.getElementById("class").readOnly = true;
+  document.getElementById("studentNo").readOnly = true;
+   document.getElementById("anticheat").hidden = true;
+  }
+</script>
+        
+    
+<div class="formbuilder-select form-group field-number1"><label for="number1" class="formbuilder-select-label">Question 1</label><select class="form-control" name="number1" id="number1"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number2" class="formbuilder-select-label">Question 2</label><select class="form-control" name="number2" id="number2"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number3" class="formbuilder-select-label">Question 3</label><select class="form-control" name="number3" id="number3"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number4" class="formbuilder-select-label">Question 4</label><select class="form-control" name="number4" id="number4"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number5" class="formbuilder-select-label">Question 5</label><select class="form-control" name="number5" id="number5"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number6" class="formbuilder-select-label">Question 6</label><select class="form-control" name="number6" id="number6"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number7" class="formbuilder-select-label">Question 7</label><select class="form-control" name="number7" id="number7"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number8" class="formbuilder-select-label">Question 8</label><select class="form-control" name="number8" id="number8"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number9" class="formbuilder-select-label">Question 9</label><select class="form-control" name="number9" id="number9"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number10" class="formbuilder-select-label">Question 10</label><select class="form-control" name="number10" id="number10"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number11" class="formbuilder-select-label">Question 11</label><select class="form-control" name="number11" id="number11"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number12" class="formbuilder-select-label">Question 12</label><select class="form-control" name="number12" id="number12"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number13" class="formbuilder-select-label">Question 13</label><select class="form-control" name="number13" id="number13"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number14" class="formbuilder-select-label">Question 14</label><select class="form-control" name="number14" id="number14"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number15" class="formbuilder-select-label">Question 15</label><select class="form-control" name="number15" id="number15"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number16" class="formbuilder-select-label">Question 16</label><select class="form-control" name="number16" id="number16"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number17" class="formbuilder-select-label">Question 17</label><select class="form-control" name="number17" id="number17"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number18" class="formbuilder-select-label">Question 18</label><select class="form-control" name="number18" id="number18"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number19" class="formbuilder-select-label">Question 19</label><select class="form-control" name="number19" id="number19"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number20" class="formbuilder-select-label">Question 20</label><select class="form-control" name="number20" id="number20"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number21" class="formbuilder-select-label">Question 21</label><select class="form-control" name="number21" id="number21"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number22" class="formbuilder-select-label">Question 22</label><select class="form-control" name="number22" id="number22"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number23" class="formbuilder-select-label">Question 23</label><select class="form-control" name="number23" id="number23"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number24" class="formbuilder-select-label">Question 24</label><select class="form-control" name="number24" id="number24"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number25" class="formbuilder-select-label">Question 25</label><select class="form-control" name="number25" id="number25"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number26" class="formbuilder-select-label">Question 26</label><select class="form-control" name="number26" id="number26"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number27" class="formbuilder-select-label">Question 27</label><select class="form-control" name="number27" id="number27"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number28" class="formbuilder-select-label">Question 28</label><select class="form-control" name="number28" id="number28"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number29" class="formbuilder-select-label">Question 29</label><select class="form-control" name="number29" id="number29"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number30" class="formbuilder-select-label">Question 30</label><select class="form-control" name="number30" id="number30"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number31" class="formbuilder-select-label">Question 31</label><select class="form-control" name="number31" id="number31"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number32" class="formbuilder-select-label">Question 32</label><select class="form-control" name="number32" id="number32"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number33" class="formbuilder-select-label">Question 33</label><select class="form-control" name="number33" id="number33"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number34" class="formbuilder-select-label">Question 34</label><select class="form-control" name="number34" id="number34"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number35" class="formbuilder-select-label">Question 35</label><select class="form-control" name="number35" id="number35"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number36" class="formbuilder-select-label">Question 36</label><select class="form-control" name="number36" id="number36"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number37" class="formbuilder-select-label">Question 37</label><select class="form-control" name="number37" id="number37"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number38" class="formbuilder-select-label">Question 38</label><select class="form-control" name="number38" id="number38"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number39" class="formbuilder-select-label">Question 39</label><select class="form-control" name="number39" id="number39"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number40" class="formbuilder-select-label">Question 40</label><select class="form-control" name="number40" id="number40"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number41" class="formbuilder-select-label">Question 41</label><select class="form-control" name="number41" id="number41"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number42" class="formbuilder-select-label">Question 42</label><select class="form-control" name="number42" id="number42"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number43" class="formbuilder-select-label">Question 43</label><select class="form-control" name="number43" id="number43"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number44" class="formbuilder-select-label">Question 44</label><select class="form-control" name="number44" id="number44"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number5"><label for="number45" class="formbuilder-select-label">Question 45</label><select class="form-control" name="number45" id="number45"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number1"><label for="number46" class="formbuilder-select-label">Question 46</label><select class="form-control" name="number46" id="number46"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number2"><label for="number47" class="formbuilder-select-label">Question 47</label><select class="form-control" name="number47" id="number47"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number3"><label for="number48" class="formbuilder-select-label">Question 48</label><select class="form-control" name="number48" id="number48"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number49" class="formbuilder-select-label">Question 49</label><select class="form-control" name="number49" id="number49"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-select form-group field-number4"><label for="number50" class="formbuilder-select-label">Question 50</label><select class="form-control" name="number50" id="number50"><option value="A" id="number1-0">A</option><option value="B" id="number1-1">B</option><option value="C" id="number1-2">C</option><option value="D" id="number1-3">D</option><option value="E" id="number1-4">E</option></select></div>
+<div class="formbuilder-button form-group field-submit"><button type="submit" class="btn-primary btn" name="submit" style="primary" id="submit">Submit</button></div>
+</form>
+    <footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer d-print-none">
+	<div class="container-fluid tm-container-small">
+            <div class="row">
+                <div class="col-lg-8 col-md-7 col-12 px-5 text-mb3">
+		<button onClick="window.print()"><b>Download for Submission</b></button>
+                </div>
+                <div class="col-lg-4 col-md-5 col-12 px-5 text-right">
+                    Designed by <a href="" class="tm-text-gray" rel="sponsored" target="_parent">venturazz</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../js/plugins.js"></script>
+    <script>
+        $(window).on("load", function() {
+            $('body').addClass('loaded');
+        });
+    </script>
+</body>
+</html>
