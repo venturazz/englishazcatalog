@@ -179,7 +179,7 @@ div.page{box-shadow: none;}
 <div id="formviewer">
 <div></div>
 <div id="overlay"></div>
-<form action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST'>
+<form action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST' id="answersheet">
 <div id="contentContainer">
 <div id="page1" style="width: 640px; height: 909px; margin-top:20px;" class="page">
 <div class="page-inner" style="width: 640px; height: 909px;">
@@ -736,7 +736,7 @@ div.page{box-shadow: none;}
 <input id="form53_1" type="text" tabindex="53" value="" data-objref="661 0 R" title="" data-field-name="studentclassno" name="studentclassno"/>
 <input id="form54_1" type="text" tabindex="54" value="" data-objref="664 0 R" title="" data-field-name="examtitle" name="examtitle"/>
 <input id="form55_1" type="datetime-local" tabindex="55" value="" data-objref="667 0 R" title="" data-field-name="date" name="date"/>
-<input id="form56_1" type="submit" tabindex="56" data-objref="683 0 R" title="" data-field-name="submit" name="submit" onClick="antiReSubmit()"/>
+<input id="form56_1" type="submit" tabindex="56" data-objref="683 0 R" title="" data-field-name="submit" label="none" name="submit" onClick="antiReSubmit()"/>
 <input id="form57_1" type="button" tabindex="57" data-objref="684 0 R" title="" data-field-name="anticheat" name="anticheat" onClick="antiCheat()"/>
 
 <script>
@@ -750,8 +750,74 @@ function antiCheat() {
     }
   
   function antiReSubmit() {
+  document.getElementById("form1_1").readOnly = true;
+  document.getElementById("form2_1").readOnly = true;
+  document.getElementById("form3_1").readOnly = true;
+  document.getElementById("form4_1").readOnly = true;
+  document.getElementById("form5_1").readOnly = true;
+  document.getElementById("form6_1").readOnly = true;
+  document.getElementById("form7_1").readOnly = true;
+  document.getElementById("form8_1").readOnly = true;
+  document.getElementById("form9_1").readOnly = true;
+  document.getElementById("form10_1").readOnly = true;
+  document.getElementById("form11_1").readOnly = true;
+  document.getElementById("form12_1").readOnly = true;
+  document.getElementById("form13_1").readOnly = true;
+  document.getElementById("form14_1").readOnly = true;
+  document.getElementById("form15_1").readOnly = true;
+  document.getElementById("form16_1").readOnly = true;
+  document.getElementById("form17_1").readOnly = true;
+  document.getElementById("form18_1").readOnly = true;
+  document.getElementById("form19_1").readOnly = true;
+  document.getElementById("form20_1").readOnly = true;
+  document.getElementById("form21_1").readOnly = true;
+  document.getElementById("form22_1").readOnly = true;
+  document.getElementById("form23_1").readOnly = true;
+  document.getElementById("form24_1").readOnly = true;
+  document.getElementById("form25_1").readOnly = true;
+  document.getElementById("form26_1").readOnly = true;
+  document.getElementById("form27_1").readOnly = true;
+  document.getElementById("form28_1").readOnly = true;
+  document.getElementById("form29_1").readOnly = true;
+  document.getElementById("form30_1").readOnly = true;
+  document.getElementById("form31_1").readOnly = true;
+  document.getElementById("form32_1").readOnly = true;
+  document.getElementById("form33_1").readOnly = true;
+  document.getElementById("form34_1").readOnly = true;
+  document.getElementById("form35_1").readOnly = true;
+  document.getElementById("form36_1").readOnly = true;
+  document.getElementById("form37_1").readOnly = true;
+  document.getElementById("form38_1").readOnly = true;
+  document.getElementById("form39_1").readOnly = true;
+  document.getElementById("form40_1").readOnly = true;
+  document.getElementById("form41_1").readOnly = true;
+  document.getElementById("form42_1").readOnly = true;
+  document.getElementById("form43_1").readOnly = true;
+  document.getElementById("form44_1").readOnly = true;
+  document.getElementById("form45_1").readOnly = true;
+  document.getElementById("form46_1").readOnly = true;
+  document.getElementById("form47_1").readOnly = true;
+  document.getElementById("form48_1").readOnly = true;
+  document.getElementById("form49_1").readOnly = true;
+  document.getElementById("form50_1").readOnly = true;
   document.getElementById("form56_1").hidden = true;
   }
+  
+  window.addEventListener("load", function() {
+  const form = document.getElementById('answersheet');
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const data = new FormData(form);
+    const action = e.target.action;
+    fetch(action, {
+      method: 'POST',
+      body: data,
+    })
+    .then(() => {
+      alert("Your work has been submitted!");
+    })
+  });
+});
 </script>
 
 <!-- End Form Data -->
@@ -768,8 +834,5 @@ JVBERi0xLjUKJc684b+mCgoxIDAgb2JqCjw8IC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUiAvTGFu
 </div>
 <script src="config.js" type="text/javascript"></script>
 <script type="text/javascript">FormViewer.setup();</script>
-
-<script>window.addEventListener('DOMContentLoaded',function(){const el=document.createElement("div");el.innerHTML=atob("PGRpdiBzdHlsZT0icG9zaXRpb246Zml4ZWQ7cmlnaHQ6MzBweDtib3R0b206MTVweDtib3JkZXItcmFkaXVzOjVweDtib3gtc2hhZG93OiAxcHggMXB4IDRweCByZ2JhKDEyMCwxMjAsMTIwLDAuNSk7bGluZS1oZWlnaHQ6MDtvdmVyZmxvdzpoaWRkZW47Ij48YSBocmVmPSJodHRwczovL3d3dy5pZHJzb2x1dGlvbnMuY29tL29ubGluZS1wZGZmb3JtLXRvLWh0bWwtY29udmVydGVyIiByZWw9Im5vZm9sbG93IiB0YXJnZXQ9Il9ibGFuayI+PGltZyBhbHQ9IkNyZWF0ZWQgd2l0aCBGb3JtVnUiIHN0eWxlPSJib3JkZXI6MDsiIHNyYz0iZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFKWUFBQUF0Q0FNQUFBQjcwbUptQUFBQ3ZsQk1WRVgvLy8vLy92N3c4UEQzOS9mNyt2dkd4c1lkSFJ2OS9mMzE5Zlg4L1B2NStmbWJtNXVUazVQUTBOREN3c0xsNWVTeXNySi9mMy9KT1ZuRE5sWENOVlVlSGh6Tk9sd2lJaUh5OHZMWjJkbkV4TVIyZG5Ya1BtZTNJMXl3SWxqbjUrZk56Y3kydHJhd3NLK3JxNnVrcEtQR04xZzFOVFRwNmVuZzRPRFYxZFcwdExTbXBxYVltSmUrTWxMdDdlM3I2K3ZjM056VDA5TEp5Y21pb3FMUlBGL1BPMTdMT1Z2RU4xWWdJQjdpUG1lOEpGKzZJMTdHTjFldElWYkJNMVFwS1NqMDlQU29xS2lXbHBhRWhJVEZKMlhBSldLK0pXRzFJbHV6SWxyQU5GTzhNVkViR3huKysveno0T2J0MitDL3Y3Kzh2THlmbjUrTWpJeUppWWhkWFZ5eElsbXVJVmZCTlZRbUppVGUzdDdPenM3THk4dTl2YjJ0cmEyZG5aMnNJcGFsSFkxNWVYbHZiMi9MSjJqQ0pXVEhOMW5JT0ZqRU5WZEpTVWorK2Z2ODlQYjQ4dmI2N08vMzUrMzU1ZW5ZMk5qWDE5ZW9INUdnR1hkbVptWFRQbUZUVTFOQ1FrRStQajB2THk3Ly9mNzE0ZWFRa0pEVGRJYWlHNFdCZ1lHaEduN1hVM0JyYTJ2T0tHdmVQbWFlRjJaalkyUFdQbUsxS0ZsWFYxZTVMMUJQVDA3djNldm16OXZXcTgydXJxNmFtcHJwY29xa0hJcDlmWHpSYUh2WVczWFFYM1IwZEhPZkdXM0tLbXJISm1iV08yWExOR0d2SEZiNzd2RHg1T3YzM3VMdjNPSGIyOXZ3MDlqc3hzend1TUxjdGJydXJybTR1TGpHazdYWG1xWFhsSit5VEo3Vmg1VFVncExWT1hXZkdIRFpQV1BCTGwyZUZsMjhMRnUxSEZvN096bjg5L2owNXV2cDFlWDExOXpodjlyZXhOTFp0ZEhRazhYWnVzUEJ3Y0hldE1ETWtNRGp0cnpEZzdYYXJMUGhxckx1b2ErK1pxNjliNjNpb3F6a2xLUE5rNlBTaXFDMmJwK3lLNTNyaVp5eExKeXlXNW1xTlpPbktvM0Rib2VyVTRmY2NZWE5iMzYrVEhMUk0zSGFURzNsU0czWlRHeXdPV3FpTldyRE8yallRMmJhTzJYSVNtU2lHV0xHUjJES1FGMnhMbDJuSEZ1a0dsYXJHMVJyVjcyV0FBQUdlRWxFUVZSWXcrMlk5ZHZTVUJUSHYzZWIyNEFwbUlDaWhBaStyNmdJQmxqWTNkM2QzZDNkM2QzZDNkM2QzZTEvNGIwYjJGaVA5VHo2K1dIYnVidmJQcHh6dGowRC8vblBmNzRKTGduK1J2NXIvYmlXM3U3UHJzZVg4U2U4SDlXMmcrSEkvQXUxT3ZxY3lWeUorQmc1Ky92UnlnOE1jbGoxVEN4THRsK25aVlI0VFVQSXprUHZwWUhFY1FSSVVrY21XZ3llRTRJY1N5dWdFMmdJR1IzcnlSS3F5Tm40WDZTbFU3SkYxeGxkQWF2QlZNV3JjNWtLVjliNXV5cUdRdjZKcGlwMlVyZXkwekJBQXFBSU1BWEFHZVFHM2hsVkRGNUw0MFJUVVE0L0FHbmRvZldYdGVTcWt0WmdUVGh3RTNuUzBRa2RTRlZPNTlQRDR1UEo0a1IvRmdGZU55aEY1T3lLQzVXczJiTEFYUWpJbkZHQ3N4UGkwSzVEaHc3dDJyVnIwNmFOUkJoNFMrdUZLeVl0Ni8xbHJleDlvN1VzRENRdFdqOHhpME9xWGJGU090NWlvQzAwZ01hQkxGN0FXaEdVSU9mSzdDNWtrRG9tRTRyUThHQUNVTitPT095ZWR1ZmVvRUdEcGsyYlBuWHExSDc5K3ExZnYyN042dFhIbGk5Zk1lbXU3VVM1cnhTUlQ2N1g3cXE2dEowQ3ZDQ1FKRTZPVTZST3lZQUFpNlVpSEZESkQwckdwQ2JCa0RZQmxXcDdUVFJzUU11dnhHMHVzdXpSaUJIZGN1Yk1sU1pON2hUTk03Vk1XYkJnMWpKbFJvL09GTGJaTHJiNVdtOFJaNklBVWdndUkyQXNJa0FIdHhFZDY2T2VGYkFyZWhvbjFvRlFoYXBSdWVTRlVJVE9jWE1KQVVEb3E0ZnNRMXhhbnhuUjdUMnRWSnBXbWFFMjI2VDVYNzhUcFdSSzBPZUFTYzlTcGxTdUI2T1NNWWxCeUt3VTVsQkhxVndKaFNvSDZ3Y0ZVRHJSdzVMUnlrMFFzaWxaN0x5TElIdEZ4R2YrRFdhVkswM3UzTTNmYWVXMDJjSkx2dWx4cXBOMWlDTHdoQzVZenFEbll6R2hpeGp2VC93cUN3ZXhaREd0VEpwVzFqS3B3cmJ3NXJQU0gzMzVrS1hkY3FrMWJFRmJLMVhCMGxtelp0MWtDODh0OEdMY3h4UEwvVTR0bER1dFdtbGFwYWxXR3B0dGJvRWFHYTYxZlYrcC9aNzlZMytyRnRyMG95Vk1RVHMrdjZxVmFxaHRUb1lhR2FxWFBFU2kzbTEzalQ5NTZjTDQzcjlYQzMybXAwakJzcFVuWmFxYXBVdVBzRDBleWF6UzM5b0o5RzQ3ZHQvUnRRMHBoNFZQZXl0elVwVWM2aTY1YmdQRmtJelRzbXRWeDdNUjlZallESHZTcEZZNm9yTkdUMVhid3A3SjdMWE9Cblg0bUtYUG1WVitWU3RGZU9qSUFobXFsMHFmUHQrNUJYdFhYYjdhcUhQbnpnMGJubXI3bVpZM2lDcGpaQ2JTMVN5bUZrT2pIRXhGU3M3R3phMmM3RnFkSW1MRXoxeDlvcGhjb210RFF2UnB6SDVEc3JSYWtJNy90TDJPcDJpaGF0V3NtV3BvZUd2VUttK0orek83RE93L3VSRVZXenNXbjlWcWJLS3MxTlBFalFtbEN4Z0Q2VUtlSEpwV1k2ZXBpVG1TbEFaSmE2VVdKOUMxWlpRb3BxTmFTR2pBbHJCV0psL1d3bzUxK1NsTUsyZDRNMjMzVWlXWlZmRVNUNk5lVjhhUnoydGxoSVpVVlp4U2lGVnlnRGlEWjFxcHM5Q2dpZWdtUUYxekszTVRhcDdEM01NOFhHSUtqZFZTdXp2aEsxcG9QejFQSGxiRC9PRzVNYXU4eFpzVkt6bE04eHBQRUVjcitvTDM5b3hvbGJIVzhtU09hVWxGeFNDQWdMbnFjRHBJZk9iS0VWV0xtQndzZVVYNXIycGh5VE9tbFdwVHJob3hxeEpVcTlqTFlSdXAxeW9CY2JTYXVOMXVGMDh6VWF1SDF1eVc3bVVUVksyZ3pLWHRHWEt3QzZmMlpSUmR4TktxdXlQU1hXMXNZeEVDMURIaDYxcTlqK1JKbVRKVm1qa1pDckNia0dveHE5bE5pMitoWHVmYklwNldtRHAxNmxFV3dHRnVaUUZEcmxZMmg5cGJQYnYzRFBVcUxHaGEvbDZEOVVsRFN1WmVZMVF0b1dwMlNFV00zNkNGMW10U3Bzdy9KM29UeHF5YURpbTFaZGoxQllpclZUUnQyclIxQldCeEw0OGREUHYyaUYvVmFwV3VwMWhZbGFoWHRnRS91RlptZzlsaDlMVFNRUjJxQjY2cThDMWFhSGN6WlM3VnF1UjdWa09hdm5xZ3ZZVyszUEtXVWFrelNxQTR5MWF6cUVWMEUyZW91eGVVU21VTGsvcGxmZFhHY0VaUEQwMHJlM0toWWtXbzFKbWduYUJ4dkErb1JVKzJ2cDQzYjk2MmJmblV0cG8xYTlhUTJ4czJQRHhBdmtFTHJwQ25vcXlUay9RSU9VbTA1ZmtacWZ1eWpDU1dMWXphdFNKbVJhSmFXb29reFY4MUcxUzhBMVNmSEVFU1I0djBxYUN4cUx4R256NGQycmR2WHc3Zm9pWDNEZFVhUHFXck9kSkFqNmdXRWp5MTZnSWtTTFg0d2FMWkFhTm5PeGZOVWRHSnNhdTZYYkpPTUJZMS9yd1Bzb3pWbklpaHJ6alkwOHZUSksyYURxSlVTd1Iwd1dyMFlVWmNkSnNrVTN3eTdGMjdSbk1rcDB0QUZENnhjWldpVldyajUya0p2Q29SRTh0bTUvU3hiVjVROS9Qay9WbUV4ckVKRXZCMlZKYUZmK0kvaUwrRy8xcmZnMnpGZi83em41L0ZHN3dvYWZqSm1KeUNBQUFBQUVsRlRrU3VRbUNDIj48L2E+PC9kaXY+");document.body[atob("YXBwZW5kQ2hpbGQ=")](el.firstChild);});</script>
-
 </body>
 </html>
