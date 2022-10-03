@@ -736,7 +736,7 @@ div.page{box-shadow: none;}
 <input id="form53_1" type="text" tabindex="53" value="" data-objref="661 0 R" title="" data-field-name="studentclassno" name="studentclassno"/>
 <input id="form54_1" type="text" tabindex="54" value="" data-objref="664 0 R" title="" data-field-name="examtitle" name="examtitle"/>
 <input id="form55_1" type="datetime-local" tabindex="55" value="" data-objref="667 0 R" title="" data-field-name="date" name="date"/>
-<input id="form56_1" type="submit" tabindex="56" data-objref="683 0 R" title="" data-field-name="submit" label="none" name="submit" onClick="antiReSubmit()"/>
+<input id="form56_1" hidden="hidden" type="submit" tabindex="56" data-objref="683 0 R" title="" data-field-name="submit" label="none" name="submit" onClick="antiReSubmit()" hidden/>
 <input id="form57_1" type="button" tabindex="57" data-objref="684 0 R" title="" data-field-name="anticheat" name="anticheat" onClick="antiCheat()"/>
 
 <script>
@@ -746,6 +746,7 @@ function antiCheat() {
   document.getElementById("form53_1").readOnly = true;
   document.getElementById("form54_1").readOnly = true;
   document.getElementById("form55_1").readOnly = true;
+  document.getElementById("form56_1").hidden = false;
   document.getElementById("form57_1").hidden = true;
     }
   
