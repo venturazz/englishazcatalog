@@ -1434,15 +1434,6 @@ function TypeChars(Chars){
 
 
 </head>
-<form action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST' id="answersheet">
-<input id="info1" type="text" title="" data-field-name="studentname" name="studentname" placeholder="Name"/>
-<input id="info2" type="text" title="" data-field-name="studentid" name="studentid" placeholder="ExamID"/>
-<input id="info3" type="text" title="" data-field-name="studentclassno" name="studentclassno" placeholder="Class / Number"/>
-<input id="info4" type="text" name="examtitle" placeholder="Exam Title"/>
-<input id="info5" type="datetime-local" title="" data-field-name="date" name="date"/>
-<button id="info6" name="anticheat" onClick="antiCheat()" type="button">SAVE</button>
-
-
 <body onload="StartUp()" id="TheBody" onunload="CheckLMSFinish()">
 
 <!-- BeginTopNavButtons -->
@@ -1491,7 +1482,13 @@ function TypeChars(Chars){
 </tbody>
 </table>
 
-
+<form action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST' id="answersheet">
+<input id="info1" type="text" title="" data-field-name="studentname" name="studentname" placeholder="Name"/>
+<input id="info2" type="text" title="" data-field-name="studentid" name="studentid" placeholder="ExamID"/>
+<input id="info3" type="text" title="" data-field-name="studentclassno" name="studentclassno" placeholder="Class / Number"/>
+<input id="info4" type="text" name="examtitle" placeholder="Exam Title"/>
+<input id="info5" type="datetime-local" title="" data-field-name="date" name="date"/>
+<button id="info6" name="anticheat" onClick="antiCheat()" type="button" id="CheckButton2" class="FuncButton">SAVE</button>
 <input type='hidden' id="Score" name='TotalScore' value='0'>
 <button type="submit" id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
 <script>

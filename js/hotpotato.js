@@ -813,6 +813,7 @@ function CheckAnswers(){
 		TotalScore += State[i].ItemScore;
 	}
 	TotalScore = Math.floor((TotalScore * 100)/I.length);
+	document.getElementById('Score').value=TotalScore;
 
 //Compile the output
 	Output = '';
