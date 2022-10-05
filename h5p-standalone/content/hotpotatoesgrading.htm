@@ -3,10 +3,20 @@
 <head><meta name="author" content="Created with Hot Potatoes by Half-Baked Software, registered to ven."/><meta name="keywords" content="Hot Potatoes, Hot Potatoes, Half-Baked Software, Windows, University of Victoria"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <meta name="dc:creator" content="ven" />
 <meta name="dc:title" content="Characters" />
-
+<title>English A-Z Catalog - Hotpotatoes Content Example</title>
+<script src="../js/main.bundle.js" type="text/javascript"></script>
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../fontawesome/css/all.min.css">
+<link rel="stylesheet" href="../../css/templatemo-style.css">
+<link rel="stylesheet" href="../../css/bootstrap-print.css">
+<script src="../js/print.min.js"></script>
+<script src="../js/studentinformation.js"></script>
+<script src="../../js/jquery.min.js" type="text/javascript"></script>
+<script src="../../js/jspdf.min.js" type="text/javascript"></script>
+<script src="../../js/html2canvas.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../../css/print.min.css">
 
 
 <title>
@@ -1434,7 +1444,7 @@ function TypeChars(Chars){
 
 
 </head>
-<body onload="StartUp()" id="TheBody" onunload="CheckLMSFinish()">
+<body onload="StartUp()" id="TheBody" onunload="CheckLMSFinish()" class="canvas_div_pdf">
 
 <!-- BeginTopNavButtons -->
 
@@ -1488,7 +1498,7 @@ function TypeChars(Chars){
 <input id="info3" type="text" title="" data-field-name="studentclassno" name="studentclassno" placeholder="Class / Number"/>
 <input id="info4" type="text" name="examtitle" placeholder="Exam Title"/>
 <input id="info5" type="datetime-local" title="" data-field-name="date" name="date"/>
-<button id="info6" name="anticheat" onClick="antiCheat()" type="button" id="CheckButton2" class="FuncButton">SAVE</button>
+<label id="info6" name="anticheat" onClick="antiCheat()" class="FuncButton">Save</label>
 <input type='hidden' id="Score" name='TotalScore' value='0'>
 <button type="submit" id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
 <script>
@@ -1514,7 +1524,7 @@ function antiCheat() {
   document.getElementById("info3").readOnly = true;
   document.getElementById("info4").readOnly = true;
   document.getElementById("info5").readOnly = true;
-  document.getElementById("info6").disabled = true;
+  document.getElementById("info6").hidden = true;
     }
   
 
@@ -1560,6 +1570,73 @@ function antiCheat() {
 <div class="Feedback" id="FeedbackDiv">
 <div class="FeedbackText" id="FeedbackContent"></div>
 <button id="FeedbackOKButton" class="FuncButton" onclick="HideFeedback(); return false;">&#160;DO NOT CLOSE UNTIL POPUP APPEAR&#160;</button>
+</div>
+<div>
+<footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer d-print-none">
+	<div class="container-fluid tm-container-small">
+            <div class="row">
+                <div class="col-lg-8 col-md-7 col-12 px-5 text-mb3">
+		<button onClick="window.print()"><b>Download for Submission</b></button>
+		<button onClick="screenshot()" id="but_screenshot"><b>Download Screenshot</b></button>
+		<button onClick="getPDF()"><b>Download PDF</b></button>
+		</div>
+                <div class="col-lg-4 col-md-5 col-12 px-5 text-right">
+                    Designed by <a href="" class="tm-text-gray" rel="sponsored" target="_parent">venturazz</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="../js/plugins.js"></script>
+    <script>
+        $(window).on("load", function() {
+            $('body').addClass('loaded');
+        });
+    </script>
+    <script type='text/javascript'>
+     function getPDF(){
+
+		var HTML_Width = $(".canvas_div_pdf").width();
+		var HTML_Height = $(".canvas_div_pdf").height();
+		var top_left_margin = 15;
+		var PDF_Width = HTML_Width+(top_left_margin*2);
+		var PDF_Height = (PDF_Width*1.5)+(top_left_margin*2);
+		var canvas_image_width = HTML_Width;
+		var canvas_image_height = HTML_Height;
+		
+		var totalPDFPages = Math.ceil(HTML_Height/PDF_Height)-1;
+		
+
+		html2canvas($(".canvas_div_pdf")[0],{allowTaint:true}).then(function(canvas) {
+			canvas.getContext('2d');
+			
+			console.log(canvas.height+"  "+canvas.width);
+			
+			
+			var imgData = canvas.toDataURL("image/jpeg", 1.0);
+			var pdf = new jsPDF('p', 'pt',  [PDF_Width, PDF_Height]);
+		    pdf.addImage(imgData, 'JPG', top_left_margin, top_left_margin,canvas_image_width,canvas_image_height);
+			
+			
+			for (var i = 1; i <= totalPDFPages; i++) { 
+				pdf.addPage(PDF_Width, PDF_Height);
+				pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height*i)+(top_left_margin*4),canvas_image_width,canvas_image_height);
+			}
+			
+		    pdf.save("HTML-Document.pdf");
+        });
+	};
+    </script>
+    <script type='text/javascript'>
+      function screenshot(){
+  html2canvas(document.body).then((canvas) => {
+    let a = document.createElement("a");
+    a.download = "mywork.png";
+    a.href = canvas.toDataURL("image/png");
+    a.click(); // MAY NOT ALWAYS WORK!
+  });
+}
+     </script>
 </div>
 
 <!-- BeginBottomNavButtons -->
