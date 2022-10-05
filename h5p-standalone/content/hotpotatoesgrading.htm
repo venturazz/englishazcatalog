@@ -1500,7 +1500,7 @@ function TypeChars(Chars){
 <input id="info5" type="datetime-local" title="" data-field-name="date" name="date"/>
 <label id="info6" name="anticheat" onClick="antiCheat()" class="FuncButton">Save</label>
 <input type='hidden' id="Score" name='TotalScore' value='0'>
-<button type="submit" id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
+<button hidden="true" type="submit" id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
 <script>
 window.addEventListener("load", function() {
   const form = document.getElementById('answersheet');
@@ -1525,6 +1525,7 @@ function antiCheat() {
   document.getElementById("info4").readOnly = true;
   document.getElementById("info5").readOnly = true;
   document.getElementById("info6").hidden = true;
+  document.getElementById("CheckButton2").hidden = false;
     }
   
 
