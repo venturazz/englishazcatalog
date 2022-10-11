@@ -1473,6 +1473,70 @@ function TypeChars(Chars){
 
 
 <!-- EndTopNavButtons -->
+<div id="studentinformation" style="margin-left: 25em;">
+
+<form action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST' id="answersheet">
+<div>
+<label>Class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<select id="info2" name="studentid" required="required">
+	<option value="E1" >E1</option>
+	<option value="E2" >E2</option>
+	<option value="E3" >E3</option>
+	<option value="E4" >E4</option>
+	<option value="E5" >E5</option>
+    <option value="11 IPA 1" >11 IPA 1</option>
+	<option value="11 IPA 1" >11 IPA 2</option>
+	<option value="11 IPS 1" >11 IPS 1</option>
+	<option value="11 IPS 2" >11 IPS 2</option>
+	<option value="12 IPA 1" >12 IPA 1</option>
+    <option value="12 IPA 2" >12 IPA 2</option>
+	<option value="12 IPS 1" >12 IPS 1</option>
+	<option value="12 IPS 2" >12 IPS 2</option>
+</select></label>
+</div>
+<div>
+<label>Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<input id="info1" size="35" type="text" title="" data-field-name="studentname" name="studentname" placeholder="John/Leo/Jack"/></label>
+</div>
+<div>
+<label>Number&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<input id="info3" size="35" type="text" title="" data-field-name="studentclassno" name="studentclassno" placeholder="1/2/3"/></label>
+</div>
+<label>Task Name&nbsp;&nbsp;:<input id="info4" size="35" type="text" name="examtitle" placeholder="Title of the Task"/></label>
+<div>
+<label>Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<input id="info5" size="35" type="datetime-local" title="" data-field-name="date" name="date"/></label>
+</div>
+<label id="info6" name="anticheat" onClick="antiCheat()" class="FuncButton">Save</label>
+<input type='hidden' id="Score" name='TotalScore' value='0'>
+<button style="margin-left:25em;" hidden="true" type="submit" id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
+<script>
+window.addEventListener("load", function() {
+  const form = document.getElementById('answersheet');
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const data = new FormData(form);
+    const action = e.target.action;
+    fetch(action, {
+      method: 'POST',
+      body: data,
+    })
+    .then(() => {
+      alert("Your work has been submitted!");
+	  location.reload();
+    })
+  });
+});
+function antiCheat() {
+  document.getElementById("info1").readOnly = true;
+  document.getElementById("info2").readOnly = true;
+  document.getElementById("info3").readOnly = true;
+  document.getElementById("info4").readOnly = true;
+  document.getElementById("info5").readOnly = true;
+  document.getElementById("info6").hidden = true;
+  document.getElementById("CheckButton2").hidden = false;
+    }
+  
+
+</script>
+</form>
+</div>
 
 <div class="Titles">
 	<h2 class="ExerciseTitle">Analytical Exposition</h2>
@@ -1557,64 +1621,8 @@ function TypeChars(Chars){
 </tr>
 </tbody>
 </table>
-
 </div>
-
 </div>
-<form action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST' id="answersheet">
-<select id="info2" name="studentid" required="required">
-	<option value="" >--Select Class--</option>
-	<option value="E1" >E1</option>
-	<option value="E2" >E2</option>
-	<option value="E3" >E3</option>
-	<option value="E4" >E4</option>
-	<option value="E5" >E5</option>
-    <option value="11 IPA 1" >11 IPA 1</option>
-	<option value="11 IPA 1" >11 IPA 2</option>
-	<option value="11 IPS 1" >11 IPS 1</option>
-	<option value="11 IPS 2" >11 IPS 2</option>
-	<option value="12 IPA 1" >12 IPA 1</option>
-    <option value="12 IPA 2" >12 IPA 2</option>
-	<option value="12 IPS 1" >12 IPS 1</option>
-	<option value="12 IPS 2" >12 IPS 2</option>
-</select>
-<input id="info1" size="35" type="text" title="" data-field-name="studentname" name="studentname" placeholder="Name: John/Leo/Jack"/>
-<input id="info3" size="15" type="text" title="" data-field-name="studentclassno" name="studentclassno" placeholder="Number:1/2/3"/>
-<input id="info4" type="text" name="examtitle" placeholder="Task Name"/>
-<input id="info5" type="datetime-local" title="" data-field-name="date" name="date"/>
-<label id="info6" name="anticheat" onClick="antiCheat()" class="FuncButton">Save</label>
-<input type='hidden' id="Score" name='TotalScore' value='0'>
-<button hidden="true" type="submit" id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
-<script>
-window.addEventListener("load", function() {
-  const form = document.getElementById('answersheet');
-  form.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const data = new FormData(form);
-    const action = e.target.action;
-    fetch(action, {
-      method: 'POST',
-      body: data,
-    })
-    .then(() => {
-      alert("Your work has been submitted!");
-	  location.reload();
-    })
-  });
-});
-function antiCheat() {
-  document.getElementById("info1").readOnly = true;
-  document.getElementById("info2").readOnly = true;
-  document.getElementById("info3").readOnly = true;
-  document.getElementById("info4").readOnly = true;
-  document.getElementById("info5").readOnly = true;
-  document.getElementById("info6").hidden = true;
-  document.getElementById("CheckButton2").hidden = false;
-    }
-  
-
-</script>
-</form>
 <div class="Feedback" id="FeedbackDiv">
 <div class="FeedbackText" id="FeedbackContent"></div>
 <button id="FeedbackOKButton" class="FuncButton" onclick="HideFeedback(); return false;">&#160;DO NOT CLOSE UNTIL POPUP APPEAR&#160;</button>
