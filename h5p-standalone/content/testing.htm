@@ -60,7 +60,8 @@ Analytical Exposition
 </div>
 <label id="info6" name="anticheat" onClick="antiCheat()" class="FuncButton">Save</label>
 <input type='hidden' id="Score" name='TotalScore' value='0'>
-<button style="margin-left:25em;" hidden="true" type="submit" id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
+<button hidden="true" type="submit" id="CheckButton3" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
+
 <script>
 window.addEventListener("load", function() {
   const form = document.getElementById('answersheet');
@@ -1402,7 +1403,7 @@ function TypeChars(Chars){
 <body onload="StartUp()" id="TheBody" >
 
 <!-- BeginTopNavButtons -->
-
+</div>
 <!-- EndTopNavButtons -->
 
 <div class="Titles">
@@ -1457,7 +1458,7 @@ function TypeChars(Chars){
 </tbody>
 </table>
 
-<button id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Check&#160;</button>
+<button hidden="true" type="submit" id="CheckButton2" class="FuncButton" onclick="document.getElementById('CheckButton3').click()">&#160;Submit&#160;</button>
 
 <table id="Clues" style="display: none;">
 <tbody>
@@ -1503,8 +1504,9 @@ function TypeChars(Chars){
 <!-- BeginBottomNavButtons -->
 
 
-<div>
-<footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer d-print-none">
+</div>
+	<div>
+    <footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer d-print-none">
 	<div class="container-fluid tm-container-small">
             <div class="row">
                 <div class="col-lg-8 col-md-7 col-12 px-5 text-mb3">
@@ -1528,8 +1530,8 @@ function TypeChars(Chars){
     <script type='text/javascript'>
      function getPDF(){
 
-		var HTML_Width = $(".canvas_div_pdf").width();
-		var HTML_Height = $(".canvas_div_pdf").height();
+		var HTML_Width = $(document.body).width();
+		var HTML_Height = $(document.body).height();
 		var top_left_margin = 15;
 		var PDF_Width = HTML_Width+(top_left_margin*2);
 		var PDF_Height = (PDF_Width*1.5)+(top_left_margin*2);
@@ -1539,7 +1541,7 @@ function TypeChars(Chars){
 		var totalPDFPages = Math.ceil(HTML_Height/PDF_Height)-1;
 		
 
-		html2canvas($(".canvas_div_pdf")[0],{allowTaint:true}).then(function(canvas) {
+		html2canvas($(document.body)[0],{allowTaint:true}).then(function(canvas) {
 			canvas.getContext('2d');
 			
 			console.log(canvas.height+"  "+canvas.width);
@@ -1569,7 +1571,7 @@ function TypeChars(Chars){
   });
 }
      </script>
-</div>
+	 </div>
 
 
 
