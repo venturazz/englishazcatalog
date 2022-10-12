@@ -1505,7 +1505,8 @@ function TypeChars(Chars){
 </div>
 <label id="info6" name="anticheat" onClick="antiCheat()" class="FuncButton">Save</label>
 <input type='hidden' id="Score" name='TotalScore' value='0'>
-<button style="margin-left:25em;" hidden="true" type="submit" id="CheckButton2" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
+<button hidden="true" type="submit" id="CheckButton3" class="FuncButton" onclick="CheckAnswers()">&#160;Submit&#160;</button>
+
 <script>
 window.addEventListener("load", function() {
   const form = document.getElementById('answersheet');
@@ -1532,6 +1533,9 @@ function antiCheat() {
   document.getElementById("info6").hidden = true;
   document.getElementById("CheckButton2").hidden = false;
     }
+function ClickSubmit() {
+document.getElementById('CheckButton3').click()
+}
   
 
 </script>
@@ -1621,6 +1625,7 @@ function antiCheat() {
 </tr>
 </tbody>
 </table>
+<button hidden="true" type="submit" id="CheckButton2" class="FuncButton" onclick="ClickSubmit()">&#160;Submit&#160;</button>
 </div>
 </div>
 <div class="Feedback" id="FeedbackDiv">
