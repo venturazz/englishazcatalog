@@ -1466,7 +1466,7 @@ function TypeChars(Chars){
 
 </head>
 
-<body onload="StartUp()" id="TheBody" onunload="CheckLMSFinish()" class="canvas_div_pdf">
+<body onload="StartUp()" id="TheBody" onunload="CheckLMSFinish()">
 
 <!-- BeginTopNavButtons -->
 
@@ -1653,8 +1653,8 @@ function antiCheat() {
     <script type='text/javascript'>
      function getPDF(){
 
-		var HTML_Width = $(".canvas_div_pdf").width();
-		var HTML_Height = $(".canvas_div_pdf").height();
+		var HTML_Width = $(document.body).width();
+		var HTML_Height = $(document.body).height();
 		var top_left_margin = 15;
 		var PDF_Width = HTML_Width+(top_left_margin*2);
 		var PDF_Height = (PDF_Width*1.5)+(top_left_margin*2);
@@ -1664,7 +1664,7 @@ function antiCheat() {
 		var totalPDFPages = Math.ceil(HTML_Height/PDF_Height)-1;
 		
 
-		html2canvas($(".canvas_div_pdf")[0],{allowTaint:true}).then(function(canvas) {
+		html2canvas($(document.body)[0],{allowTaint:true}).then(function(canvas) {
 			canvas.getContext('2d');
 			
 			console.log(canvas.height+"  "+canvas.width);
