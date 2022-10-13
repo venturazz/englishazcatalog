@@ -245,7 +245,7 @@ div.Feedback {
 
 
 .ReadingText{
-	text-align: left;
+	text-align: justify;
 }
 
 #ReadingDiv h3.ExerciseSubtitle{
@@ -1470,12 +1470,19 @@ function TypeChars(Chars){
 
 <!-- BeginTopNavButtons -->
 
+<div class="Titles">
+	<h2 class="ExerciseTitle">Analytical Exposition</h2>
 
+	<h3 class="ExerciseSubtitle">Crossword</h3>
+
+
+
+</div>
 
 <!-- EndTopNavButtons -->
 <div id="studentinformation">
 
-<form action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST' id="answersheet">
+<form action='https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec' method='POST' id="answersheet" style="padding-bottom: 25px;">
 <div>
 <label>Class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<select id="info2" name="studentid" required="required">
 	<option value="E1" >E1</option>
@@ -1499,7 +1506,7 @@ function TypeChars(Chars){
 <div>
 <label>Number&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<input id="info3" size="35" type="text" title="" data-field-name="studentclassno" name="studentclassno" placeholder="1/2/3"/></label>
 </div>
-<label>Task Name&nbsp;&nbsp;:<input id="info4" size="35" type="text" name="examtitle" placeholder="Title of the Task"/></label>
+<label>Task Name&nbsp;&nbsp;:<input id="info4" size="35" type="text" name="Exercise" placeholder="Title of the Task"/></label>
 <div>
 <label>Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<input id="info5" size="35" type="datetime-local" title="" data-field-name="date" name="date"/></label>
 </div>
@@ -1541,15 +1548,6 @@ document.getElementById("CheckButton2").hidden = true;
 
 </script>
 </form>
-</div>
-
-<div class="Titles">
-	<h2 class="ExerciseTitle">Analytical Exposition</h2>
-
-	<h3 class="ExerciseSubtitle">Crossword</h3>
-
-
-
 </div>
 
 <div id="InstructionsDiv" class="StdDiv">
