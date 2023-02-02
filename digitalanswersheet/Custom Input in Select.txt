@@ -1,0 +1,41 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<form name="BrowserSurvey" action="https://script.google.com/macros/s/AKfycbwUQR_7o2-WR8Ahg4_OzWI-VR9AKoTQ0mWzAH5iO_4eOcP0hN1vVWWHRUjoKiyUyY0DXQ/exec" method='POST'>
+Browser: <select name="studentname" onchange="if($(this).val()=='customOption')showCustomInput('studentname')">
+    <option></option>
+    <option value="customOption">[type a custom value]</option>
+    <option>A</option>
+    <option>B</option>
+    <option>C</option>
+    <option>D</option>
+    <option>E</option></select><input name="studentname" style="display:none;" 
+   
+ disabled="disabled" onblur="if($(this).val()=='')showOptions('studentid')">
+Browser: <select name="studentid" onchange="if($(this).val()=='customOption')showCustomInput('studentid')">
+    <option></option>
+    <option value="customOption">[type a custom value]</option>
+    <option>A</option>
+    <option>B</option>
+    <option>C</option>
+    <option>D</option>
+    <option>E</option></select><input name="studentid" style="display:none;" disabled="disabled" onblur="if($(this).val()=='')showOptions('studentid')">
+
+
+<input type="submit" value="Submit">
+</form>
+<script>
+function toggle($toBeHidden, $toBeShown) {
+  $toBeHidden.hide().prop('disabled', true);
+  $toBeShown.show().prop('disabled', false).focus();
+}
+
+function showOptions(inputName) {
+  var $select = $(`select[name=${inputName}]`);
+  toggle($(`input[name=${inputName}]`), $select);
+  $select.val(null);
+}
+
+
+function showCustomInput(inputName) {
+  toggle($(`select[name=${inputName}]`), $(`input[name=${inputName}]`));
+}
+</script>
