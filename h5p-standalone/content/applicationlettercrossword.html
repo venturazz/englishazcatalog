@@ -154,11 +154,11 @@ H5P.RequestQueue=function(n,t){function e(e){t.call(this),this.processingQueue=!
 
 		var HTML_Width = $(document.body).width();
 		var HTML_Height = $(document.body).height();
-		var PDF_Width = HTML_Width;
-		var PDF_Height = HTML_Height;
+		var top_left_margin = 2;
+		var PDF_Width = HTML_Width+(top_left_margin*2);
+		var PDF_Height = (PDF_Width*1.5)+(top_left_margin*2);
 		var canvas_image_width = HTML_Width;
 		var canvas_image_height = HTML_Height;
-		
 		var totalPDFPages = Math.ceil(HTML_Height/PDF_Height)-1;
 		
 
