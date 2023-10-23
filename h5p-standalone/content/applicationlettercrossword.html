@@ -162,7 +162,7 @@ H5P.RequestQueue=function(n,t){function e(e){t.call(this),this.processingQueue=!
 		var totalPDFPages = Math.ceil(HTML_Height/PDF_Height)-1;
 		
 
-		html2canvas($(document.body)[0],{allowTaint:true}).then(function(canvas) {
+		html2canvas($(document.body)[0],{allowTaint:false,useCORS:true}).then(function(canvas) {
 			canvas.getContext('2d');
 			
 			console.log(canvas.height+"  "+canvas.width);
