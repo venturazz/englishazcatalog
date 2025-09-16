@@ -1317,19 +1317,18 @@ EXERCISE 3: ERROR CORRECTION
             
             // Check vocabulary table
             const vocabInputs = document.querySelectorAll('.vocab-input');
-            const vocabWords = Object.keys(correctAnswers.vocab);
             
-            vocabInputs.forEach((input, index) => {
-                const wordIndex = Math.floor(index / 2);
-                const isComparative = index % 2 === 0;
-                const word = vocabWords[wordIndex];
+            vocabInputs.forEach((input) => {
+                const row = input.closest('tr');
+                const baseWord = row.querySelector('td:first-child').textContent.trim().toLowerCase();
+                const isComparative = input === row.querySelector('td:nth-child(2) input');
                 
-                if (word && correctAnswers.vocab[word]) {
+                if (correctAnswers.vocab[baseWord]) {
                     totalQuestions++;
                     const userAnswer = input.value.trim().toLowerCase();
                     const correctAnswer = isComparative ? 
-                        correctAnswers.vocab[word][0].toLowerCase() : 
-                        correctAnswers.vocab[word][1].toLowerCase();
+                        correctAnswers.vocab[baseWord][0].toLowerCase() : 
+                        correctAnswers.vocab[baseWord][1].toLowerCase();
                     
                     if (userAnswer === correctAnswer) {
                         input.classList.remove('incorrect');
@@ -1421,6 +1420,5 @@ EXERCISE 3: ERROR CORRECTION
             showFeedback(`Answers checked! Grade: ${letterGrade} - ${correctCount}/${totalQuestions} correct`);
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97fcdec380874495',t:'MTc1Nzk4OTA3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97fd53b366511dd6',t:'MTc1Nzk5Mzg2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
