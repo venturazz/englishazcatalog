@@ -16,8 +16,20 @@
   .incorrect { color: red; }
   button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
   button:hover { background-color: #0056b3; }
-  #results { margin-top: 20px; font-weight: bold; font-size: 1.1em; }
   .drawing-section { font-style: italic; color: #555; }
+  #results-container { text-align: center; margin-top: 30px; }
+  #score-box { 
+      background-color: #e9ecef; 
+      border: 2px solid #007bff; 
+      padding: 20px; 
+      border-radius: 8px; 
+      display: inline-block; 
+      min-width: 150px; 
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  #score-box h3 { margin: 0 0 10px 0; color: #007bff; }
+  #score { font-size: 2.5em; font-weight: bold; color: #333; }
 </style>
 </head>
 <body>
@@ -82,7 +94,7 @@
     </form>
   </div>
   
-  <hr>
+  ---
 
   <div class="section">
     <h2>2. Fill in the blank!</h2>
@@ -140,7 +152,7 @@
     </form>
   </div>
 
-  <hr>
+  ---
 
   <div class="section">
     <h2>3. Draw about:</h2>
@@ -154,7 +166,7 @@
     </div>
   </div>
 
-  <hr>
+  ---
 
   <div class="section">
     <h2>4. Translate to Indonesian!</h2>
@@ -187,7 +199,7 @@
     </form>
   </div>
 
-  <hr>
+  ---
 
   <div class="section">
     <h2>5. Draw thing in the classroom?</h2>
@@ -197,15 +209,22 @@
   </div>
 
   <button onclick="checkAnswers()">Check Answers</button>
-  <div id="results"></div>
+
+  <div id="results-container">
+    <div id="score-box" style="display: none;">
+      <h3>Nilai Anda</h3>
+      <span id="score"></span>
+    </div>
+  </div>
 </div>
 
 <script>
   function checkAnswers() {
     let correctCount = 0;
     const allInputs = document.querySelectorAll('input[type="text"]');
-    const totalQuestions = document.querySelectorAll('input[type="text"]').length;
-
+    const totalQuestions = allInputs.length;
+    
+    // Check and provide feedback for each question
     allInputs.forEach(input => {
       const userAnswer = input.value.trim().toLowerCase();
       const correctAnswer = input.dataset.answer.toLowerCase();
@@ -218,13 +237,21 @@
         feedbackDiv.classList.add('correct');
         correctCount++;
       } else {
-        feedbackDiv.textContent = 'Incorrect. Correct answer: ' + input.dataset.answer;
+        feedbackDiv.textContent = 'Incorrect. Jawaban yang benar: ' + input.dataset.answer;
         feedbackDiv.classList.add('incorrect');
       }
     });
 
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.textContent = `You got ${correctCount} out of ${totalQuestions} questions correct!`;
+    // Calculate score (1-100)
+    const score = (correctCount / totalQuestions) * 100;
+    const roundedScore = Math.round(score);
+
+    // Display the score in the box
+    const scoreBox = document.getElementById('score-box');
+    const scoreSpan = document.getElementById('score');
+    
+    scoreSpan.textContent = roundedScore;
+    scoreBox.style.display = 'inline-block'; // Show the score box
   }
 </script>
 
