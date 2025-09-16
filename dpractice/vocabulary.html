@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Classroom Vocabulary Practice</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+  .container { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+  h1, h2 { color: #333; }
+  .section { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+  .section:last-child { border-bottom: none; }
+  .question-item { margin-bottom: 15px; }
+  label { display: block; margin-bottom: 5px; font-weight: bold; }
+  input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+  .feedback { margin-top: 5px; font-size: 0.9em; }
+  .correct { color: green; }
+  .incorrect { color: red; }
+  button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+  button:hover { background-color: #0056b3; }
+  #results { margin-top: 20px; font-weight: bold; font-size: 1.1em; }
+  .drawing-section { font-style: italic; color: #555; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Classroom Vocabulary Practice</h1>
+  <p>Wednesday, 10th September 2025</p>
+
+  <div class="section">
+    <h2>1. Translate to Indonesian!</h2>
+    <form id="translationForm">
+      <div class="question-item">
+        <label for="q1a">a. Sharpener:</label>
+        <input type="text" id="q1a" data-answer="Rautan">
+        <div class="feedback" id="feedback1a"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1b">b. Correction pen:</label>
+        <input type="text" id="q1b" data-answer="Tip-X">
+        <div class="feedback" id="feedback1b"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1c">c. Marker:</label>
+        <input type="text" id="q1c" data-answer="Spidol">
+        <div class="feedback" id="feedback1c"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1d">d. Paper clip:</label>
+        <input type="text" id="q1d" data-answer="Klip kertas">
+        <div class="feedback" id="feedback1d"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1e">e. Notebook:</label>
+        <input type="text" id="q1e" data-answer="Buku catatan">
+        <div class="feedback" id="feedback1e"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1f">f. Book shelf:</label>
+        <input type="text" id="q1f" data-answer="Rak buku">
+        <div class="feedback" id="feedback1f"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1g">g. Highlighter:</label>
+        <input type="text" id="q1g" data-answer="Stabilo">
+        <div class="feedback" id="feedback1g"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1h">h. Board:</label>
+        <input type="text" id="q1h" data-answer="Papan tulis">
+        <div class="feedback" id="feedback1h"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1i">i. Eraser:</label>
+        <input type="text" id="q1i" data-answer="Penghapus">
+        <div class="feedback" id="feedback1i"></div>
+      </div>
+      <div class="question-item">
+        <label for="q1j">j. Pencil Case:</label>
+        <input type="text" id="q1j" data-answer="Tempat pensil">
+        <div class="feedback" id="feedback1j"></div>
+      </div>
+    </form>
+  </div>
+  
+  <hr>
+
+  <div class="section">
+    <h2>2. Fill in the blank!</h2>
+    <form id="fillBlankForm">
+      <div class="question-item">
+        <label for="q2a">a. R _ _ ler:</label>
+        <input type="text" id="q2a" data-answer="Ruler">
+        <div class="feedback" id="feedback2a"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2b">b. T _ bl_:</label>
+        <input type="text" id="q2b" data-answer="Table">
+        <div class="feedback" id="feedback2b"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2c">c. C _ ay _ n:</label>
+        <input type="text" id="q2c" data-answer="Crayon">
+        <div class="feedback" id="feedback2c"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2d">d. Ch _ lk:</label>
+        <input type="text" id="q2d" data-answer="Chalk">
+        <div class="feedback" id="feedback2d"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2e">e. B _ g:</label>
+        <input type="text" id="q2e" data-answer="Bag">
+        <div class="feedback" id="feedback2e"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2f">f. Gl _ e:</label>
+        <input type="text" id="q2f" data-answer="Glue">
+        <div class="feedback" id="feedback2f"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2g">g. P _ pe_:</label>
+        <input type="text" id="q2g" data-answer="Paper">
+        <div class="feedback" id="feedback2g"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2h">h. Ch _ ir:</label>
+        <input type="text" id="q2h" data-answer="Chair">
+        <div class="feedback" id="feedback2h"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2i">i. P _ nc _ l:</label>
+        <input type="text" id="q2i" data-answer="Pencil">
+        <div class="feedback" id="feedback2i"></div>
+      </div>
+      <div class="question-item">
+        <label for="q2j">j. P _ n:</label>
+        <input type="text" id="q2j" data-answer="Pen">
+        <div class="feedback" id="feedback2j"></div>
+      </div>
+    </form>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h2>3. Draw about:</h2>
+    <div class="drawing-section">
+      <p>a. long pencil</p>
+      <p>b. short pencil</p>
+      <p>c. long ruler</p>
+      <p>d. long crayon</p>
+      <p>e. short ruler</p>
+      <p>This is a drawing exercise. You can do this on a separate piece of paper!</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h2>4. Translate to Indonesian!</h2>
+    <form id="translationForm2">
+      <div class="question-item">
+        <label for="q4a">a. Help:</label>
+        <input type="text" id="q4a" data-answer="Tolong">
+        <div class="feedback" id="feedback4a"></div>
+      </div>
+      <div class="question-item">
+        <label for="q4b">b. Borrowing:</label>
+        <input type="text" id="q4b" data-answer="Meminjam">
+        <div class="feedback" id="feedback4b"></div>
+      </div>
+      <div class="question-item">
+        <label for="q4c">c. Good person:</label>
+        <input type="text" id="q4c" data-answer="Orang baik">
+        <div class="feedback" id="feedback4c"></div>
+      </div>
+      <div class="question-item">
+        <label for="q4d">d. friend:</label>
+        <input type="text" id="q4d" data-answer="Teman">
+        <div class="feedback" id="feedback4d"></div>
+      </div>
+      <div class="question-item">
+        <label for="q4e">e. Of Course:</label>
+        <input type="text" id="q4e" data-answer="Tentu saja">
+        <div class="feedback" id="feedback4e"></div>
+      </div>
+    </form>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h2>5. Draw thing in the classroom?</h2>
+    <div class="drawing-section">
+      <p>This is a drawing exercise. You can do this on a separate piece of paper!</p>
+    </div>
+  </div>
+
+  <button onclick="checkAnswers()">Check Answers</button>
+  <div id="results"></div>
+</div>
+
+<script>
+  function checkAnswers() {
+    let correctCount = 0;
+    const allInputs = document.querySelectorAll('input[type="text"]');
+    const totalQuestions = document.querySelectorAll('input[type="text"]').length;
+
+    allInputs.forEach(input => {
+      const userAnswer = input.value.trim().toLowerCase();
+      const correctAnswer = input.dataset.answer.toLowerCase();
+      const feedbackDiv = document.getElementById('feedback' + input.id.substring(1));
+
+      feedbackDiv.classList.remove('correct', 'incorrect');
+
+      if (userAnswer === correctAnswer) {
+        feedbackDiv.textContent = 'Correct!';
+        feedbackDiv.classList.add('correct');
+        correctCount++;
+      } else {
+        feedbackDiv.textContent = 'Incorrect. Correct answer: ' + input.dataset.answer;
+        feedbackDiv.classList.add('incorrect');
+      }
+    });
+
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.textContent = `You got ${correctCount} out of ${totalQuestions} questions correct!`;
+  }
+</script>
+
+</body>
+</html>
