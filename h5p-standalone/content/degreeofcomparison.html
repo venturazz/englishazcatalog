@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Degrees of Comparison Worksheet - Describing Places</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .export-buttons {
+            background: #f8fafc;
+            padding: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .export-btn {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .export-btn:active {
+            transform: translateY(0);
+        }
+        
+        .worksheet {
+            padding: 40px;
+            background: white;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #4f46e5;
+            position: relative;
+        }
+        
+        .header h1 {
+            color: #1e293b;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .grade-section {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .grade-section h3 {
+            font-size: 14px;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .grade-display {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .check-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .check-btn:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+        
+        .check-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .check-btn:disabled:hover {
+            background: #9ca3af;
+            transform: none;
+        }
+        
+        .save-info-btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .save-info-btn:hover {
+            background: #047857;
+            transform: translateY(-1px);
+        }
+        
+        .save-info-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .save-info-btn:disabled:hover {
+            background: #9ca3af;
+            transform: none;
+        }
+        
+        .student-info {
+            border: 3px solid #4f46e5;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-field label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .info-field input {
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            min-height: 44px;
+            line-height: 1.4;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .info-field input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .topic-focus {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .topic-focus h3 {
+            color: #92400e;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .topic-focus p {
+            color: #b45309;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+            padding: 25px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fafafa;
+        }
+        
+        .section h2 {
+            color: #1f2937;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4f46e5;
+        }
+        
+        .vocab-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .vocab-table th {
+            background: #4f46e5;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .vocab-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .vocab-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .example-box {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .example-box h4 {
+            color: #047857;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .exercise {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .exercise h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .exercise-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+        
+        .vocab-input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            background: white;
+            min-height: 36px;
+            line-height: 1.4;
+        }
+        
+        .vocab-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+        
+        .vocab-input.correct {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+        }
+        
+        .vocab-input.incorrect {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        
+        .exercise-input {
+            border: none;
+            border-bottom: 2px solid #4f46e5;
+            background: transparent;
+            padding: 6px 12px;
+            font-size: 14px;
+            min-width: 140px;
+            margin: 0 4px;
+            min-height: 32px;
+            line-height: 1.4;
+        }
+        
+        .exercise-input:focus {
+            outline: none;
+            background: #f0f9ff;
+            border-bottom-color: #0ea5e9;
+        }
+        
+        .exercise-input.correct {
+            border-bottom-color: #10b981;
+            background-color: #ecfdf5;
+        }
+        
+        .exercise-input.incorrect {
+            border-bottom-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        
+        .sentence-input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 14px;
+            margin-top: 8px;
+            background: white;
+            min-height: 44px;
+            line-height: 1.5;
+        }
+        
+        .sentence-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+        
+        .correction-input {
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 10px 14px;
+            font-size: 14px;
+            background: white;
+            margin-left: 8px;
+            min-height: 40px;
+            line-height: 1.4;
+        }
+        
+        .correction-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+        
+        .feedback {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .feedback.show {
+            transform: translateX(0);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                margin: 0;
+                border-radius: 12px;
+            }
+            
+            .worksheet {
+                padding: 15px;
+            }
+            
+            .export-buttons {
+                padding: 15px;
+                flex-direction: column;
+            }
+            
+            .export-btn {
+                padding: 12px 16px;
+                font-size: 14px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .grade-section {
+                position: static;
+                margin-top: 15px;
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .vocab-table {
+                font-size: 12px;
+            }
+            
+            .vocab-table th,
+            .vocab-table td {
+                padding: 8px 4px;
+            }
+            
+            .vocab-input {
+                font-size: 12px;
+                padding: 6px;
+            }
+            
+            .exercise-input {
+                min-width: 80px;
+                font-size: 12px;
+            }
+            
+            .sentence-input,
+            .correction-input {
+                font-size: 12px;
+                padding: 8px;
+            }
+            
+            .section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .section h2 {
+                font-size: 18px;
+            }
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .export-buttons {
+                display: none;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .vocab-input, .exercise-input, .sentence-input, .correction-input, .info-field input {
+                border: 1px solid #000 !important;
+                background: white !important;
+                color: #000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                min-height: 40px !important;
+                padding: 10px 14px !important;
+                font-size: 14px !important;
+                line-height: 1.4 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        
+        <div class="worksheet" id="worksheet">
+            <div class="header">
+                <h1>Degrees of Comparison</h1>
+                <p>Describing Places - B1 Level English Worksheet</p>
+                <div class="grade-section">
+                    <h3>Final Grade</h3>
+                    <div class="grade-display" id="gradeDisplay">-</div>
+                    <button class="check-btn" onclick="checkAnswers()">Check Answers</button>
+                </div>
+            </div>
+            
+            <div class="student-info">
+                <div class="info-grid">
+                    <div class="info-field">
+                        <label for="studentName">Student's Name:</label>
+                        <input type="text" id="studentName" placeholder="Enter your full name">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentClass">Class:</label>
+                        <input type="text" id="studentClass" placeholder="e.g., B1-A">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentNumber">Student Number:</label>
+                        <input type="text" id="studentNumber" placeholder="Enter student ID">
+                    </div>
+                    <div class="info-field">
+                        <label for="worksheetDate">Date:</label>
+                        <input type="date" id="worksheetDate">
+                    </div>
+                    <div class="info-field">
+                        <label for="worksheetTime">Time:</label>
+                        <input type="time" id="worksheetTime">
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="save-info-btn" onclick="saveStudentInfo()">🔒 Save Student Information</button>
+                </div>
+            </div>
+            
+
+            
+            <div class="section">
+                <h2>📚 Vocabulary Reference</h2>
+                <table class="vocab-table">
+                    <thead>
+                        <tr>
+                            <th>Positive</th>
+                            <th>Comparative</th>
+                            <th>Superlative</th>
+                            <th>Usage for Places</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>big</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>city size</td>
+                        </tr>
+                        <tr>
+                            <td>small</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>town/village size</td>
+                        </tr>
+                        <tr>
+                            <td>beautiful</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>scenic locations</td>
+                        </tr>
+                        <tr>
+                            <td>crowded</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>tourist areas</td>
+                        </tr>
+                        <tr>
+                            <td>quiet</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>peaceful places</td>
+                        </tr>
+                        <tr>
+                            <td>expensive</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>cost of living</td>
+                        </tr>
+                        <tr>
+                            <td>modern</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>architecture/facilities</td>
+                        </tr>
+                        <tr>
+                            <td>old</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>historical places</td>
+                        </tr>
+                        <tr>
+                            <td>clean</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>environment</td>
+                        </tr>
+                        <tr>
+                            <td>dirty</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>pollution level</td>
+                        </tr>
+                        <tr>
+                            <td>safe</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>security level</td>
+                        </tr>
+                        <tr>
+                            <td>dangerous</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>risk level</td>
+                        </tr>
+                        <tr>
+                            <td>hot</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>temperature</td>
+                        </tr>
+                        <tr>
+                            <td>cold</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>weather</td>
+                        </tr>
+                        <tr>
+                            <td>busy</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>activity level</td>
+                        </tr>
+                        <tr>
+                            <td>peaceful</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>atmosphere</td>
+                        </tr>
+                        <tr>
+                            <td>popular</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>tourist attraction</td>
+                        </tr>
+                        <tr>
+                            <td>famous</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>well-known places</td>
+                        </tr>
+                        <tr>
+                            <td>comfortable</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>living conditions</td>
+                        </tr>
+                        <tr>
+                            <td>interesting</td>
+                            <td><input type="text" class="vocab-input" placeholder="Write comparative form"></td>
+                            <td><input type="text" class="vocab-input" placeholder="Write superlative form"></td>
+                            <td>attractions</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h2>💡 Examples</h2>
+                
+                <div class="example-box">
+                    <h4>Positive Degree:</h4>
+                    <p>• Paris is a <strong>beautiful</strong> city.</p>
+                    <p>• The museum is <strong>old</strong>.</p>
+                    <p>• This restaurant is <strong>expensive</strong>.</p>
+                </div>
+                
+                <div class="example-box">
+                    <h4>Comparative Degree:</h4>
+                    <p>• London is <strong>bigger</strong> than Paris.</p>
+                    <p>• The countryside is <strong>quieter</strong> than the city center.</p>
+                    <p>• This hotel is <strong>more expensive</strong> than that one.</p>
+                </div>
+                
+                <div class="example-box">
+                    <h4>Superlative Degree:</h4>
+                    <p>• Tokyo is the <strong>biggest</strong> city in Japan.</p>
+                    <p>• This is the <strong>most beautiful</strong> beach I've ever seen.</p>
+                    <p>• The library is the <strong>quietest</strong> place in town.</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>✏️ Exercise 1: Fill in the Blanks</h2>
+                <div class="exercise">
+                    <h4>Complete the sentences with the correct form:</h4>
+                    
+                    <div id="exercise1-container">
+                        <div class="exercise-item">
+                            1. New York is <input type="text" class="exercise-input" placeholder="answer"> (big) than Boston.
+                        </div>
+                        
+                        <div class="exercise-item">
+                            2. This village is the <input type="text" class="exercise-input" placeholder="answer"> (quiet) place in the region.
+                        </div>
+                        
+                        <div class="exercise-item">
+                            3. The mountain view is <input type="text" class="exercise-input" placeholder="answer"> (beautiful) than the city view.
+                        </div>
+                        
+                        <div class="exercise-item">
+                            4. Switzerland is one of the <input type="text" class="exercise-input" placeholder="answer"> (expensive) countries in Europe.
+                        </div>
+                        
+                        <div class="exercise-item">
+                            5. The town square is <input type="text" class="exercise-input" placeholder="answer"> (crowded) on weekends.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>✏️ Exercise 2: Create Your Own Sentences</h2>
+                <div class="exercise">
+                    <h4>Write sentences comparing these places using the given adjectives:</h4>
+                    
+                    <div class="exercise-item">
+                        1. Compare your hometown and the capital city (big):
+                        <br><input type="text" class="sentence-input" placeholder="Write your sentence here...">
+                    </div>
+                    
+                    <div class="exercise-item">
+                        2. Compare a beach and a mountain (beautiful):
+                        <br><input type="text" class="sentence-input" placeholder="Write your sentence here...">
+                    </div>
+                    
+                    <div class="exercise-item">
+                        3. Write about the most interesting place you know:
+                        <br><input type="text" class="sentence-input" placeholder="Write your sentence here...">
+                    </div>
+                    
+                    <div class="exercise-item">
+                        4. Compare two restaurants (expensive):
+                        <br><input type="text" class="sentence-input" placeholder="Write your sentence here...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🎯 Exercise 3: Error Correction</h2>
+                <div class="exercise">
+                    <h4>Find and correct the mistakes in these sentences:</h4>
+                    
+                    <div id="correction-container">
+                        <div class="exercise-item">
+                            1. Paris is more big than Lyon. → <input type="text" class="correction-input" placeholder="Write the correct sentence">
+                        </div>
+                        
+                        <div class="exercise-item">
+                            2. This is the most old building in the city. → <input type="text" class="correction-input" placeholder="Write the correct sentence">
+                        </div>
+                        
+                        <div class="exercise-item">
+                            3. The park is more quiet than the street. → <input type="text" class="correction-input" placeholder="Write the correct sentence">
+                        </div>
+                        
+                        <div class="exercise-item">
+                            4. Tokyo is the bigger city in the world. → <input type="text" class="correction-input" placeholder="Write the correct sentence">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="export-buttons">
+            <button class="export-btn" onclick="printWorksheet()">
+                🖨️ Print
+            </button>
+            <button class="export-btn" onclick="copyWorksheet()">
+                📋 Copy
+            </button>
+            <button class="export-btn" onclick="downloadPDF()">
+                📄 Download PDF
+            </button>
+            <button class="export-btn" onclick="downloadDocx()">
+                📝 Download DOCX
+            </button>
+            <button class="export-btn" onclick="takeScreenshot()">
+                📸 Screenshot
+            </button>
+        </div>
+    </div>
+    
+    <div class="feedback" id="feedback"></div>
+    
+    <script>
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        // Set current date and time and shuffle questions
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            document.getElementById('worksheetDate').value = now.toISOString().split('T')[0];
+            document.getElementById('worksheetTime').value = now.toTimeString().slice(0,5);
+            
+            // Shuffle vocabulary table rows
+            shuffleVocabularyTable();
+            
+            // Shuffle exercise questions
+            shuffleExerciseQuestions();
+            
+            // Shuffle correction questions
+            shuffleCorrectionQuestions();
+        });
+        
+        function shuffleVocabularyTable() {
+            const tbody = document.querySelector('.vocab-table tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const shuffledRows = shuffleArray(rows);
+            
+            // Clear tbody and append shuffled rows
+            tbody.innerHTML = '';
+            shuffledRows.forEach(row => tbody.appendChild(row));
+        }
+        
+        function shuffleExerciseQuestions() {
+            const exerciseContainer = document.querySelector('#exercise1-container');
+            if (!exerciseContainer) return;
+            
+            // Define the question contents (without numbers)
+            const questionContents = [
+                'New York is <input type="text" class="exercise-input" placeholder="answer"> (big) than Boston.',
+                'This village is the <input type="text" class="exercise-input" placeholder="answer"> (quiet) place in the region.',
+                'The mountain view is <input type="text" class="exercise-input" placeholder="answer"> (beautiful) than the city view.',
+                'Switzerland is one of the <input type="text" class="exercise-input" placeholder="answer"> (expensive) countries in Europe.',
+                'The town square is <input type="text" class="exercise-input" placeholder="answer"> (crowded) on weekends.'
+            ];
+            
+            // Shuffle the content array
+            const shuffledContents = shuffleArray(questionContents);
+            
+            // Clear container and rebuild with fixed numbering
+            exerciseContainer.innerHTML = '';
+            shuffledContents.forEach((content, index) => {
+                const div = document.createElement('div');
+                div.className = 'exercise-item';
+                div.innerHTML = `${index + 1}. ${content}`;
+                exerciseContainer.appendChild(div);
+            });
+        }
+        
+        function shuffleCorrectionQuestions() {
+            const correctionContainer = document.querySelector('#correction-container');
+            if (!correctionContainer) return;
+            
+            // Define the correction contents (without numbers)
+            const correctionContents = [
+                'Paris is more big than Lyon. → <input type="text" class="correction-input" placeholder="Write the correct sentence">',
+                'This is the most old building in the city. → <input type="text" class="correction-input" placeholder="Write the correct sentence">',
+                'The park is more quiet than the street. → <input type="text" class="correction-input" placeholder="Write the correct sentence">',
+                'Tokyo is the bigger city in the world. → <input type="text" class="correction-input" placeholder="Write the correct sentence">'
+            ];
+            
+            // Shuffle the content array
+            const shuffledContents = shuffleArray(correctionContents);
+            
+            // Clear container and rebuild with fixed numbering
+            correctionContainer.innerHTML = '';
+            shuffledContents.forEach((content, index) => {
+                const div = document.createElement('div');
+                div.className = 'exercise-item';
+                div.innerHTML = `${index + 1}. ${content}`;
+                correctionContainer.appendChild(div);
+            });
+        }
+        
+        function showFeedback(message) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.classList.add('show');
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 3000);
+        }
+        
+        function printWorksheet() {
+            window.print();
+            showFeedback('Print dialog opened! 🖨️');
+        }
+        
+        async function copyWorksheet() {
+            try {
+                const studentName = document.getElementById('studentName').value || '[Student Name]';
+                const studentClass = document.getElementById('studentClass').value || '[Class]';
+                const studentNumber = document.getElementById('studentNumber').value || '[Student Number]';
+                const worksheetDate = document.getElementById('worksheetDate').value || '[Date]';
+                const worksheetTime = document.getElementById('worksheetTime').value || '[Time]';
+                const grade = document.getElementById('gradeDisplay').textContent || '-';
+                
+                // Get all vocabulary answers
+                const vocabInputs = document.querySelectorAll('.vocab-input');
+                const vocabAnswers = Array.from(vocabInputs).map(input => input.value || '_______');
+                
+                // Get exercise answers
+                const exerciseInputs = document.querySelectorAll('.exercise-input');
+                const exerciseAnswers = Array.from(exerciseInputs).map(input => input.value || '_______');
+                
+                // Get sentence answers
+                const sentenceInputs = document.querySelectorAll('.sentence-input');
+                const sentenceAnswers = Array.from(sentenceInputs).map(input => input.value || '_______');
+                
+                // Get correction answers
+                const correctionInputs = document.querySelectorAll('.correction-input');
+                const correctionAnswers = Array.from(correctionInputs).map(input => input.value || '_______');
+                
+                const fullContent = `
+DEGREES OF COMPARISON - DESCRIBING PLACES
+B1 Level English Worksheet
+
+STUDENT INFORMATION:
+Name: ${studentName}
+Class: ${studentClass}
+Student Number: ${studentNumber}
+Date: ${worksheetDate}
+Time: ${worksheetTime}
+Final Grade: ${grade}
+
+VOCABULARY REFERENCE:
+Positive | Comparative | Superlative | Usage
+big | ${vocabAnswers[0]} | ${vocabAnswers[1]} | city size
+small | ${vocabAnswers[2]} | ${vocabAnswers[3]} | town/village size
+beautiful | ${vocabAnswers[4]} | ${vocabAnswers[5]} | scenic locations
+crowded | ${vocabAnswers[6]} | ${vocabAnswers[7]} | tourist areas
+quiet | ${vocabAnswers[8]} | ${vocabAnswers[9]} | peaceful places
+expensive | ${vocabAnswers[10]} | ${vocabAnswers[11]} | cost of living
+modern | ${vocabAnswers[12]} | ${vocabAnswers[13]} | architecture/facilities
+old | ${vocabAnswers[14]} | ${vocabAnswers[15]} | historical places
+clean | ${vocabAnswers[16]} | ${vocabAnswers[17]} | environment
+dirty | ${vocabAnswers[18]} | ${vocabAnswers[19]} | pollution level
+safe | ${vocabAnswers[20]} | ${vocabAnswers[21]} | security level
+dangerous | ${vocabAnswers[22]} | ${vocabAnswers[23]} | risk level
+hot | ${vocabAnswers[24]} | ${vocabAnswers[25]} | temperature
+cold | ${vocabAnswers[26]} | ${vocabAnswers[27]} | weather
+busy | ${vocabAnswers[28]} | ${vocabAnswers[29]} | activity level
+peaceful | ${vocabAnswers[30]} | ${vocabAnswers[31]} | atmosphere
+popular | ${vocabAnswers[32]} | ${vocabAnswers[33]} | tourist attraction
+famous | ${vocabAnswers[34]} | ${vocabAnswers[35]} | well-known places
+comfortable | ${vocabAnswers[36]} | ${vocabAnswers[37]} | living conditions
+interesting | ${vocabAnswers[38]} | ${vocabAnswers[39]} | attractions
+
+EXERCISE 1: FILL IN THE BLANKS
+1. New York is ${exerciseAnswers[0]} (big) than Boston.
+2. This village is the ${exerciseAnswers[1]} (quiet) place in the region.
+3. The mountain view is ${exerciseAnswers[2]} (beautiful) than the city view.
+4. Switzerland is one of the ${exerciseAnswers[3]} (expensive) countries in Europe.
+5. The town square is ${exerciseAnswers[4]} (crowded) on weekends.
+
+EXERCISE 2: CREATE YOUR OWN SENTENCES
+1. Compare your hometown and the capital city (big): ${sentenceAnswers[0]}
+2. Compare a beach and a mountain (beautiful): ${sentenceAnswers[1]}
+3. Write about the most interesting place you know: ${sentenceAnswers[2]}
+4. Compare two restaurants (expensive): ${sentenceAnswers[3]}
+
+EXERCISE 3: ERROR CORRECTION
+1. Paris is more big than Lyon. → ${correctionAnswers[0]}
+2. This is the most old building in the city. → ${correctionAnswers[1]}
+3. The park is more quiet than the street. → ${correctionAnswers[2]}
+4. Tokyo is the bigger city in the world. → ${correctionAnswers[3]}
+                `;
+                
+                await navigator.clipboard.writeText(fullContent);
+                showFeedback('Complete worksheet with answers copied! 📋');
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = document.getElementById('worksheet').innerText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showFeedback('Worksheet copied to clipboard! 📋');
+            }
+        }
+        
+        async function downloadPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const worksheet = document.getElementById('worksheet');
+                
+                const canvas = await html2canvas(worksheet, {
+                    scale: 1.2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    removeContainer: true,
+                    imageTimeout: 0,
+                    logging: false,
+                    width: worksheet.scrollWidth,
+                    height: worksheet.scrollHeight
+                });
+                
+                // Compress image to reduce file size while maintaining quality
+                const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save('degrees-of-comparison-worksheet.pdf');
+                showFeedback('PDF downloaded successfully! 📄');
+            } catch (error) {
+                showFeedback('PDF download failed. Please try again.');
+            }
+        }
+        
+        async function downloadDocx() {
+            try {
+                // Get all student information and answers
+                const studentName = document.getElementById('studentName').value || '[Student Name]';
+                const studentClass = document.getElementById('studentClass').value || '[Class]';
+                const studentNumber = document.getElementById('studentNumber').value || '[Student Number]';
+                const worksheetDate = document.getElementById('worksheetDate').value || '[Date]';
+                const worksheetTime = document.getElementById('worksheetTime').value || '[Time]';
+                const grade = document.getElementById('gradeDisplay').textContent || '-';
+                
+                // Get all vocabulary answers
+                const vocabInputs = document.querySelectorAll('.vocab-input');
+                const vocabAnswers = Array.from(vocabInputs).map(input => input.value || '_____________');
+                
+                // Get exercise answers
+                const exerciseInputs = document.querySelectorAll('.exercise-input');
+                const exerciseAnswers = Array.from(exerciseInputs).map(input => input.value || '_____________');
+                
+                // Get sentence answers
+                const sentenceInputs = document.querySelectorAll('.sentence-input');
+                const sentenceAnswers = Array.from(sentenceInputs).map(input => input.value || '_________________________________________________');
+                
+                // Get correction answers
+                const correctionInputs = document.querySelectorAll('.correction-input');
+                const correctionAnswers = Array.from(correctionInputs).map(input => input.value || '_________________________________________________');
+                
+                const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Degrees of Comparison Worksheet</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+                        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .grade-box { background-color: #e8f5e8; padding: 10px; border: 2px solid #4CAF50; margin: 10px 0; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Degrees of Comparison - Describing Places</h1>
+                    <h2>B1 Level English Worksheet</h2>
+                    
+                    <div class="grade-box">
+                        <p><strong>Student Name:</strong> ${studentName}</p>
+                        <p><strong>Class:</strong> ${studentClass}</p>
+                        <p><strong>Student Number:</strong> ${studentNumber}</p>
+                        <p><strong>Date:</strong> ${worksheetDate}</p>
+                        <p><strong>Time:</strong> ${worksheetTime}</p>
+                        <p><strong>Final Grade:</strong> ${grade}</p>
+                    </div>
+                    
+                    <h3>Vocabulary Reference</h3>
+                    <table>
+                        <tr>
+                            <th>Positive</th>
+                            <th>Comparative</th>
+                            <th>Superlative</th>
+                            <th>Usage for Places</th>
+                        </tr>
+                        <tr><td>big</td><td>${vocabAnswers[0]}</td><td>${vocabAnswers[1]}</td><td>city size</td></tr>
+                        <tr><td>small</td><td>${vocabAnswers[2]}</td><td>${vocabAnswers[3]}</td><td>town/village size</td></tr>
+                        <tr><td>beautiful</td><td>${vocabAnswers[4]}</td><td>${vocabAnswers[5]}</td><td>scenic locations</td></tr>
+                        <tr><td>crowded</td><td>${vocabAnswers[6]}</td><td>${vocabAnswers[7]}</td><td>tourist areas</td></tr>
+                        <tr><td>quiet</td><td>${vocabAnswers[8]}</td><td>${vocabAnswers[9]}</td><td>peaceful places</td></tr>
+                        <tr><td>expensive</td><td>${vocabAnswers[10]}</td><td>${vocabAnswers[11]}</td><td>cost of living</td></tr>
+                        <tr><td>modern</td><td>${vocabAnswers[12]}</td><td>${vocabAnswers[13]}</td><td>architecture/facilities</td></tr>
+                        <tr><td>old</td><td>${vocabAnswers[14]}</td><td>${vocabAnswers[15]}</td><td>historical places</td></tr>
+                        <tr><td>clean</td><td>${vocabAnswers[16]}</td><td>${vocabAnswers[17]}</td><td>environment</td></tr>
+                        <tr><td>dirty</td><td>${vocabAnswers[18]}</td><td>${vocabAnswers[19]}</td><td>pollution level</td></tr>
+                        <tr><td>safe</td><td>${vocabAnswers[20]}</td><td>${vocabAnswers[21]}</td><td>security level</td></tr>
+                        <tr><td>dangerous</td><td>${vocabAnswers[22]}</td><td>${vocabAnswers[23]}</td><td>risk level</td></tr>
+                        <tr><td>hot</td><td>${vocabAnswers[24]}</td><td>${vocabAnswers[25]}</td><td>temperature</td></tr>
+                        <tr><td>cold</td><td>${vocabAnswers[26]}</td><td>${vocabAnswers[27]}</td><td>weather</td></tr>
+                        <tr><td>busy</td><td>${vocabAnswers[28]}</td><td>${vocabAnswers[29]}</td><td>activity level</td></tr>
+                        <tr><td>peaceful</td><td>${vocabAnswers[30]}</td><td>${vocabAnswers[31]}</td><td>atmosphere</td></tr>
+                        <tr><td>popular</td><td>${vocabAnswers[32]}</td><td>${vocabAnswers[33]}</td><td>tourist attraction</td></tr>
+                        <tr><td>famous</td><td>${vocabAnswers[34]}</td><td>${vocabAnswers[35]}</td><td>well-known places</td></tr>
+                        <tr><td>comfortable</td><td>${vocabAnswers[36]}</td><td>${vocabAnswers[37]}</td><td>living conditions</td></tr>
+                        <tr><td>interesting</td><td>${vocabAnswers[38]}</td><td>${vocabAnswers[39]}</td><td>attractions</td></tr>
+                    </table>
+                    
+                    <h3>Exercise 1: Fill in the Blanks</h3>
+                    <p>1. New York is <strong>${exerciseAnswers[0]}</strong> (big) than Boston.</p>
+                    <p>2. This village is the <strong>${exerciseAnswers[1]}</strong> (quiet) place in the region.</p>
+                    <p>3. The mountain view is <strong>${exerciseAnswers[2]}</strong> (beautiful) than the city view.</p>
+                    <p>4. Switzerland is one of the <strong>${exerciseAnswers[3]}</strong> (expensive) countries in Europe.</p>
+                    <p>5. The town square is <strong>${exerciseAnswers[4]}</strong> (crowded) on weekends.</p>
+                    
+                    <h3>Exercise 2: Create Your Own Sentences</h3>
+                    <p>1. Compare your hometown and the capital city (big):</p>
+                    <p><em>${sentenceAnswers[0]}</em></p>
+                    <p>2. Compare a beach and a mountain (beautiful):</p>
+                    <p><em>${sentenceAnswers[1]}</em></p>
+                    <p>3. Write about the most interesting place you know:</p>
+                    <p><em>${sentenceAnswers[2]}</em></p>
+                    <p>4. Compare two restaurants (expensive):</p>
+                    <p><em>${sentenceAnswers[3]}</em></p>
+                    
+                    <h3>Exercise 3: Error Correction</h3>
+                    <p>1. Paris is more big than Lyon. → <strong>${correctionAnswers[0]}</strong></p>
+                    <p>2. This is the most old building in the city. → <strong>${correctionAnswers[1]}</strong></p>
+                    <p>3. The park is more quiet than the street. → <strong>${correctionAnswers[2]}</strong></p>
+                    <p>4. Tokyo is the bigger city in the world. → <strong>${correctionAnswers[3]}</strong></p>
+                </body>
+                </html>
+                `;
+                
+                const blob = new Blob([htmlContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'degrees-of-comparison-worksheet.docx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showFeedback('Complete DOCX with all answers downloaded! 📝');
+            } catch (error) {
+                showFeedback('DOCX download failed. Please try again.');
+            }
+        }
+        
+        async function takeScreenshot() {
+            try {
+                const worksheet = document.getElementById('worksheet');
+                const canvas = await html2canvas(worksheet, {
+                    scale: 1.5,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    removeContainer: true,
+                    imageTimeout: 0,
+                    logging: false
+                });
+                
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'degrees-of-comparison-worksheet.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+                
+                showFeedback('Screenshot saved successfully! 📸');
+            } catch (error) {
+                showFeedback('Screenshot failed. Please try again.');
+            }
+        }
+        
+        function saveStudentInfo() {
+            const saveBtn = document.querySelector('.save-info-btn');
+            const studentInputs = document.querySelectorAll('#studentName, #studentClass, #studentNumber, #worksheetDate, #worksheetTime');
+            
+            // Check if all fields are filled
+            let allFilled = true;
+            studentInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    allFilled = false;
+                }
+            });
+            
+            if (!allFilled) {
+                showFeedback('Please fill in all student information fields first!');
+                return;
+            }
+            
+            // Disable all student info inputs
+            studentInputs.forEach(input => {
+                input.readOnly = true;
+                input.style.backgroundColor = '#f3f4f6';
+                input.style.cursor = 'not-allowed';
+            });
+            
+            // Disable and update the save button
+            saveBtn.disabled = true;
+            saveBtn.textContent = '✓ Information Saved';
+            saveBtn.style.backgroundColor = '#9ca3af';
+            
+            showFeedback('Student information saved and locked! 🔒');
+        }
+        
+        function checkAnswers() {
+            // Check if already checked
+            const checkBtn = document.querySelector('.check-btn');
+            if (checkBtn.disabled) {
+                showFeedback('Answers have already been checked!');
+                return;
+            }
+            
+            const correctAnswers = {
+                vocab: {
+                    'big': ['bigger', 'biggest'],
+                    'small': ['smaller', 'smallest'],
+                    'beautiful': ['more beautiful', 'most beautiful'],
+                    'crowded': ['more crowded', 'most crowded'],
+                    'quiet': ['quieter', 'quietest'],
+                    'expensive': ['more expensive', 'most expensive'],
+                    'modern': ['more modern', 'most modern'],
+                    'old': ['older', 'oldest'],
+                    'clean': ['cleaner', 'cleanest'],
+                    'dirty': ['dirtier', 'dirtiest'],
+                    'safe': ['safer', 'safest'],
+                    'dangerous': ['more dangerous', 'most dangerous'],
+                    'hot': ['hotter', 'hottest'],
+                    'cold': ['colder', 'coldest'],
+                    'busy': ['busier', 'busiest'],
+                    'peaceful': ['more peaceful', 'most peaceful'],
+                    'popular': ['more popular', 'most popular'],
+                    'famous': ['more famous', 'most famous'],
+                    'comfortable': ['more comfortable', 'most comfortable'],
+                    'interesting': ['more interesting', 'most interesting']
+                },
+                exercise1: ['bigger', 'quietest', 'more beautiful', 'most expensive', 'more crowded'],
+                corrections: [
+                    'Paris is bigger than Lyon',
+                    'This is the oldest building in the city',
+                    'The park is quieter than the street',
+                    'Tokyo is the biggest city in the world'
+                ]
+            };
+            
+            let totalQuestions = 0;
+            let correctCount = 0;
+            
+            // Check vocabulary table
+            const vocabInputs = document.querySelectorAll('.vocab-input');
+            const vocabWords = Object.keys(correctAnswers.vocab);
+            
+            vocabInputs.forEach((input, index) => {
+                const wordIndex = Math.floor(index / 2);
+                const isComparative = index % 2 === 0;
+                const word = vocabWords[wordIndex];
+                
+                if (word && correctAnswers.vocab[word]) {
+                    totalQuestions++;
+                    const userAnswer = input.value.trim().toLowerCase();
+                    const correctAnswer = isComparative ? 
+                        correctAnswers.vocab[word][0].toLowerCase() : 
+                        correctAnswers.vocab[word][1].toLowerCase();
+                    
+                    if (userAnswer === correctAnswer) {
+                        input.classList.remove('incorrect');
+                        input.classList.add('correct');
+                        correctCount++;
+                    } else {
+                        input.classList.remove('correct');
+                        input.classList.add('incorrect');
+                    }
+                }
+            });
+            
+            // Check Exercise 1 - match answers to original questions regardless of order
+            const exercise1Inputs = document.querySelectorAll('.exercise-input');
+            const exercise1Answers = {
+                'new york': 'bigger',
+                'village': 'quietest', 
+                'mountain view': 'more beautiful',
+                'switzerland': 'most expensive',
+                'town square': 'more crowded'
+            };
+            
+            exercise1Inputs.forEach((input) => {
+                const questionText = input.parentElement.textContent.toLowerCase();
+                totalQuestions++;
+                const userAnswer = input.value.trim().toLowerCase();
+                
+                let correctAnswer = '';
+                if (questionText.includes('new york')) correctAnswer = 'bigger';
+                else if (questionText.includes('village')) correctAnswer = 'quietest';
+                else if (questionText.includes('mountain view')) correctAnswer = 'more beautiful';
+                else if (questionText.includes('switzerland')) correctAnswer = 'most expensive';
+                else if (questionText.includes('town square')) correctAnswer = 'more crowded';
+                
+                if (userAnswer === correctAnswer) {
+                    input.classList.remove('incorrect');
+                    input.classList.add('correct');
+                    correctCount++;
+                } else {
+                    input.classList.remove('correct');
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            // Check corrections - match answers to original questions regardless of order
+            const correctionInputs = document.querySelectorAll('.correction-input');
+            correctionInputs.forEach((input) => {
+                const questionText = input.parentElement.textContent.toLowerCase();
+                totalQuestions++;
+                const userAnswer = input.value.trim().toLowerCase();
+                
+                let isCorrect = false;
+                if (questionText.includes('more big') && userAnswer.includes('bigger')) isCorrect = true;
+                else if (questionText.includes('most old') && userAnswer.includes('oldest')) isCorrect = true;
+                else if (questionText.includes('more quiet') && userAnswer.includes('quieter')) isCorrect = true;
+                else if (questionText.includes('bigger city in the world') && userAnswer.includes('biggest')) isCorrect = true;
+                
+                if (isCorrect) {
+                    input.classList.remove('incorrect');
+                    input.classList.add('correct');
+                    correctCount++;
+                } else {
+                    input.classList.remove('correct');
+                    input.classList.add('incorrect');
+                }
+            });
+            
+            // Calculate and display grade
+            const percentage = Math.round((correctCount / totalQuestions) * 100);
+            let letterGrade = 'F';
+            
+            if (percentage >= 90) letterGrade = 'A';
+            else if (percentage >= 80) letterGrade = 'B';
+            else if (percentage >= 70) letterGrade = 'C';
+            else if (percentage >= 60) letterGrade = 'D';
+            
+            document.getElementById('gradeDisplay').textContent = `${letterGrade} (${percentage}%)`;
+            
+            // Disable the check button and change text
+            checkBtn.disabled = true;
+            checkBtn.textContent = 'Checked ✓';
+            
+            // Make all inputs readonly to prevent changes
+            const allInputs = document.querySelectorAll('.vocab-input, .exercise-input, .correction-input');
+            allInputs.forEach(input => {
+                input.readOnly = true;
+            });
+            
+            showFeedback(`Answers checked! Grade: ${letterGrade} - ${correctCount}/${totalQuestions} correct`);
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97fcdec380874495',t:'MTc1Nzk4OTA3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
