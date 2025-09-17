@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Watching Report - Analytical Exposition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .worksheet-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .grade-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .grade-box h3 {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .grade-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .movie-image {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .student-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+        }
+
+        .student-info h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-field label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .info-field input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .info-field input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .info-field input:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .save-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .save-btn:hover:not(:disabled) {
+            background: #219a52;
+        }
+
+        .save-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            min-height: 40px;
+            overflow: hidden;
+            resize: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .vocab-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .vocab-item {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .vocab-item input {
+            padding: 6px 8px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            min-height: 32px;
+            overflow: hidden;
+            resize: none;
+        }
+
+        .reasons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .reason-section h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .reason-item {
+            margin-bottom: 15px;
+        }
+
+        .reason-item input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            min-height: 40px;
+            overflow: hidden;
+            resize: none;
+        }
+
+        .check-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 30px auto;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .check-btn:hover:not(:disabled) {
+            background: #c0392b;
+        }
+
+        .check-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            background: #2c3e50;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .footer-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .footer-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            min-width: 120px;
+        }
+
+        .footer-btn:hover {
+            background: #2980b9;
+        }
+
+        .correct {
+            border-color: #27ae60 !important;
+            background-color: #d5f4e6 !important;
+        }
+
+        .incorrect {
+            border-color: #e74c3c !important;
+            background-color: #fdf2f2 !important;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .grade-box {
+                position: static;
+                margin-top: 20px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .vocab-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .vocab-item {
+                grid-template-columns: 1fr;
+            }
+
+            .reasons-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .footer-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="worksheet-container" id="worksheet">
+        <div class="header">
+            <h1>Movie Watching Report</h1>
+            <p>Analytical Exposition - B1 English Level</p>
+            <div class="grade-box">
+                <h3>Grade</h3>
+                <div class="grade-display" id="gradeDisplay">-</div>
+            </div>
+        </div>
+
+        <div class="movie-image">
+            🎬 🍿 📽️
+        </div>
+
+        <div class="content">
+            <div class="student-info">
+                <h3>Student Information</h3>
+                <div class="info-grid">
+                    <div class="info-field">
+                        <label for="studentName">Student's Name:</label>
+                        <input type="text" id="studentName" placeholder="Enter your full name">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentClass">Class:</label>
+                        <input type="text" id="studentClass" placeholder="Enter your class">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentNumber">Student Number:</label>
+                        <input type="text" id="studentNumber" placeholder="Enter your student number">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentDate">Date:</label>
+                        <input type="date" id="studentDate">
+                    </div>
+                </div>
+                <button class="save-btn" id="saveBtn" onclick="saveStudentInfo()">Save Information</button>
+            </div>
+
+            <div class="section">
+                <h3>1. Movie Details</h3>
+                <div class="form-group">
+                    <label for="movieTitle">Movie Title:</label>
+                    <input type="text" id="movieTitle" placeholder="Enter the movie title">
+                </div>
+                <div class="form-group">
+                    <label for="movieDirector">Director:</label>
+                    <input type="text" id="movieDirector" placeholder="Enter the director's name">
+                </div>
+                <div class="form-group">
+                    <label for="movieYear">Release Year:</label>
+                    <input type="number" id="movieYear" placeholder="Enter the release year">
+                </div>
+                <div class="form-group">
+                    <label for="movieGenre">Genre:</label>
+                    <input type="text" id="movieGenre" placeholder="Enter the movie genre">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>2. Vocabulary and Definitions (10 words)</h3>
+                <div class="vocab-grid">
+                    <div class="vocab-column">
+                        <div class="vocab-item">
+                            <input type="text" id="vocab1" placeholder="Word 1">
+                            <input type="text" id="def1" placeholder="Definition 1">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="vocab2" placeholder="Word 2">
+                            <input type="text" id="def2" placeholder="Definition 2">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="vocab3" placeholder="Word 3">
+                            <input type="text" id="def3" placeholder="Definition 3">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="vocab4" placeholder="Word 4">
+                            <input type="text" id="def4" placeholder="Definition 4">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="vocab5" placeholder="Word 5">
+                            <input type="text" id="def5" placeholder="Definition 5">
+                        </div>
+                    </div>
+                    <div class="vocab-column">
+                        <div class="vocab-item">
+                            <input type="text" id="vocab6" placeholder="Word 6">
+                            <input type="text" id="def6" placeholder="Definition 6">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="vocab7" placeholder="Word 7">
+                            <input type="text" id="def7" placeholder="Definition 7">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="vocab8" placeholder="Word 8">
+                            <input type="text" id="def8" placeholder="Definition 8">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="vocab9" placeholder="Word 9">
+                            <input type="text" id="def9" placeholder="Definition 9">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="vocab10" placeholder="Word 10">
+                            <input type="text" id="def10" placeholder="Definition 10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>3. Conjunctions Found and Definitions (10 conjunctions)</h3>
+                <div class="vocab-grid">
+                    <div class="vocab-column">
+                        <div class="vocab-item">
+                            <input type="text" id="conj1" placeholder="Conjunction 1">
+                            <input type="text" id="conjDef1" placeholder="Definition/Usage 1">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="conj2" placeholder="Conjunction 2">
+                            <input type="text" id="conjDef2" placeholder="Definition/Usage 2">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="conj3" placeholder="Conjunction 3">
+                            <input type="text" id="conjDef3" placeholder="Definition/Usage 3">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="conj4" placeholder="Conjunction 4">
+                            <input type="text" id="conjDef4" placeholder="Definition/Usage 4">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="conj5" placeholder="Conjunction 5">
+                            <input type="text" id="conjDef5" placeholder="Definition/Usage 5">
+                        </div>
+                    </div>
+                    <div class="vocab-column">
+                        <div class="vocab-item">
+                            <input type="text" id="conj6" placeholder="Conjunction 6">
+                            <input type="text" id="conjDef6" placeholder="Definition/Usage 6">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="conj7" placeholder="Conjunction 7">
+                            <input type="text" id="conjDef7" placeholder="Definition/Usage 7">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="conj8" placeholder="Conjunction 8">
+                            <input type="text" id="conjDef8" placeholder="Definition/Usage 8">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="conj9" placeholder="Conjunction 9">
+                            <input type="text" id="conjDef9" placeholder="Definition/Usage 9">
+                        </div>
+                        <div class="vocab-item">
+                            <input type="text" id="conj10" placeholder="Conjunction 10">
+                            <input type="text" id="conjDef10" placeholder="Definition/Usage 10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>4. Synopsis of the Movie</h3>
+                <div class="form-group">
+                    <label for="synopsis">Write a detailed synopsis (150-200 words):</label>
+                    <textarea id="synopsis" rows="6" placeholder="Describe the main plot, key events, and storyline of the movie..."></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>5. Character Analysis (3 Characters)</h3>
+                <div class="form-group">
+                    <label for="mainCharacter">First Character Name:</label>
+                    <input type="text" id="mainCharacter" placeholder="Enter the first character's name">
+                </div>
+                <div class="form-group">
+                    <label for="characterAnalysis">First Character Analysis (100-150 words):</label>
+                    <textarea id="characterAnalysis" rows="5" placeholder="Analyze this character's personality, development, motivations, and role in the story..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="secondCharacter">Second Character Name:</label>
+                    <input type="text" id="secondCharacter" placeholder="Enter the second character's name">
+                </div>
+                <div class="form-group">
+                    <label for="secondCharacterAnalysis">Second Character Analysis (100-150 words):</label>
+                    <textarea id="secondCharacterAnalysis" rows="5" placeholder="Analyze this character's personality, development, motivations, and role in the story..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="thirdCharacter">Third Character Name:</label>
+                    <input type="text" id="thirdCharacter" placeholder="Enter the third character's name">
+                </div>
+                <div class="form-group">
+                    <label for="thirdCharacterAnalysis">Third Character Analysis (100-150 words):</label>
+                    <textarea id="thirdCharacterAnalysis" rows="5" placeholder="Analyze this character's personality, development, motivations, and role in the story..."></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>6. Reasons Why You Like and Don't Like the Movie</h3>
+                <div class="reasons-grid">
+                    <div class="reason-section">
+                        <h4>👍 What I Liked (3 reasons):</h4>
+                        <div class="reason-item">
+                            <input type="text" id="like1" placeholder="Reason 1 why you liked the movie">
+                        </div>
+                        <div class="reason-item">
+                            <input type="text" id="like2" placeholder="Reason 2 why you liked the movie">
+                        </div>
+                        <div class="reason-item">
+                            <input type="text" id="like3" placeholder="Reason 3 why you liked the movie">
+                        </div>
+                    </div>
+                    <div class="reason-section">
+                        <h4>👎 What I Didn't Like (3 reasons):</h4>
+                        <div class="reason-item">
+                            <input type="text" id="dislike1" placeholder="Reason 1 why you didn't like the movie">
+                        </div>
+                        <div class="reason-item">
+                            <input type="text" id="dislike2" placeholder="Reason 2 why you didn't like the movie">
+                        </div>
+                        <div class="reason-item">
+                            <input type="text" id="dislike3" placeholder="Reason 3 why you didn't like the movie">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>7. Final Remarks About the Movie</h3>
+                <div class="form-group">
+                    <label for="finalRemarks">Overall Opinion and Recommendation (100-150 words):</label>
+                    <textarea id="finalRemarks" rows="5" placeholder="Share your overall thoughts about the movie, would you recommend it to others, and why..."></textarea>
+                </div>
+            </div>
+
+            <button class="check-btn" id="checkBtn" onclick="checkAnswers()">Check Answers & Calculate Grade</button>
+        </div>
+
+        <div class="footer">
+            <div class="footer-buttons">
+                <button class="footer-btn" onclick="printWorksheet()">🖨️ Print</button>
+                <button class="footer-btn" onclick="copyToClipboard()">📋 Copy</button>
+                <button class="footer-btn" onclick="downloadPDF()">📄 Download PDF</button>
+                <button class="footer-btn" onclick="downloadDocx()">📝 Download Word</button>
+                <button class="footer-btn" onclick="takeScreenshot()">📸 Screenshot</button>
+                <button class="footer-btn" onclick="clearAllData()" style="background: #e74c3c;">🗑️ Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isInfoSaved = false;
+        let isChecked = false;
+
+        // Set today's date by default
+        document.getElementById('studentDate').value = new Date().toISOString().split('T')[0];
+
+        // Auto-resize function for inputs and textareas
+        function autoResize(element) {
+            element.style.height = 'auto';
+            element.style.height = Math.max(element.scrollHeight, element.tagName === 'TEXTAREA' ? 100 : 40) + 'px';
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            const formData = {};
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                if (input.id) {
+                    formData[input.id] = input.value;
+                }
+            });
+            localStorage.setItem('movieWorksheetData', JSON.stringify(formData));
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const savedData = localStorage.getItem('movieWorksheetData');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                Object.keys(formData).forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.value = formData[id];
+                        autoResize(element);
+                    }
+                });
+            }
+        }
+
+        // Add auto-resize to all inputs and textareas
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved data first
+            loadData();
+            
+            const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+            inputs.forEach(input => {
+                // Initial resize
+                autoResize(input);
+                
+                // Add event listeners for dynamic resizing and auto-save
+                input.addEventListener('input', function() {
+                    autoResize(this);
+                    saveData(); // Auto-save on every input
+                });
+                
+                input.addEventListener('paste', function() {
+                    setTimeout(() => {
+                        autoResize(this);
+                        saveData(); // Auto-save after paste
+                    }, 10);
+                });
+            });
+        });
+
+        function saveStudentInfo() {
+            const fields = ['studentName', 'studentClass', 'studentNumber', 'studentDate'];
+            fields.forEach(field => {
+                document.getElementById(field).disabled = true;
+            });
+            document.getElementById('saveBtn').disabled = true;
+            document.getElementById('saveBtn').textContent = 'Information Saved ✓';
+            isInfoSaved = true;
+        }
+
+        function checkAnswers() {
+            if (isChecked) return;
+
+            // Simple grading system - checks if fields are filled
+            let totalFields = 0;
+            let filledFields = 0;
+
+            // Check all input fields and textareas
+            const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+            inputs.forEach(input => {
+                if (input.id !== 'studentName' && input.id !== 'studentClass' && 
+                    input.id !== 'studentNumber' && input.id !== 'studentDate') {
+                    totalFields++;
+                    if (input.value.trim() !== '') {
+                        filledFields++;
+                        input.classList.add('correct');
+                    } else {
+                        input.classList.add('incorrect');
+                    }
+                }
+            });
+
+            // Calculate grade
+            const percentage = Math.round((filledFields / totalFields) * 100);
+            let grade = 'F';
+            if (percentage >= 90) grade = 'A';
+            else if (percentage >= 80) grade = 'B';
+            else if (percentage >= 70) grade = 'C';
+            else if (percentage >= 60) grade = 'D';
+
+            document.getElementById('gradeDisplay').textContent = `${percentage}% (${grade})`;
+            document.getElementById('checkBtn').disabled = true;
+            document.getElementById('checkBtn').textContent = 'Answers Checked ✓';
+            isChecked = true;
+        }
+
+        function printWorksheet() {
+            window.print();
+        }
+
+        function copyToClipboard() {
+            // Collect all form data in a formatted way
+            const data = {
+                studentName: document.getElementById('studentName').value || 'Not provided',
+                studentClass: document.getElementById('studentClass').value || 'Not provided',
+                studentNumber: document.getElementById('studentNumber').value || 'Not provided',
+                studentDate: document.getElementById('studentDate').value || 'Not provided',
+                grade: document.getElementById('gradeDisplay').textContent || 'Not graded',
+                movieTitle: document.getElementById('movieTitle').value || 'Not provided',
+                movieDirector: document.getElementById('movieDirector').value || 'Not provided',
+                movieYear: document.getElementById('movieYear').value || 'Not provided',
+                movieGenre: document.getElementById('movieGenre').value || 'Not provided',
+                synopsis: document.getElementById('synopsis').value || 'Not provided',
+                mainCharacter: document.getElementById('mainCharacter').value || 'Not provided',
+                characterAnalysis: document.getElementById('characterAnalysis').value || 'Not provided',
+                secondCharacter: document.getElementById('secondCharacter').value || 'Not provided',
+                secondCharacterAnalysis: document.getElementById('secondCharacterAnalysis').value || 'Not provided',
+                thirdCharacter: document.getElementById('thirdCharacter').value || 'Not provided',
+                thirdCharacterAnalysis: document.getElementById('thirdCharacterAnalysis').value || 'Not provided',
+                finalRemarks: document.getElementById('finalRemarks').value || 'Not provided'
+            };
+
+            // Collect vocabulary
+            const vocab = [];
+            for (let i = 1; i <= 10; i++) {
+                const word = document.getElementById(`vocab${i}`).value || '';
+                const def = document.getElementById(`def${i}`).value || '';
+                if (word || def) {
+                    vocab.push(`${i}. ${word}: ${def}`);
+                }
+            }
+
+            // Collect conjunctions
+            const conj = [];
+            for (let i = 1; i <= 10; i++) {
+                const word = document.getElementById(`conj${i}`).value || '';
+                const def = document.getElementById(`conjDef${i}`).value || '';
+                if (word || def) {
+                    conj.push(`${i}. ${word}: ${def}`);
+                }
+            }
+
+            // Collect likes and dislikes
+            const likes = [];
+            const dislikes = [];
+            for (let i = 1; i <= 3; i++) {
+                const like = document.getElementById(`like${i}`).value;
+                const dislike = document.getElementById(`dislike${i}`).value;
+                if (like) likes.push(`${i}. ${like}`);
+                if (dislike) dislikes.push(`${i}. ${dislike}`);
+            }
+
+            // Format the content
+            let content = `MOVIE WATCHING REPORT - ANALYTICAL EXPOSITION
+Grade: ${data.grade}
+
+STUDENT INFORMATION
+Name: ${data.studentName}
+Class: ${data.studentClass}
+Student Number: ${data.studentNumber}
+Date: ${data.studentDate}
+
+1. MOVIE DETAILS
+Title: ${data.movieTitle}
+Director: ${data.movieDirector}
+Year: ${data.movieYear}
+Genre: ${data.movieGenre}
+
+2. VOCABULARY AND DEFINITIONS
+`;
+
+            if (vocab.length > 0) {
+                content += vocab.join('\n') + '\n';
+            } else {
+                content += 'No vocabulary entries provided.\n';
+            }
+
+            content += `
+3. CONJUNCTIONS FOUND AND DEFINITIONS
+`;
+
+            if (conj.length > 0) {
+                content += conj.join('\n') + '\n';
+            } else {
+                content += 'No conjunction entries provided.\n';
+            }
+
+            content += `
+4. SYNOPSIS OF THE MOVIE
+${data.synopsis}
+
+5. CHARACTER ANALYSIS
+First Character: ${data.mainCharacter}
+${data.characterAnalysis}
+
+Second Character: ${data.secondCharacter}
+${data.secondCharacterAnalysis}
+
+Third Character: ${data.thirdCharacter}
+${data.thirdCharacterAnalysis}
+
+6. REASONS WHY I LIKE AND DON'T LIKE THE MOVIE
+WHAT I LIKED:
+`;
+
+            if (likes.length > 0) {
+                content += likes.join('\n') + '\n';
+            } else {
+                content += 'No reasons provided.\n';
+            }
+
+            content += `
+WHAT I DIDN'T LIKE:
+`;
+
+            if (dislikes.length > 0) {
+                content += dislikes.join('\n') + '\n';
+            } else {
+                content += 'No reasons provided.\n';
+            }
+
+            content += `
+7. FINAL REMARKS ABOUT THE MOVIE
+${data.finalRemarks}`;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(content).then(() => {
+                alert('All your answers have been copied to clipboard in a formatted text!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = content;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('All your answers have been copied to clipboard!');
+            });
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // Create a temporary clone to ensure all input values are visible
+            const originalElement = document.getElementById('worksheet');
+            const clonedElement = originalElement.cloneNode(true);
+            
+            // Hide elements that shouldn't appear in export
+            const elementsToHide = clonedElement.querySelectorAll('.movie-image, .footer, .check-btn');
+            elementsToHide.forEach(element => {
+                element.style.display = 'none';
+            });
+            
+            // Replace all inputs and textareas with divs containing their text
+            const clonedInputs = clonedElement.querySelectorAll('input, textarea');
+            const originalInputs = originalElement.querySelectorAll('input, textarea');
+            
+            originalInputs.forEach((input, index) => {
+                if (clonedInputs[index]) {
+                    const textDiv = document.createElement('div');
+                    const inputValue = input.value || '';
+                    
+                    // Only show content if there's actual input (not placeholder)
+                    if (inputValue.trim() !== '') {
+                        // Copy styles from original input
+                        const computedStyle = window.getComputedStyle(input);
+                        textDiv.style.cssText = computedStyle.cssText;
+                        textDiv.style.border = '1px solid #ddd';
+                        textDiv.style.padding = computedStyle.padding;
+                        textDiv.style.margin = computedStyle.margin;
+                        textDiv.style.width = computedStyle.width;
+                        textDiv.style.minHeight = computedStyle.minHeight;
+                        textDiv.style.fontSize = computedStyle.fontSize;
+                        textDiv.style.fontFamily = computedStyle.fontFamily;
+                        textDiv.style.backgroundColor = 'transparent';
+                        textDiv.style.borderRadius = computedStyle.borderRadius;
+                        textDiv.style.boxSizing = 'border-box';
+                        textDiv.style.wordWrap = 'break-word';
+                        textDiv.style.whiteSpace = 'pre-wrap';
+                        textDiv.style.overflow = 'visible';
+                        textDiv.style.display = 'block';
+                        textDiv.style.color = '#333';
+                        
+                        textDiv.textContent = inputValue;
+                    } else {
+                        // Hide empty fields
+                        textDiv.style.display = 'none';
+                    }
+                    
+                    // Replace the input with the text div
+                    clonedInputs[index].parentNode.replaceChild(textDiv, clonedInputs[index]);
+                }
+            });
+            
+            // Force desktop layout for export
+            clonedElement.style.position = 'absolute';
+            clonedElement.style.left = '-9999px';
+            clonedElement.style.top = '0';
+            clonedElement.style.width = '900px'; // Force desktop width
+            clonedElement.style.maxWidth = '900px';
+            
+            // Override mobile styles for export
+            const style = document.createElement('style');
+            style.textContent = `
+                .vocab-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
+                .vocab-item { display: grid !important; grid-template-columns: 1fr 2fr !important; gap: 8px !important; align-items: center !important; }
+                .vocab-item > div { width: 100% !important; box-sizing: border-box !important; }
+                .reasons-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 25px !important; }
+                .reason-item > div { width: 100% !important; box-sizing: border-box !important; }
+                .info-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; gap: 15px !important; }
+                .info-field > div { width: 100% !important; box-sizing: border-box !important; }
+                .form-group > div { width: 100% !important; box-sizing: border-box !important; }
+                .grade-box { position: absolute !important; top: 20px !important; right: 20px !important; margin: 0 !important; }
+                .movie-image { display: none !important; }
+                .footer { display: none !important; }
+                .check-btn { display: none !important; }
+            `;
+            clonedElement.appendChild(style);
+            document.body.appendChild(clonedElement);
+            
+            // Wait a moment for rendering
+            setTimeout(() => {
+                html2canvas(clonedElement, {
+                    scale: 1.5,
+                    useCORS: true,
+                    allowTaint: true,
+                    width: clonedElement.scrollWidth,
+                    height: clonedElement.scrollHeight,
+                    backgroundColor: '#ffffff'
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                    const imgWidth = 190;
+                    const pageHeight = 277;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 10;
+
+                    doc.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight + 10;
+                        doc.addPage();
+                        doc.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+
+                    doc.save('movie-watching-report.pdf');
+                    
+                    // Remove the temporary clone
+                    document.body.removeChild(clonedElement);
+                }).catch(error => {
+                    console.error('Error generating PDF:', error);
+                    document.body.removeChild(clonedElement);
+                    alert('Error generating PDF. Please try again.');
+                });
+            }, 100);
+        }
+
+        function downloadDocx() {
+            // Collect all form data
+            const data = {
+                studentName: document.getElementById('studentName').value || 'Not provided',
+                studentClass: document.getElementById('studentClass').value || 'Not provided',
+                studentNumber: document.getElementById('studentNumber').value || 'Not provided',
+                studentDate: document.getElementById('studentDate').value || 'Not provided',
+                grade: document.getElementById('gradeDisplay').textContent || 'Not graded',
+                movieTitle: document.getElementById('movieTitle').value || 'Not provided',
+                movieDirector: document.getElementById('movieDirector').value || 'Not provided',
+                movieYear: document.getElementById('movieYear').value || 'Not provided',
+                movieGenre: document.getElementById('movieGenre').value || 'Not provided',
+                synopsis: document.getElementById('synopsis').value || 'Not provided',
+                mainCharacter: document.getElementById('mainCharacter').value || 'Not provided',
+                characterAnalysis: document.getElementById('characterAnalysis').value || 'Not provided',
+                secondCharacter: document.getElementById('secondCharacter').value || 'Not provided',
+                secondCharacterAnalysis: document.getElementById('secondCharacterAnalysis').value || 'Not provided',
+                thirdCharacter: document.getElementById('thirdCharacter').value || 'Not provided',
+                thirdCharacterAnalysis: document.getElementById('thirdCharacterAnalysis').value || 'Not provided',
+                finalRemarks: document.getElementById('finalRemarks').value || 'Not provided'
+            };
+
+            // Collect vocabulary
+            const vocab = [];
+            for (let i = 1; i <= 10; i++) {
+                const word = document.getElementById(`vocab${i}`).value || '';
+                const def = document.getElementById(`def${i}`).value || '';
+                if (word || def) {
+                    vocab.push(`${i}. ${word}: ${def}`);
+                }
+            }
+
+            // Collect conjunctions
+            const conj = [];
+            for (let i = 1; i <= 10; i++) {
+                const word = document.getElementById(`conj${i}`).value || '';
+                const def = document.getElementById(`conjDef${i}`).value || '';
+                if (word || def) {
+                    conj.push(`${i}. ${word}: ${def}`);
+                }
+            }
+
+            // Collect likes and dislikes
+            const likes = [];
+            const dislikes = [];
+            for (let i = 1; i <= 3; i++) {
+                const like = document.getElementById(`like${i}`).value;
+                const dislike = document.getElementById(`dislike${i}`).value;
+                if (like) likes.push(`${i}. ${like}`);
+                if (dislike) dislikes.push(`${i}. ${dislike}`);
+            }
+
+            // Create HTML content for Word document
+            let htmlContent = `
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>Movie Watching Report</title>
+                    <style>
+                        body { font-family: 'Times New Roman', serif; line-height: 1.6; margin: 40px; }
+                        h1 { text-align: center; color: #2c3e50; font-size: 24px; margin-bottom: 20px; }
+                        h2 { color: #34495e; font-size: 18px; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+                        h3 { color: #2c3e50; font-size: 16px; margin-top: 20px; margin-bottom: 10px; }
+                        .grade { text-align: right; font-weight: bold; font-size: 18px; margin-bottom: 20px; }
+                        .student-info { background-color: #f8f9fa; padding: 15px; margin-bottom: 20px; border-left: 4px solid #3498db; }
+                        .vocab-item, .conj-item { margin-bottom: 8px; }
+                        .character-section { margin-bottom: 20px; }
+                        .reasons { display: flex; justify-content: space-between; }
+                        .reason-column { width: 48%; }
+                        p { margin-bottom: 10px; }
+                        .bold { font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <h1>MOVIE WATCHING REPORT - ANALYTICAL EXPOSITION</h1>
+                    <div class="grade">Grade: ${data.grade}</div>
+                    
+                    <div class="student-info">
+                        <h3>STUDENT INFORMATION</h3>
+                        <p><strong>Name:</strong> ${data.studentName}</p>
+                        <p><strong>Class:</strong> ${data.studentClass}</p>
+                        <p><strong>Student Number:</strong> ${data.studentNumber}</p>
+                        <p><strong>Date:</strong> ${data.studentDate}</p>
+                    </div>
+                    
+                    <h2>1. MOVIE DETAILS</h2>
+                    <p><strong>Title:</strong> ${data.movieTitle}</p>
+                    <p><strong>Director:</strong> ${data.movieDirector}</p>
+                    <p><strong>Year:</strong> ${data.movieYear}</p>
+                    <p><strong>Genre:</strong> ${data.movieGenre}</p>
+                    
+                    <h2>2. VOCABULARY AND DEFINITIONS</h2>`;
+
+            if (vocab.length > 0) {
+                vocab.forEach(entry => {
+                    htmlContent += `<div class="vocab-item">${entry}</div>`;
+                });
+            } else {
+                htmlContent += `<p>No vocabulary entries provided.</p>`;
+            }
+
+            htmlContent += `<h2>3. CONJUNCTIONS FOUND AND DEFINITIONS</h2>`;
+
+            if (conj.length > 0) {
+                conj.forEach(entry => {
+                    htmlContent += `<div class="conj-item">${entry}</div>`;
+                });
+            } else {
+                htmlContent += `<p>No conjunction entries provided.</p>`;
+            }
+
+            htmlContent += `
+                    <h2>4. SYNOPSIS OF THE MOVIE</h2>
+                    <p>${data.synopsis}</p>
+                    
+                    <h2>5. CHARACTER ANALYSIS</h2>
+                    <div class="character-section">
+                        <h3>First Character: ${data.mainCharacter}</h3>
+                        <p>${data.characterAnalysis}</p>
+                    </div>
+                    <div class="character-section">
+                        <h3>Second Character: ${data.secondCharacter}</h3>
+                        <p>${data.secondCharacterAnalysis}</p>
+                    </div>
+                    <div class="character-section">
+                        <h3>Third Character: ${data.thirdCharacter}</h3>
+                        <p>${data.thirdCharacterAnalysis}</p>
+                    </div>
+                    
+                    <h2>6. REASONS WHY I LIKE AND DON'T LIKE THE MOVIE</h2>
+                    <div class="reasons">
+                        <div class="reason-column">
+                            <h3>WHAT I LIKED:</h3>`;
+
+            if (likes.length > 0) {
+                likes.forEach(like => {
+                    htmlContent += `<p>${like}</p>`;
+                });
+            } else {
+                htmlContent += `<p>No reasons provided.</p>`;
+            }
+
+            htmlContent += `</div><div class="reason-column"><h3>WHAT I DIDN'T LIKE:</h3>`;
+
+            if (dislikes.length > 0) {
+                dislikes.forEach(dislike => {
+                    htmlContent += `<p>${dislike}</p>`;
+                });
+            } else {
+                htmlContent += `<p>No reasons provided.</p>`;
+            }
+
+            htmlContent += `
+                        </div>
+                    </div>
+                    
+                    <h2>7. FINAL REMARKS ABOUT THE MOVIE</h2>
+                    <p>${data.finalRemarks}</p>
+                </body>
+                </html>`;
+
+            // Create blob and download
+            const blob = new Blob([htmlContent], { 
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'movie-watching-report.doc';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                // Clear localStorage
+                localStorage.removeItem('movieWorksheetData');
+                
+                // Clear all form fields
+                const inputs = document.querySelectorAll('input, textarea');
+                inputs.forEach(input => {
+                    if (input.type !== 'date') {
+                        input.value = '';
+                        input.disabled = false;
+                        input.classList.remove('correct', 'incorrect');
+                        autoResize(input);
+                    }
+                });
+                
+                // Reset date to today
+                document.getElementById('studentDate').value = new Date().toISOString().split('T')[0];
+                
+                // Reset buttons and states
+                document.getElementById('saveBtn').disabled = false;
+                document.getElementById('saveBtn').textContent = 'Save Information';
+                document.getElementById('checkBtn').disabled = false;
+                document.getElementById('checkBtn').textContent = 'Check Answers & Calculate Grade';
+                document.getElementById('gradeDisplay').textContent = '-';
+                
+                isInfoSaved = false;
+                isChecked = false;
+                
+                alert('All data has been cleared successfully!');
+            }
+        }
+
+        function takeScreenshot() {
+            // Create a temporary clone to ensure all input values are visible
+            const originalElement = document.getElementById('worksheet');
+            const clonedElement = originalElement.cloneNode(true);
+            
+            // Hide elements that shouldn't appear in export
+            const elementsToHide = clonedElement.querySelectorAll('.movie-image, .footer, .check-btn');
+            elementsToHide.forEach(element => {
+                element.style.display = 'none';
+            });
+            
+            // Replace all inputs and textareas with divs containing their text
+            const clonedInputs = clonedElement.querySelectorAll('input, textarea');
+            const originalInputs = originalElement.querySelectorAll('input, textarea');
+            
+            originalInputs.forEach((input, index) => {
+                if (clonedInputs[index]) {
+                    const textDiv = document.createElement('div');
+                    const inputValue = input.value || '';
+                    
+                    // Only show content if there's actual input (not placeholder)
+                    if (inputValue.trim() !== '') {
+                        // Copy styles from original input
+                        const computedStyle = window.getComputedStyle(input);
+                        textDiv.style.cssText = computedStyle.cssText;
+                        textDiv.style.border = '1px solid #ddd';
+                        textDiv.style.padding = computedStyle.padding;
+                        textDiv.style.margin = computedStyle.margin;
+                        textDiv.style.width = computedStyle.width;
+                        textDiv.style.minHeight = computedStyle.minHeight;
+                        textDiv.style.fontSize = computedStyle.fontSize;
+                        textDiv.style.fontFamily = computedStyle.fontFamily;
+                        textDiv.style.backgroundColor = 'transparent';
+                        textDiv.style.borderRadius = computedStyle.borderRadius;
+                        textDiv.style.boxSizing = 'border-box';
+                        textDiv.style.wordWrap = 'break-word';
+                        textDiv.style.whiteSpace = 'pre-wrap';
+                        textDiv.style.overflow = 'visible';
+                        textDiv.style.display = 'block';
+                        textDiv.style.color = '#333';
+                        
+                        textDiv.textContent = inputValue;
+                    } else {
+                        // Hide empty fields
+                        textDiv.style.display = 'none';
+                    }
+                    
+                    // Replace the input with the text div
+                    clonedInputs[index].parentNode.replaceChild(textDiv, clonedInputs[index]);
+                }
+            });
+            
+            // Force desktop layout for export
+            clonedElement.style.position = 'absolute';
+            clonedElement.style.left = '-9999px';
+            clonedElement.style.top = '0';
+            clonedElement.style.width = '900px'; // Force desktop width
+            clonedElement.style.maxWidth = '900px';
+            
+            // Override mobile styles for export
+            const style = document.createElement('style');
+            style.textContent = `
+                .vocab-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
+                .vocab-item { display: grid !important; grid-template-columns: 1fr 2fr !important; gap: 8px !important; align-items: center !important; }
+                .vocab-item > div { width: 100% !important; box-sizing: border-box !important; }
+                .reasons-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 25px !important; }
+                .reason-item > div { width: 100% !important; box-sizing: border-box !important; }
+                .info-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; gap: 15px !important; }
+                .info-field > div { width: 100% !important; box-sizing: border-box !important; }
+                .form-group > div { width: 100% !important; box-sizing: border-box !important; }
+                .grade-box { position: absolute !important; top: 20px !important; right: 20px !important; margin: 0 !important; }
+                .movie-image { display: none !important; }
+                .footer { display: none !important; }
+                .check-btn { display: none !important; }
+            `;
+            clonedElement.appendChild(style);
+            document.body.appendChild(clonedElement);
+            
+            // Wait a moment for rendering
+            setTimeout(() => {
+                html2canvas(clonedElement, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'movie-watching-report-screenshot.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    
+                    // Remove the temporary clone
+                    document.body.removeChild(clonedElement);
+                }).catch(error => {
+                    console.error('Error taking screenshot:', error);
+                    document.body.removeChild(clonedElement);
+                    alert('Error taking screenshot. Please try again.');
+                });
+            }, 100);
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9805aba3d5fc8944',t:'MTc1ODA4MTM1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
