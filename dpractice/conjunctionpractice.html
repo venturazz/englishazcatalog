@@ -481,6 +481,7 @@
                         <label for="studentDate">Date:</label>
                         <input type="date" id="studentDate">
                     </div>
+
                 </div>
                 <button class="save-btn" id="saveBtn" onclick="saveStudentInfo()">Save Information</button>
             </div>
@@ -607,64 +608,62 @@
             ],
             matching: {
                 conjunctions: [
-                    { id: 1, text: "because", type: "causal" },
-                    { id: 2, text: "although", type: "contrast" },
-                    { id: 3, text: "when", type: "temporal" },
-                    { id: 4, text: "therefore", type: "result" },
-                    { id: 5, text: "while", type: "temporal" },
-                    { id: 6, text: "however", type: "contrast" },
-                    { id: 7, text: "since", type: "causal" },
-                    { id: 8, text: "unless", type: "conditional" },
-                    { id: 9, text: "moreover", type: "addition" },
-                    { id: 10, text: "nevertheless", type: "contrast" },
-                    { id: 11, text: "meanwhile", type: "temporal" },
-                    { id: 12, text: "consequently", type: "result" }
+                    { id: 1, text: "because", matchId: 1 },
+                    { id: 2, text: "although", matchId: 2 },
+                    { id: 3, text: "when", matchId: 3 },
+                    { id: 4, text: "therefore", matchId: 4 },
+                    { id: 5, text: "while", matchId: 5 },
+                    { id: 6, text: "however", matchId: 6 },
+                    { id: 7, text: "since", matchId: 7 },
+                    { id: 8, text: "unless", matchId: 8 },
+                    { id: 9, text: "moreover", matchId: 9 },
+                    { id: 10, text: "nevertheless", matchId: 10 }
                 ],
-                functions: [
-                    { id: 1, text: "Shows cause and reason", type: "causal" },
-                    { id: 2, text: "Shows contrast or opposition", type: "contrast" },
-                    { id: 3, text: "Shows time relationship", type: "temporal" },
-                    { id: 4, text: "Shows result or consequence", type: "result" },
-                    { id: 5, text: "Shows simultaneous actions", type: "temporal" },
-                    { id: 6, text: "Introduces contrasting idea", type: "contrast" },
-                    { id: 7, text: "Indicates reason or cause", type: "causal" },
-                    { id: 8, text: "Shows condition or requirement", type: "conditional" },
-                    { id: 9, text: "Adds additional information", type: "addition" },
-                    { id: 10, text: "Shows contrast despite expectation", type: "contrast" },
-                    { id: 11, text: "Shows events happening at same time", type: "temporal" },
-                    { id: 12, text: "Shows logical result or outcome", type: "result" }
+                meanings: [
+                    { id: 1, text: "karena / sebab", matchId: 1 },
+                    { id: 2, text: "meskipun / walaupun", matchId: 2 },
+                    { id: 3, text: "ketika / saat", matchId: 3 },
+                    { id: 4, text: "oleh karena itu / maka", matchId: 4 },
+                    { id: 5, text: "sementara / selagi", matchId: 5 },
+                    { id: 6, text: "namun / akan tetapi", matchId: 6 },
+                    { id: 7, text: "sejak / karena (waktu lampau)", matchId: 7 },
+                    { id: 8, text: "kecuali jika / jika tidak", matchId: 8 },
+                    { id: 9, text: "selain itu / terlebih lagi", matchId: 9 },
+                    { id: 10, text: "meskipun demikian / walau begitu", matchId: 10 },
+                    { id: 11, text: "dengan demikian / akibatnya", matchId: null },
+                    { id: 12, text: "sebaliknya / di sisi lain", matchId: null }
                 ]
             },
             sentenceCreation: [
                 {
-                    prompt: "Write a sentence describing a place using 'although' to show contrast:",
+                    prompt: "Write a sentence expressing an opinion using 'although' to show contrast:",
                     conjunction: "although",
-                    example: "Although the desert is hot during the day, it becomes very cold at night."
+                    example: "Although social media can be entertaining, it often wastes too much time."
                 },
                 {
-                    prompt: "Create a sentence about a place using 'because' to show reason:",
+                    prompt: "Create an argument sentence using 'because' to give a reason:",
                     conjunction: "because",
-                    example: "Many tourists visit the island because it has beautiful beaches and clear water."
+                    example: "Students should have longer lunch breaks because they need time to relax and socialize."
                 },
                 {
-                    prompt: "Write a sentence describing a place using 'while' to show simultaneous actions:",
+                    prompt: "Write an opinion using 'while' to compare two viewpoints:",
                     conjunction: "while",
-                    example: "While visitors explore the ancient ruins, local guides share historical stories."
+                    example: "While some people prefer online shopping, others enjoy the experience of visiting stores."
                 },
                 {
-                    prompt: "Create a sentence about a place using 'unless' to show condition:",
+                    prompt: "Create an argument using 'unless' to state a condition:",
                     conjunction: "unless",
-                    example: "You cannot enter the national park unless you have a valid permit."
+                    example: "Schools cannot improve student performance unless they provide better resources and support."
                 },
                 {
-                    prompt: "Write a sentence describing a place using 'moreover' to add information:",
+                    prompt: "Write an opinion using 'moreover' to strengthen your argument:",
                     conjunction: "moreover",
-                    example: "The hotel has excellent service; moreover, it offers stunning ocean views."
+                    example: "Homework helps students practice skills; moreover, it teaches them responsibility and time management."
                 },
                 {
-                    prompt: "Create a sentence about a place using 'consequently' to show result:",
+                    prompt: "Create an argument using 'consequently' to show a result:",
                     conjunction: "consequently",
-                    example: "The bridge was damaged in the storm; consequently, the village became isolated."
+                    example: "Many teenagers spend too much time on phones; consequently, their sleep quality has decreased significantly."
                 }
             ]
         };
@@ -672,6 +671,56 @@
         let shuffledExercises = {};
         let isChecked = false;
         let selectedMatches = {};
+        let teacherMode = false;
+        let matchingPairs = {};
+
+
+
+        function showAnswers() {
+            if (!teacherMode) return;
+            
+            // Show fill-in-the-blank answers
+            shuffledExercises.fillInBlanks.forEach((exercise, index) => {
+                const input = document.getElementById(`blank${index}`);
+                if (input) {
+                    input.value = exercise.answer;
+                    input.style.backgroundColor = '#e8f5e8';
+                    input.style.fontWeight = 'bold';
+                }
+            });
+
+            // Show matching answers - highlight correct pairs
+            shuffledExercises.matching.conjunctions.forEach(conjItem => {
+                const correctMeaning = shuffledExercises.matching.meanings.find(m => m.matchId === conjItem.matchId);
+                if (correctMeaning) {
+                    const conjElement = document.querySelector(`.matching-item[data-type="conjunction"][data-id="${conjItem.id}"]`);
+                    const meaningElement = document.querySelector(`.matching-item[data-type="meaning"][data-id="${correctMeaning.id}"]`);
+                    
+                    if (conjElement && meaningElement) {
+                        conjElement.style.backgroundColor = '#e8f5e8';
+                        conjElement.style.fontWeight = 'bold';
+                        conjElement.style.border = '2px solid #28a745';
+                        
+                        meaningElement.style.backgroundColor = '#e8f5e8';
+                        meaningElement.style.fontWeight = 'bold';
+                        meaningElement.style.border = '2px solid #28a745';
+                        
+                        // Store the correct match for teacher mode
+                        matchingPairs[conjItem.id] = correctMeaning.id;
+                    }
+                }
+            });
+
+            // Show sentence examples
+            shuffledExercises.sentenceCreation.forEach((exercise, index) => {
+                const textarea = document.getElementById(`sentence${index}`);
+                if (textarea) {
+                    textarea.value = exercise.example;
+                    textarea.style.backgroundColor = '#e8f5e8';
+                    textarea.style.fontWeight = 'bold';
+                }
+            });
+        }
 
         function initializeWorksheet() {
             // Set today's date
@@ -681,7 +730,7 @@
             shuffledExercises.fillInBlanks = [...exercises.fillInBlanks].sort(() => Math.random() - 0.5);
             shuffledExercises.matching = {
                 conjunctions: [...exercises.matching.conjunctions].sort(() => Math.random() - 0.5),
-                functions: [...exercises.matching.functions].sort(() => Math.random() - 0.5)
+                meanings: [...exercises.matching.meanings].sort(() => Math.random() - 0.5)
             };
             shuffledExercises.sentenceCreation = [...exercises.sentenceCreation].sort(() => Math.random() - 0.5);
 
@@ -743,7 +792,7 @@
                 <div class="section">
                     <h3>Part 2: Matching Exercise</h3>
                     <div class="instruction">
-                        Match each conjunction with its correct function. Click on a conjunction, then click on its matching function.
+                        Match each conjunction with its Indonesian meaning. Click on a conjunction, then click on its matching Indonesian meaning.
                     </div>
                     <div class="matching-container">
                         <div class="matching-column">
@@ -752,7 +801,7 @@
 
             shuffledExercises.matching.conjunctions.forEach((item, index) => {
                 html += `
-                    <div class="matching-item" data-type="conjunction" data-id="${item.id}" data-match-type="${item.type}" onclick="selectMatch('conjunction', ${item.id}, '${item.type}')">
+                    <div class="matching-item" data-type="conjunction" data-id="${item.id}" data-match-id="${item.matchId}" onclick="selectMatch('conjunction', ${item.id}, ${item.matchId})">
                         ${String.fromCharCode(65 + index)}. ${item.text}
                     </div>
                 `;
@@ -761,12 +810,12 @@
             html += `
                         </div>
                         <div class="matching-column">
-                            <h4>Functions</h4>
+                            <h4>Indonesian Meanings</h4>
             `;
 
-            shuffledExercises.matching.functions.forEach((item, index) => {
+            shuffledExercises.matching.meanings.forEach((item, index) => {
                 html += `
-                    <div class="matching-item" data-type="function" data-id="${item.id}" data-match-type="${item.type}" onclick="selectMatch('function', ${item.id}, '${item.type}')">
+                    <div class="matching-item" data-type="meaning" data-id="${item.id}" data-match-id="${item.matchId}" onclick="selectMatch('meaning', ${item.id}, ${item.matchId})">
                         ${index + 1}. ${item.text}
                     </div>
                 `;
@@ -781,9 +830,9 @@
             // Sentence Creation Section
             html += `
                 <div class="section">
-                    <h3>Part 3: Create Your Own Sentences</h3>
+                    <h3>Part 3: Express Opinions and Arguments</h3>
                     <div class="instruction">
-                        Write original sentences describing places using the given conjunctions. Make sure your sentences are complete and make sense.
+                        Write original sentences expressing opinions or making arguments using the given conjunctions. Focus on topics like school, technology, social issues, or personal beliefs. Make sure your sentences are complete and persuasive.
                     </div>
             `;
 
@@ -799,9 +848,14 @@
             html += `</div>`;
 
             container.innerHTML = html;
+            
+            // If teacher mode is active, show answers
+            if (teacherMode) {
+                setTimeout(showAnswers, 100);
+            }
         }
 
-        function selectMatch(type, id, matchType) {
+        function selectMatch(type, id, matchId) {
             if (isChecked) return;
 
             // Clear previous selections of the same type
@@ -814,10 +868,35 @@
             selectedItem.classList.add('selected');
 
             // Store selection
-            selectedMatches[type] = { id, matchType };
+            selectedMatches[type] = { id, matchId };
 
             // Check if we have both selections
-            if (selectedMatches.conjunction && selectedMatches.function) {
+            if (selectedMatches.conjunction && selectedMatches.meaning) {
+                const conjId = selectedMatches.conjunction.id;
+                const meaningId = selectedMatches.meaning.id;
+                const conjMatchId = selectedMatches.conjunction.matchId;
+                const meaningMatchId = selectedMatches.meaning.matchId;
+
+                // Store the match
+                matchingPairs[conjId] = meaningId;
+
+                // Check if it's correct (both should have the same matchId and not null)
+                if (conjMatchId === meaningMatchId && conjMatchId !== null) {
+                    // Correct match - mark both items as correct
+                    document.querySelector(`.matching-item[data-type="conjunction"][data-id="${conjId}"]`).classList.add('correct');
+                    document.querySelector(`.matching-item[data-type="meaning"][data-id="${meaningId}"]`).classList.add('correct');
+                } else {
+                    // Incorrect match - mark both items as incorrect temporarily
+                    document.querySelector(`.matching-item[data-type="conjunction"][data-id="${conjId}"]`).classList.add('incorrect');
+                    document.querySelector(`.matching-item[data-type="meaning"][data-id="${meaningId}"]`).classList.add('incorrect');
+                    
+                    // Remove incorrect marking after 2 seconds
+                    setTimeout(() => {
+                        document.querySelector(`.matching-item[data-type="conjunction"][data-id="${conjId}"]`).classList.remove('incorrect');
+                        document.querySelector(`.matching-item[data-type="meaning"][data-id="${meaningId}"]`).classList.remove('incorrect');
+                    }, 2000);
+                }
+
                 // Clear selections after a brief moment
                 setTimeout(() => {
                     document.querySelectorAll('.matching-item.selected').forEach(item => {
@@ -858,23 +937,29 @@
                 }
             });
 
-            // Check matching (simplified - check if correct pairs were identified)
-            const matchingPairs = shuffledExercises.matching.conjunctions.length;
-            totalQuestions += matchingPairs;
-            
-            // For demonstration, we'll give partial credit for matching
-            // In a real implementation, you'd track the actual matches made
-            correctAnswers += Math.floor(matchingPairs * 0.7); // Assume 70% correct for demo
-
-            // Mark matching items (for visual feedback)
-            shuffledExercises.matching.conjunctions.forEach(item => {
-                const element = document.querySelector(`.matching-item[data-type="conjunction"][data-id="${item.id}"]`);
-                element.classList.add('correct'); // Simplified for demo
+            // Check matching exercise
+            shuffledExercises.matching.conjunctions.forEach(conjItem => {
+                totalQuestions++;
+                const matchedMeaningId = matchingPairs[conjItem.id];
+                if (matchedMeaningId) {
+                    const meaningItem = shuffledExercises.matching.meanings.find(m => m.id === matchedMeaningId);
+                    if (meaningItem && conjItem.matchId === meaningItem.matchId && conjItem.matchId !== null) {
+                        correctAnswers++;
+                    }
+                }
             });
 
-            shuffledExercises.matching.functions.forEach(item => {
-                const element = document.querySelector(`.matching-item[data-type="function"][data-id="${item.id}"]`);
-                element.classList.add('correct'); // Simplified for demo
+            // Show correct answers for unmatched items
+            shuffledExercises.matching.conjunctions.forEach(conjItem => {
+                const conjElement = document.querySelector(`.matching-item[data-type="conjunction"][data-id="${conjItem.id}"]`);
+                if (!conjElement.classList.contains('correct')) {
+                    const correctMeaning = shuffledExercises.matching.meanings.find(m => m.matchId === conjItem.matchId);
+                    if (correctMeaning) {
+                        const meaningElement = document.querySelector(`.matching-item[data-type="meaning"][data-id="${correctMeaning.id}"]`);
+                        conjElement.style.border = '2px solid #ffc107';
+                        meaningElement.style.border = '2px solid #ffc107';
+                    }
+                }
             });
 
             // Check sentence creation (simplified - check if conjunction is used)
@@ -920,12 +1005,18 @@
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             
+            // Create PDF with optimized settings for smaller file size
             html2canvas(document.getElementById('worksheet'), {
-                scale: 2,
+                scale: 1.5, // Reduced scale for smaller file size
                 useCORS: true,
-                allowTaint: true
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                removeContainer: true,
+                imageTimeout: 0,
+                logging: false
             }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
+                // Compress image to JPEG with quality setting for smaller size
+                const imgData = canvas.toDataURL('image/jpeg', 0.8); // 80% quality
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const imgWidth = 210;
                 const pageHeight = 295;
@@ -933,97 +1024,144 @@
                 let heightLeft = imgHeight;
                 let position = 0;
 
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                // Add first page
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
                 heightLeft -= pageHeight;
 
+                // Add additional pages if needed
                 while (heightLeft >= 0) {
                     position = heightLeft - imgHeight;
                     pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
                     heightLeft -= pageHeight;
                 }
 
                 pdf.save('conjunction-practice-worksheet.pdf');
+            }).catch(error => {
+                console.error('PDF generation failed:', error);
+                alert('PDF generation failed. Please try again.');
             });
         }
 
         function downloadDocx() {
-            // Get student information
-            const studentName = document.getElementById('studentName').value || 'Not provided';
-            const studentClass = document.getElementById('studentClass').value || 'Not provided';
-            const studentNumber = document.getElementById('studentNumber').value || 'Not provided';
-            const studentDate = document.getElementById('studentDate').value || 'Not provided';
-            const grade = document.getElementById('gradeScore').textContent;
+            try {
+                // Get student information
+                const studentName = document.getElementById('studentName').value || 'Not provided';
+                const studentClass = document.getElementById('studentClass').value || 'Not provided';
+                const studentNumber = document.getElementById('studentNumber').value || 'Not provided';
+                const studentDate = document.getElementById('studentDate').value || 'Not provided';
+                const grade = document.getElementById('gradeScore').textContent;
 
-            // Create document content
-            const doc = new docx.Document({
-                sections: [{
-                    properties: {},
-                    children: [
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: "Conjunction Practice: Describing Places",
-                                    bold: true,
-                                    size: 32
-                                })
-                            ],
-                            alignment: docx.AlignmentType.CENTER
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `Grade: ${grade}`,
-                                    bold: true,
-                                    size: 24
-                                })
-                            ],
-                            alignment: docx.AlignmentType.RIGHT
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: "Student Information",
-                                    bold: true,
-                                    size: 24
-                                })
-                            ]
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `Name: ${studentName}`
-                                })
-                            ]
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `Class: ${studentClass}`
-                                })
-                            ]
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `Student Number: ${studentNumber}`
-                                })
-                            ]
-                        }),
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun({
-                                    text: `Date: ${studentDate}`
-                                })
-                            ]
-                        })
-                    ]
-                }]
-            });
+                // Create RTF content (Rich Text Format - opens in Word)
+                let rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}
+\\f0\\fs24 
+{\\qc\\b\\fs32 Conjunction Practice Worksheet\\par}
+\\par
+{\\qr\\b Grade: ${grade}\\par}
+\\par\\par
+{\\b Student Information\\par}
+\\par
+Name: ${studentName}\\par
+Class: ${studentClass}\\par
+Student Number: ${studentNumber}\\par
+Date: ${studentDate}\\par
+\\par\\par
+{\\b Part 1: Fill in the Blanks\\par}
+\\par`;
 
-            docx.Packer.toBlob(doc).then(blob => {
-                saveAs(blob, "conjunction-practice-worksheet.docx");
-            });
+                // Add fill-in-the-blank questions
+                shuffledExercises.fillInBlanks.forEach((exercise, index) => {
+                    const input = document.getElementById(`blank${index}`);
+                    const userAnswer = input ? input.value : '____';
+                    const questionText = exercise.text.replace('_____', `[${userAnswer}]`);
+                    rtfContent += `${index + 1}. ${questionText}\\par\\par`;
+                });
+
+                rtfContent += `\\par{\\b Part 2: Matching Exercise\\par}\\par`;
+                
+                // Add matching results
+                let matchingResults = '';
+                shuffledExercises.matching.conjunctions.forEach((conjItem, index) => {
+                    const matchedMeaningId = matchingPairs[conjItem.id];
+                    let matchedText = 'Not matched';
+                    if (matchedMeaningId) {
+                        const meaningItem = shuffledExercises.matching.meanings.find(m => m.id === matchedMeaningId);
+                        if (meaningItem) {
+                            matchedText = meaningItem.text;
+                        }
+                    }
+                    matchingResults += `${String.fromCharCode(65 + index)}. ${conjItem.text} → ${matchedText}\\par`;
+                });
+                rtfContent += matchingResults + '\\par\\par';
+
+                rtfContent += `{\\b Part 3: Sentence Creation\\par}\\par`;
+
+                // Add sentence creation
+                shuffledExercises.sentenceCreation.forEach((exercise, index) => {
+                    const textarea = document.getElementById(`sentence${index}`);
+                    const userSentence = textarea ? textarea.value : '[No answer provided]';
+                    rtfContent += `${index + 1}. ${exercise.prompt}\\par`;
+                    rtfContent += `Answer: ${userSentence}\\par\\par`;
+                });
+
+                rtfContent += '}';
+
+                // Create and download the file
+                const blob = new Blob([rtfContent], { type: 'application/rtf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'conjunction-practice-worksheet.rtf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+            } catch (error) {
+                console.error('Document export error:', error);
+                // Fallback to plain text if RTF fails
+                try {
+                    const studentName = document.getElementById('studentName').value || 'Not provided';
+                    const studentClass = document.getElementById('studentClass').value || 'Not provided';
+                    const studentNumber = document.getElementById('studentNumber').value || 'Not provided';
+                    const studentDate = document.getElementById('studentDate').value || 'Not provided';
+                    const grade = document.getElementById('gradeScore').textContent;
+
+                    let textContent = `CONJUNCTION PRACTICE WORKSHEET\n\n`;
+                    textContent += `Grade: ${grade}\n\n`;
+                    textContent += `STUDENT INFORMATION\n`;
+                    textContent += `Name: ${studentName}\n`;
+                    textContent += `Class: ${studentClass}\n`;
+                    textContent += `Student Number: ${studentNumber}\n`;
+                    textContent += `Date: ${studentDate}\n\n`;
+                    
+                    textContent += `PART 1: FILL IN THE BLANKS\n\n`;
+                    shuffledExercises.fillInBlanks.forEach((exercise, index) => {
+                        const input = document.getElementById(`blank${index}`);
+                        const userAnswer = input ? input.value : '____';
+                        const questionText = exercise.text.replace('_____', `[${userAnswer}]`);
+                        textContent += `${index + 1}. ${questionText}\n\n`;
+                    });
+
+                    textContent += `PART 3: SENTENCE CREATION\n\n`;
+                    shuffledExercises.sentenceCreation.forEach((exercise, index) => {
+                        const textarea = document.getElementById(`sentence${index}`);
+                        const userSentence = textarea ? textarea.value : '[No answer provided]';
+                        textContent += `${index + 1}. ${exercise.prompt}\n`;
+                        textContent += `Answer: ${userSentence}\n\n`;
+                    });
+
+                    const blob = new Blob([textContent], { type: 'text/plain' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'conjunction-practice-worksheet.txt';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                } catch (fallbackError) {
+                    alert('Document export failed. Please try the PDF option instead.');
+                }
+            }
         }
 
         function takeScreenshot() {
@@ -1039,8 +1177,85 @@
             });
         }
 
+        // Secret teacher mode activation
+        let secretSequence = [];
+        let tapSequence = [];
+        const targetSequence = ['1', '3', '3', '2', '4', '1', '2', '4'];
+        let lastTapTime = 0;
+        
+        // Keyboard activation (desktop)
+        document.addEventListener('keydown', function(event) {
+            secretSequence.push(event.key.toLowerCase());
+            
+            // Keep only the last 8 keys
+            if (secretSequence.length > targetSequence.length) {
+                secretSequence.shift();
+            }
+            
+            // Check if sequence matches
+            if (secretSequence.length === targetSequence.length && 
+                secretSequence.every((key, index) => key === targetSequence[index])) {
+                if (!teacherMode) {
+                    teacherMode = true;
+                    showAnswers();
+                    alert('🎓 Teacher mode activated! All answers are now visible.');
+                }
+                secretSequence = []; // Reset sequence
+            }
+        });
+
+        // Touch activation (mobile) - tap the grade box in sequence
+        document.getElementById('gradeScore').addEventListener('click', function() {
+            const currentTime = Date.now();
+            
+            // Reset if more than 3 seconds between taps
+            if (currentTime - lastTapTime > 3000) {
+                tapSequence = [];
+            }
+            
+            lastTapTime = currentTime;
+            tapSequence.push('tap');
+            
+            // Need 8 taps for the code 13324124
+            if (tapSequence.length === 8) {
+                if (!teacherMode) {
+                    teacherMode = true;
+                    showAnswers();
+                    alert('🎓 Teacher mode activated! All answers are now visible.');
+                }
+                tapSequence = [];
+            }
+            
+            // Keep only last 8 taps
+            if (tapSequence.length > 8) {
+                tapSequence.shift();
+            }
+        });
+
+        // Alternative: Long press on header for mobile
+        let longPressTimer;
+        const header = document.querySelector('.header h1');
+        
+        header.addEventListener('touchstart', function(e) {
+            longPressTimer = setTimeout(function() {
+                if (!teacherMode) {
+                    teacherMode = true;
+                    showAnswers();
+                    alert('🎓 Teacher mode activated! All answers are now visible.');
+                }
+            }, 3000); // 3 second long press
+        });
+        
+        header.addEventListener('touchend', function(e) {
+            clearTimeout(longPressTimer);
+        });
+        
+        header.addEventListener('touchmove', function(e) {
+            clearTimeout(longPressTimer);
+        });
+
         // Initialize the worksheet when page loads
         window.onload = initializeWorksheet;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98046aae04008801',t:'MTc1ODA2ODIwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9804e42704a44717',t:'MTc1ODA3MzE4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
