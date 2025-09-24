@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conjunction Worksheet</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .worksheet-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .grade-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            min-width: 100px;
+            text-align: center;
+            cursor: default;
+        }
+
+        .grade-label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .grade-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .teacher-mode-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .teacher-mode-indicator.active {
+            display: block;
+            background: #28a745 !important;
+            border-color: #28a745 !important;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200"><rect fill="%234facfe" width="800" height="200"/><circle fill="%23ffffff" opacity="0.1" cx="100" cy="50" r="30"/><circle fill="%23ffffff" opacity="0.1" cx="300" cy="120" r="40"/><circle fill="%23ffffff" opacity="0.1" cx="600" cy="80" r="25"/><path fill="%23ffffff" opacity="0.2" d="M0,150 Q200,100 400,130 T800,120 L800,200 L0,200 Z"/></svg>');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .student-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4facfe;
+        }
+
+        .student-info h3 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-field label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .info-field input {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .info-field input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .info-field input:disabled {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .save-btn:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        .save-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .exercise-section {
+            margin-bottom: 30px;
+        }
+
+        .exercise-section h3 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #2196f3;
+        }
+
+        .instructions p {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .conjunction-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .conjunction-tag {
+            background: #4facfe;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .question {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .question:hover {
+            border-color: #4facfe;
+        }
+
+        .question-number {
+            background: #4facfe;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        .question-text {
+            display: inline-block;
+            vertical-align: top;
+            width: calc(100% - 45px);
+            line-height: 1.8;
+        }
+
+        .blank {
+            display: inline-block;
+            min-width: 120px;
+            padding: 8px 12px;
+            margin: 0 5px;
+            border: none;
+            border-bottom: 2px solid #4facfe;
+            background: transparent;
+            font-size: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .blank:focus {
+            outline: none;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .blank.correct {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .blank.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+
+
+        .teacher-answer {
+            display: none;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .teacher-answer.show {
+            display: block;
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 30px auto;
+            display: block;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .check-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .check-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 25px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .footer-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            min-width: 100px;
+        }
+
+        .footer-btn:hover {
+            background: #5a6268;
+        }
+
+        .footer-btn.print { background: #17a2b8; }
+        .footer-btn.copy { background: #ffc107; color: #212529; }
+        .footer-btn.pdf { background: #dc3545; }
+        .footer-btn.docx { background: #007bff; }
+        .footer-btn.screenshot { background: #28a745; }
+
+        .footer-btn.print:hover { background: #138496; }
+        .footer-btn.copy:hover { background: #e0a800; }
+        .footer-btn.pdf:hover { background: #c82333; }
+        .footer-btn.docx:hover { background: #0056b3; }
+        .footer-btn.screenshot:hover { background: #1e7e34; }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .grade-box, .teacher-mode-indicator {
+                position: static;
+                margin-top: 20px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .question-number {
+                margin-bottom: 10px;
+            }
+
+            .question-text {
+                width: 100%;
+                display: block;
+            }
+
+            .blank {
+                min-width: 100px;
+                margin: 5px 2px;
+            }
+
+            .footer {
+                padding: 20px;
+            }
+
+            .footer-btn {
+                flex: 1;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="worksheet-container" id="worksheet">
+        <div class="header">
+            <div class="teacher-mode-indicator" id="teacherIndicator">👨‍🏫 Teacher Mode ON</div>
+            <h1>Conjunction Worksheet</h1>
+            <div class="grade-box" id="gradeBox" onclick="handleGradeBoxClick()">
+                <div class="grade-label">Grade</div>
+                <div class="grade-score" id="gradeScore">-</div>
+            </div>
+        </div>
+
+        <div class="hero-image">
+            <span>📚 Master English Conjunctions - B1 Level</span>
+        </div>
+
+        <div class="content">
+            <div class="student-info">
+                <h3>Student Information</h3>
+                <div class="info-grid">
+                    <div class="info-field">
+                        <label for="studentName">Student's Name:</label>
+                        <input type="text" id="studentName" placeholder="Enter your name">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentClass">Class:</label>
+                        <input type="text" id="studentClass" placeholder="Enter your class">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentNumber">Student's Number:</label>
+                        <input type="text" id="studentNumber" placeholder="Enter your number">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentDate">Date:</label>
+                        <input type="date" id="studentDate">
+                    </div>
+                </div>
+                <button class="save-btn" id="saveBtn" onclick="saveStudentInfo()">Save Information</button>
+            </div>
+
+            <div class="exercise-section">
+                <h3>Analytical Exposition: Conjunctions in Argumentative Writing</h3>
+                <div class="instructions">
+                    <p><strong>Instructions:</strong> Complete the analytical exposition texts below by filling in the blanks with appropriate conjunctions. These texts present arguments and use conjunctions to connect ideas, show cause-effect relationships, and strengthen arguments.</p>
+                    <div class="conjunction-list">
+                        <span class="conjunction-tag">therefore</span>
+                        <span class="conjunction-tag">however</span>
+                        <span class="conjunction-tag">moreover</span>
+                        <span class="conjunction-tag">furthermore</span>
+                        <span class="conjunction-tag">consequently</span>
+                        <span class="conjunction-tag">nevertheless</span>
+                        <span class="conjunction-tag">although</span>
+                        <span class="conjunction-tag">because</span>
+                        <span class="conjunction-tag">since</span>
+                        <span class="conjunction-tag">despite</span>
+                        <span class="conjunction-tag">in addition</span>
+                        <span class="conjunction-tag">as a result</span>
+                        <span class="conjunction-tag">on the other hand</span>
+                        <span class="conjunction-tag">in conclusion</span>
+                    </div>
+                </div>
+
+                <!-- Questions will be dynamically generated here -->
+
+                <button class="check-btn" id="checkBtn" onclick="checkAnswers()">Check Answers</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="footer-btn print" onclick="printWorksheet()">🖨️ Print</button>
+            <button class="footer-btn copy" onclick="copyContent()">📋 Copy</button>
+            <button class="footer-btn pdf" onclick="downloadPDF()">📄 Download PDF</button>
+            <button class="footer-btn docx" onclick="downloadDocx()">📝 Download DOCX</button>
+            <button class="footer-btn screenshot" onclick="takeScreenshot()">📸 Screenshot</button>
+        </div>
+    </div>
+
+    <script>
+        let isInfoSaved = false;
+        let isChecked = false;
+        let isTeacherMode = false;
+        let tapCount = 0;
+        let tapTimer = null;
+
+        // Question data for shuffling
+        const questionData = [
+            {
+                title: "The Importance of Reading Books",
+                text: "Reading books is essential for personal development. _____, students should be encouraged to read regularly from an early age.",
+                answer: "Therefore",
+                explanation: "(shows logical conclusion from the premise)"
+            },
+            {
+                title: "Social Media and Mental Health",
+                text: "Social media can connect people worldwide. _____, excessive use has been linked to increased anxiety and depression among teenagers.",
+                answer: "However",
+                explanation: "(introduces contrasting argument)"
+            },
+            {
+                title: "Climate Change Action",
+                text: "Governments must implement strict environmental policies _____ climate change poses an immediate threat to our planet's future.",
+                answer: "because",
+                explanation: "(provides reasoning for the argument)"
+            },
+            {
+                title: "Online Learning Benefits",
+                text: "Online learning offers flexibility and accessibility to students. _____, it reduces educational costs significantly.",
+                answer: "Moreover",
+                explanation: "(adds supporting evidence)"
+            },
+            {
+                title: "Fast Food and Health",
+                text: "_____ fast food is convenient and affordable, it contributes to obesity and various health problems in society.",
+                answer: "Although",
+                explanation: "(acknowledges opposing viewpoint before main argument)"
+            },
+            {
+                title: "Technology in Education",
+                text: "Technology has revolutionized the way students learn. _____, traditional teaching methods must adapt to incorporate digital tools.",
+                answer: "Consequently",
+                explanation: "(shows result of the stated fact)"
+            },
+            {
+                title: "Public Transportation",
+                text: "_____ the initial high costs of building public transportation systems, they provide long-term economic and environmental benefits.",
+                answer: "Despite",
+                explanation: "(acknowledges counterargument before presenting main point)"
+            },
+            {
+                title: "Renewable Energy",
+                text: "Fossil fuels are becoming increasingly expensive and environmentally harmful. _____, many countries continue to rely heavily on them for energy production.",
+                answer: "Nevertheless",
+                explanation: "(shows contrast despite logical expectation)"
+            },
+            {
+                title: "Exercise and Well-being",
+                text: "Regular exercise improves physical health and mental well-being. _____, it enhances cognitive function and academic performance.",
+                answer: "Furthermore",
+                explanation: "(adds additional supporting argument)"
+            },
+            {
+                title: "Plastic Pollution",
+                text: "Single-use plastics are convenient for consumers and businesses. _____, marine ecosystems are suffering from unprecedented pollution levels.",
+                answer: "As a result",
+                explanation: "(shows consequence of the stated situation)"
+            },
+            {
+                title: "Digital Privacy",
+                text: "People value convenience in digital services. _____, they are increasingly concerned about their personal data being misused.",
+                answer: "On the other hand",
+                explanation: "(presents contrasting perspective)"
+            },
+            {
+                title: "Work-Life Balance",
+                text: "Modern technology allows people to work from anywhere. _____, it has also blurred the boundaries between work and personal life.",
+                answer: "However",
+                explanation: "(introduces unexpected negative consequence)"
+            },
+            {
+                title: "Urban Development",
+                text: "_____ urban populations continue to grow rapidly, cities must invest in sustainable infrastructure and housing solutions.",
+                answer: "Since",
+                explanation: "(provides causal reasoning for the argument)"
+            },
+            {
+                title: "Artificial Intelligence",
+                text: "AI technology offers tremendous benefits for healthcare and education. _____, it raises important ethical questions about job displacement and privacy.",
+                answer: "In addition",
+                explanation: "(introduces additional consideration)"
+            },
+            {
+                title: "Global Cooperation",
+                text: "International challenges require collaborative solutions from all nations. _____, global cooperation is essential for addressing climate change, poverty, and health crises.",
+                answer: "In conclusion",
+                explanation: "(summarizes the main argument)"
+            }
+        ];
+
+        // Shuffle function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Generate shuffled questions on page load
+        function generateQuestions() {
+            const shuffledQuestions = shuffleArray(questionData);
+            const questionsContainer = document.querySelector('.exercise-section');
+            const checkButton = questionsContainer.querySelector('.check-btn');
+            
+            // Remove existing questions
+            const existingQuestions = questionsContainer.querySelectorAll('.question');
+            existingQuestions.forEach(q => q.remove());
+            
+            // Add shuffled questions
+            shuffledQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <span class="question-number">${index + 1}</span>
+                    <div class="question-text">
+                        <strong>${q.title}</strong><br><br>
+                        ${q.text.replace('_____', `<input type="text" class="blank" data-answer="${q.answer}">`)}
+                    </div>
+                    <div class="teacher-answer">✅ Correct Answer: <strong>${q.answer}</strong> ${q.explanation}</div>
+                `;
+                questionsContainer.insertBefore(questionDiv, checkButton);
+            });
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            generateQuestions();
+        });
+
+        // Set today's date by default
+        document.getElementById('studentDate').value = new Date().toISOString().split('T')[0];
+
+        function saveStudentInfo() {
+            const inputs = ['studentName', 'studentClass', 'studentNumber', 'studentDate'];
+            inputs.forEach(id => {
+                document.getElementById(id).disabled = true;
+            });
+            document.getElementById('saveBtn').disabled = true;
+            document.getElementById('saveBtn').textContent = 'Information Saved ✓';
+            isInfoSaved = true;
+        }
+
+        function handleGradeBoxClick() {
+            tapCount++;
+            
+            // Clear existing timer
+            if (tapTimer) {
+                clearTimeout(tapTimer);
+            }
+            
+            // Set timer to reset tap count after 2 seconds
+            tapTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 2000);
+            
+            // Check if 7 taps reached
+            if (tapCount === 7) {
+                toggleTeacherMode();
+                tapCount = 0;
+                clearTimeout(tapTimer);
+            }
+        }
+
+        function toggleTeacherMode() {
+            isTeacherMode = !isTeacherMode;
+            const teacherIndicator = document.getElementById('teacherIndicator');
+            const teacherAnswers = document.querySelectorAll('.teacher-answer');
+            
+            if (isTeacherMode) {
+                teacherIndicator.classList.add('active');
+                teacherAnswers.forEach(answer => answer.classList.add('show'));
+            } else {
+                teacherIndicator.classList.remove('active');
+                teacherAnswers.forEach(answer => answer.classList.remove('show'));
+            }
+        }
+
+
+
+        function checkAnswers() {
+            if (isChecked) return;
+
+            const blanks = document.querySelectorAll('.blank');
+            let correct = 0;
+            let total = blanks.length;
+
+            blanks.forEach(blank => {
+                const userAnswer = blank.value.toLowerCase().trim();
+                const correctAnswer = blank.dataset.answer.toLowerCase();
+                
+                if (userAnswer === correctAnswer) {
+                    blank.classList.add('correct');
+                    blank.classList.remove('incorrect');
+                    correct++;
+                } else {
+                    blank.classList.add('incorrect');
+                    blank.classList.remove('correct');
+                }
+                blank.disabled = true;
+            });
+
+            const percentage = Math.round((correct / total) * 100);
+            document.getElementById('gradeScore').textContent = `${correct}/${total} (${percentage}%)`;
+            
+            document.getElementById('checkBtn').disabled = true;
+            document.getElementById('checkBtn').textContent = 'Answers Checked ✓';
+            isChecked = true;
+        }
+
+        function printWorksheet() {
+            window.print();
+        }
+
+        function copyContent() {
+            const worksheet = document.getElementById('worksheet');
+            const range = document.createRange();
+            range.selectNode(worksheet);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            
+            try {
+                document.execCommand('copy');
+                alert('Worksheet content copied to clipboard!');
+            } catch (err) {
+                alert('Failed to copy content. Please try again.');
+            }
+            
+            window.getSelection().removeAllRanges();
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            
+            html2canvas(document.getElementById('worksheet'), {
+                scale: 1.5,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                removeContainer: true,
+                imageTimeout: 0,
+                logging: false
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save('conjunction-worksheet.pdf');
+            });
+        }
+
+        function downloadDocx() {
+            // Get student information
+            const studentName = document.getElementById('studentName').value || 'Not provided';
+            const studentClass = document.getElementById('studentClass').value || 'Not provided';
+            const studentNumber = document.getElementById('studentNumber').value || 'Not provided';
+            const studentDate = document.getElementById('studentDate').value || 'Not provided';
+            const grade = document.getElementById('gradeScore').textContent;
+
+            // Get answers
+            const blanks = document.querySelectorAll('.blank');
+            let answersText = '';
+            blanks.forEach((blank, index) => {
+                const userAnswer = blank.value || '(blank)';
+                const correctAnswer = blank.dataset.answer;
+                const isCorrect = blank.classList.contains('correct') ? '✓' : (blank.classList.contains('incorrect') ? '✗' : '');
+                answersText += `${index + 1}. ${userAnswer} ${isCorrect}\n`;
+            });
+
+            // Get current questions and answers dynamically
+            const questions = document.querySelectorAll('.question');
+            let questionsText = '';
+            questions.forEach((q, index) => {
+                const title = q.querySelector('strong').textContent;
+                const answer = q.querySelector('.blank').dataset.answer;
+                questionsText += `${index + 1}. ${title}: ${answer}\n`;
+            });
+
+            const docContent = `CONJUNCTION WORKSHEET
+Student: ${studentName} | Class: ${studentClass} | Number: ${studentNumber} | Date: ${studentDate}
+Grade: ${grade}
+
+ANSWERS:
+${answersText}
+CORRECT ANSWERS:
+${questionsText}`;
+
+            const blob = new Blob([docContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'conjunction-worksheet-fill-in-blanks.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function takeScreenshot() {
+            html2canvas(document.getElementById('worksheet'), {
+                scale: 1.5,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                removeContainer: true,
+                imageTimeout: 0,
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'conjunction-worksheet-screenshot.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'983e1c4737999b99',t:'MTc1ODY3MzE2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
