@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Paragraf Argumentatif - Hortatory Exposition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .paragraph-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .paragraph-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .paragraph-item.selected {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .paragraph-item.used {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .slot {
+            min-height: 120px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .slot:hover:not(.filled) {
+            background-color: #f0f9ff;
+            border-color: #0ea5e9;
+        }
+        .slot.filled {
+            background-color: #f8fafc;
+        }
+        .correct {
+            background-color: #dcfce7 !important;
+            border-color: #16a34a !important;
+        }
+        .incorrect {
+            background-color: #fef2f2 !important;
+            border-color: #dc2626 !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-center text-indigo-800 mb-2">Argumentative Paragraph Sorting</h1>
+            <p class="text-center text-gray-600 mb-4">Arrange hortatory exposition paragraphs in the correct order</p>
+            
+            <div id="scoreDisplay" class="mb-4 p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg border border-blue-200 hidden">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800">Your Score</h3>
+                    <div class="text-3xl font-bold text-blue-600" id="scoreValue">0</div>
+                </div>
+                <div class="mt-2">
+                    <div class="bg-gray-200 rounded-full h-3">
+                        <div id="scoreBar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1" id="scoreText">Complete the arrangement to see your score</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 justify-center mb-6">
+                <select id="difficultySelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-green-50">
+                    <option value="easy">🟢 Easy (Max 85 points)</option>
+                    <option value="medium">🟡 Medium (Max 90 points)</option>
+                    <option value="hard">🔴 Hard (Max 100 points)</option>
+                </select>
+                <select id="topicSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="0">The Importance of Reading Books</option>
+                    <option value="1">The Dangers of Social Media for Teenagers</option>
+                    <option value="2">The Importance of Regular Exercise</option>
+                    <option value="3">Reducing Plastic Usage</option>
+                    <option value="4">The Importance of Breakfast</option>
+                    <option value="5">The Dangers of Smoking</option>
+                    <option value="6">The Importance of Character Education</option>
+                    <option value="7">Saving Electrical Energy</option>
+                    <option value="8">The Importance of Adequate Sleep</option>
+                    <option value="9">Reducing Junk Food Consumption</option>
+                    <option value="10">The Importance of Learning Foreign Languages</option>
+                    <option value="11">Maintaining Environmental Cleanliness</option>
+                    <option value="12">The Importance of Saving Money</option>
+                    <option value="13">The Dangers of Excessive Online Gaming</option>
+                    <option value="14">The Importance of Family Communication</option>
+                </select>
+                <button onclick="shuffleParagraphs()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    Shuffle Again
+                </button>
+                <button onclick="resetArrangement()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Reset Arrangement
+                </button>
+                <button onclick="checkAnswer()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    Check Answer
+                </button>
+                <button onclick="showAnswer()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors hidden" id="showAnswerBtn">
+                    Show Answer
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6">
+            <!-- Paragraphs to be sorted -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">📝 Click paragraphs to arrange them in correct order</h2>
+                <div id="paragraphPool" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <!-- Paragraphs will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Sorting area -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">🎯 Your Arrangement</h2>
+                <div id="sortingArea" class="space-y-3">
+                    <!-- Numbered slots will be dynamically generated based on topic -->
+                </div>
+            </div>
+        </div>
+
+
+
+        <div id="feedback" class="mt-6 p-4 rounded-lg hidden">
+            <!-- Feedback akan muncul di sini -->
+        </div>
+    </div>
+
+    <script>
+        const topics = [
+            {
+                title: "The Importance of Reading Books",
+                paragraphs: [
+                    { type: "thesis", text: "Reading books is an extremely important activity for intellectual and emotional development. In this digital era, the habit of reading books is declining, even though its benefits are enormous for our lives. This text will discuss the benefits of reading books, namely increasing knowledge and insight, training critical thinking skills, improving vocabulary and language abilities, and providing mental stimulation to prevent cognitive decline." },
+                    { type: "argument1", text: "First, reading books can increase our knowledge and insight. Through books, we can learn various new things, from history and science to other people's life experiences that can enrich our understanding of the world." },
+                    { type: "argument2", text: "Second, reading books can train critical and analytical thinking skills. When reading, our brain works to understand, analyze, and connect the information obtained with existing knowledge." },
+                    { type: "argument3", text: "Third, reading books improves vocabulary and language skills significantly. Regular readers develop better writing abilities, communication skills, and can express their thoughts more clearly and effectively." },
+                    { type: "argument4", text: "Fourth, reading books provides mental stimulation and can help prevent cognitive decline. Studies show that people who read regularly have better memory retention and are less likely to develop dementia in old age." },
+                    { type: "recommendation", text: "Therefore, let us start getting used to reading books every day for at least 30 minutes. Choose books that suit our interests and needs so that reading becomes more enjoyable and beneficial." }
+                ]
+            },
+            {
+                title: "The Dangers of Social Media for Teenagers",
+                paragraphs: [
+                    { type: "thesis", text: "Social media has become an inseparable part of teenagers' lives today. However, excessive use of social media can have serious negative impacts on teenage development. This text will discuss the dangers of excessive social media use for teenagers, namely causing addiction that disrupts learning, triggering mental health problems, and exposing them to cyberbullying and online harassment." },
+                    { type: "argument1", text: "First, social media can cause addiction and disrupt learning activities. Teenagers who use social media too often tend to neglect their school assignments and study time." },
+                    { type: "argument2", text: "Second, social media can trigger mental health problems such as depression and anxiety. Social comparisons that occur on social media often make teenagers feel insecure and dissatisfied with their lives." },
+                    { type: "argument3", text: "Third, social media exposes teenagers to cyberbullying and online harassment. Many young people experience emotional trauma from negative comments, threats, or exclusion in digital spaces." },
+                    { type: "recommendation", text: "Therefore, parents and teachers must guide teenagers to use social media wisely. Limit usage time and teach them to focus more on positive activities in the real world." }
+                ]
+            },
+            {
+                title: "The Importance of Regular Exercise",
+                paragraphs: [
+                    { type: "thesis", text: "Regular exercise is a very important activity for maintaining physical and mental health. Unfortunately, many people ignore the importance of exercising regularly in their daily lives. This text will discuss the importance of regular exercise, namely maintaining physical health and preventing diseases, improving mental health and reducing stress, enhancing cognitive function and brain performance, and promoting better sleep quality and energy levels." },
+                    { type: "argument1", text: "First, regular exercise can maintain physical health and prevent various diseases. Regular physical activity can strengthen the heart, increase body endurance, and maintain ideal body weight." },
+                    { type: "argument2", text: "Second, exercise can improve mental health and reduce stress. When exercising, the body releases endorphin hormones that can make us feel happier and more relaxed." },
+                    { type: "argument3", text: "Third, regular exercise enhances cognitive function and brain performance. Physical activity increases blood flow to the brain, improving memory, concentration, and learning abilities." },
+                    { type: "argument4", text: "Fourth, exercise promotes better sleep quality and energy levels throughout the day. People who exercise regularly fall asleep faster and experience deeper, more restorative sleep." },
+                    { type: "recommendation", text: "Therefore, let us start getting used to exercising regularly, at least 3 times a week for 30 minutes. Choose the type of exercise we enjoy so it can be done consistently." }
+                ]
+            },
+            {
+                title: "Reducing Plastic Usage",
+                paragraphs: [
+                    { type: "thesis", text: "Excessive plastic use has become a serious environmental problem worldwide. We all must play an active role in reducing plastic use to preserve the earth. This text will discuss why we must reduce plastic usage, namely because plastic takes hundreds of years to decompose, it is dangerous for marine life, and its production contributes to greenhouse gas emissions and climate change." },
+                    { type: "argument1", text: "First, plastic takes a very long time to decompose, up to hundreds of years. This causes plastic waste accumulation that pollutes soil, water, and air." },
+                    { type: "argument2", text: "Second, plastic waste is very dangerous for marine life. Many marine animals die from eating or getting entangled in plastic waste that pollutes the oceans." },
+                    { type: "argument3", text: "Third, plastic production contributes significantly to greenhouse gas emissions and climate change. The manufacturing process requires large amounts of fossil fuels and releases harmful chemicals into the atmosphere." },
+                    { type: "recommendation", text: "Therefore, let us start reducing plastic use by bringing our own shopping bags, using reusable water bottles, and choosing products with environmentally friendly packaging." }
+                ]
+            },
+            {
+                title: "The Importance of Breakfast",
+                paragraphs: [
+                    { type: "thesis", text: "Breakfast is the most important meal of the day. However, many people still skip breakfast for various reasons, even though this can have bad effects on health. This text will discuss the importance of breakfast, namely providing energy for daily activities, helping control weight and prevent overeating, improving cognitive performance and academic achievement, and stabilizing blood sugar levels to prevent mood swings." },
+                    { type: "argument1", text: "First, breakfast provides the energy the body needs to start daily activities. Without breakfast, the body will lack energy and make us feel weak and have difficulty concentrating." },
+                    { type: "argument2", text: "Second, breakfast can help control weight and prevent overeating during the day. People who regularly eat breakfast tend to have more regular and healthy eating patterns." },
+                    { type: "argument3", text: "Third, eating breakfast improves cognitive performance and academic achievement. Students who eat breakfast regularly show better memory, attention span, and problem-solving abilities in school." },
+                    { type: "argument4", text: "Fourth, breakfast helps stabilize blood sugar levels and prevents mood swings throughout the day. A nutritious morning meal provides steady energy and helps maintain emotional balance." },
+                    { type: "recommendation", text: "Therefore, make it a habit to have breakfast every morning with healthy and nutritious menus. Prepare simple breakfasts like whole wheat bread, eggs, or fruits to start the day well." }
+                ]
+            },
+            {
+                title: "The Dangers of Smoking",
+                paragraphs: [
+                    { type: "thesis", text: "Smoking is a bad habit that is very dangerous for health. Although there have been many campaigns about the dangers of smoking, many people still do not realize how serious the negative impacts of this habit are. This text will discuss the dangers of smoking, namely causing various serious diseases, endangering passive smokers around them, and creating enormous financial burdens on individuals and healthcare systems." },
+                    { type: "argument1", text: "First, smoking can cause various serious diseases such as lung cancer, heart disease, and stroke. The harmful substances in cigarettes can damage vital organs in the body." },
+                    { type: "argument2", text: "Second, smoking is not only dangerous for active smokers, but also for people around them who inhale cigarette smoke (passive smokers). Children and pregnant women are very vulnerable to the bad effects of cigarette smoke." },
+                    { type: "argument3", text: "Third, smoking creates a financial burden on individuals and healthcare systems. The cost of cigarettes, medical treatments, and lost productivity due to smoking-related illnesses is enormous." },
+                    { type: "recommendation", text: "Therefore, for those who don't smoke, never try it. For those who already smoke, quit immediately and seek professional help if needed. Health is the most precious treasure." }
+                ]
+            },
+            {
+                title: "The Importance of Character Education",
+                paragraphs: [
+                    { type: "thesis", text: "Character education is an important aspect of the education system that must be implemented from an early age. Education is not only about transferring knowledge, but also forming good character. This text will discuss the importance of character education, namely forming individuals with noble character and high morals, preventing juvenile delinquency and negative behaviors, and building leadership skills and social responsibility in students." },
+                    { type: "argument1", text: "First, character education helps form individuals with noble character and high morals. Students will learn values such as honesty, responsibility, and empathy that are important for social life." },
+                    { type: "argument2", text: "Second, character education can prevent juvenile delinquency and other negative behaviors. With strong character, students will be better able to distinguish between right and wrong." },
+                    { type: "argument3", text: "Third, character education builds leadership skills and social responsibility in students. They learn to work in teams, respect diversity, and contribute positively to their communities." },
+                    { type: "recommendation", text: "Therefore, schools and parents must work together in implementing character education. Integrate character values in every learning and provide good examples in daily life." }
+                ]
+            },
+            {
+                title: "Saving Electrical Energy",
+                paragraphs: [
+                    { type: "thesis", text: "Saving electrical energy is an important action that must be taken by every individual. By saving electricity, we not only reduce bill costs, but also help protect the environment. This text will discuss why we must save electrical energy, namely to reduce greenhouse gas emissions, reduce the burden on the national electricity system, preserve natural resources for future generations, and significantly lower household expenses." },
+                    { type: "argument1", text: "First, saving electricity can reduce greenhouse gas emissions produced by power plants. This helps reduce the impact of global warming and climate change." },
+                    { type: "argument2", text: "Second, electricity savings can reduce the burden on the national electricity system and prevent rolling blackouts. This also helps save natural resources used to generate electricity." },
+                    { type: "argument3", text: "Third, energy conservation helps preserve natural resources for future generations. By using less electricity today, we ensure that coal, oil, and gas reserves will last longer." },
+                    { type: "argument4", text: "Fourth, reducing electricity consumption can significantly lower household expenses. The money saved can be used for other important needs like education, healthcare, or emergency funds." },
+                    { type: "recommendation", text: "Therefore, let us start saving electricity in simple ways such as turning off lights when not in use, using energy-efficient appliances, and utilizing natural light as much as possible." }
+                ]
+            },
+            {
+                title: "The Importance of Adequate Sleep",
+                paragraphs: [
+                    { type: "thesis", text: "Adequate sleep is a basic human need that is very important for physical and mental health. However, many people ignore the importance of quality sleep in their daily lives. This text will discuss the importance of adequate sleep, namely helping the body recover and repair damaged cells, supporting brain function and cognitive abilities, and regulating emotions and mental health." },
+                    { type: "argument1", text: "First, adequate sleep helps the body recover and repair damaged cells. During sleep, the body produces growth hormones and strengthens the immune system." },
+                    { type: "argument2", text: "Second, adequate sleep is very important for brain function and cognitive abilities. Lack of sleep can cause decreased concentration, memory, and decision-making abilities." },
+                    { type: "argument3", text: "Third, proper sleep regulates emotions and mental health. People who get enough sleep are less likely to experience depression, anxiety, and mood disorders." },
+                    { type: "recommendation", text: "Therefore, make it a habit to sleep 7-8 hours every night and maintain sleep quality by creating a comfortable environment, avoiding caffeine before bed, and turning off gadgets at least 1 hour before sleep." }
+                ]
+            },
+            {
+                title: "Reducing Junk Food Consumption",
+                paragraphs: [
+                    { type: "thesis", text: "Junk food or fast food consumption has become a common habit in modern society. However, this habit can have serious negative impacts on health if not controlled. This text will discuss why we must reduce junk food consumption, namely because it contains harmful substances that cause diseases, can cause addiction and unhealthy eating patterns, weakens the immune system, and negatively impacts mental health and cognitive function." },
+                    { type: "argument1", text: "First, junk food contains high calories, saturated fat, sugar, and excessive salt that can cause obesity, diabetes, and heart disease. Low nutritional content makes the body lack important vitamins and minerals." },
+                    { type: "argument2", text: "Second, excessive junk food consumption can cause addiction and change eating patterns to become unhealthy. This can disrupt body metabolism and cause digestive problems." },
+                    { type: "argument3", text: "Third, regular junk food consumption weakens the immune system and increases susceptibility to infections. The lack of essential nutrients makes it harder for the body to fight off diseases." },
+                    { type: "argument4", text: "Fourth, junk food consumption can negatively impact mental health and cognitive function. Studies show links between processed foods and increased rates of depression and decreased brain performance." },
+                    { type: "recommendation", text: "Therefore, reduce junk food consumption and replace it with healthy foods such as fruits, vegetables, and home-cooked meals. Make it a habit to read nutrition labels before buying packaged foods." }
+                ]
+            },
+            {
+                title: "The Importance of Learning Foreign Languages",
+                paragraphs: [
+                    { type: "thesis", text: "Foreign language skills are very important skills in this era of globalization. Everyone should master at least one foreign language to face future challenges. This text will discuss the importance of learning foreign languages, namely opening wider career opportunities, improving cognitive abilities and broadening cultural insights, and developing better problem-solving skills and creativity." },
+                    { type: "argument1", text: "First, foreign language skills open wider career opportunities, both domestically and abroad. Many multinational companies need employees who can communicate in international languages." },
+                    { type: "argument2", text: "Second, learning foreign languages can improve cognitive abilities and broaden cultural insights. Through language, we can understand the way of thinking and culture of people from other countries." },
+                    { type: "argument3", text: "Third, multilingual individuals have better problem-solving skills and creativity. Learning different languages trains the brain to think flexibly and approach challenges from multiple perspectives." },
+                    { type: "recommendation", text: "Therefore, start learning foreign languages from an early age by utilizing various learning resources such as applications, online courses, or joining language communities. Practice consistently so that abilities continue to develop." }
+                ]
+            },
+            {
+                title: "Maintaining Environmental Cleanliness",
+                paragraphs: [
+                    { type: "thesis", text: "Maintaining environmental cleanliness is a shared responsibility that must be carried out by every individual. A clean environment is not only comfortable to live in, but also important for health and quality of life. This text will discuss why we must maintain environmental cleanliness, namely to prevent disease spread and maintain public health, improve quality of life and social welfare, attract tourism and economic investment, and protect wildlife and biodiversity." },
+                    { type: "argument1", text: "First, a clean environment can prevent the spread of disease and maintain public health. Scattered garbage can become a breeding ground for bacteria and viruses that are dangerous to health." },
+                    { type: "argument2", text: "Second, a clean environment can improve the quality of life and welfare of society. A beautiful and clean environment makes the mood better and increases productivity." },
+                    { type: "argument3", text: "Third, environmental cleanliness attracts tourism and economic investment. Clean, well-maintained areas are more likely to receive government funding and business development." },
+                    { type: "argument4", text: "Fourth, maintaining cleanliness protects wildlife and biodiversity. Clean environments provide safe habitats for animals and plants, preserving ecological balance." },
+                    { type: "recommendation", text: "Therefore, let us start from ourselves by not littering, recycling, and participating in community service activities to clean the surrounding environment." }
+                ]
+            },
+            {
+                title: "The Importance of Saving Money",
+                paragraphs: [
+                    { type: "thesis", text: "Saving is a very important financial habit for a better future. Unfortunately, many people still do not understand the importance of saving and prefer to spend all their income. This text will discuss the importance of saving money, namely providing financial security for emergencies, helping realize dreams and long-term goals, and reducing financial stress while improving mental health." },
+                    { type: "argument1", text: "First, saving provides financial security and preparation for facing emergencies. By having savings, we don't need to worry when facing unexpected situations that require funds." },
+                    { type: "argument2", text: "Second, saving helps realize dreams and long-term goals such as buying a house, vehicle, or education costs. By saving consistently, these goals can be achieved." },
+                    { type: "argument3", text: "Third, having savings reduces financial stress and improves mental health. People with emergency funds feel more confident and secure about their financial future." },
+                    { type: "recommendation", text: "Therefore, start saving from now, even with small amounts. Make a monthly budget, set aside at least 10% of income for savings, and choose savings products that suit your needs." }
+                ]
+            },
+            {
+                title: "The Dangers of Excessive Online Gaming",
+                paragraphs: [
+                    { type: "thesis", text: "Online games have become popular entertainment among children and teenagers. However, playing online games excessively can have serious negative impacts on development and health. We must limit gaming time because excessive gaming disrupts academic performance, causes physical health problems, leads to sleep disorders, and triggers aggressive behavior." },
+                    { type: "argument1", text: "First, online game addiction can disrupt academic achievement and social activities. Children who play games too often tend to neglect school assignments and isolate themselves from their social environment." },
+                    { type: "argument2", text: "Second, excessive gaming can cause physical health problems such as eye disorders, headaches, and posture problems. Sitting too long in front of screens can also cause obesity." },
+                    { type: "argument3", text: "Third, online gaming addiction can lead to sleep disorders and irregular eating patterns. Gamers often stay up late and skip meals, which disrupts their biological rhythms." },
+                    { type: "argument4", text: "Fourth, excessive gaming can cause aggressive behavior and difficulty distinguishing between virtual and real worlds. This can lead to problems in social relationships and emotional development." },
+                    { type: "recommendation", text: "Therefore, considering the academic disruption, physical health problems, sleep disorders, and aggressive behavior discussed above, parents must supervise and limit children's gaming time. Create a balanced schedule between playing games, studying, and other physical activities." }
+                ]
+            },
+            {
+                title: "The Importance of Family Communication",
+                paragraphs: [
+                    { type: "thesis", text: "Good communication within the family is an important foundation for creating harmonious and healthy relationships. Unfortunately, many families experience problems due to lack of effective communication. This text will discuss the importance of family communication, namely strengthening emotional bonds between family members, preventing and resolving conflicts within the family, and helping children develop better social skills and emotional intelligence." },
+                    { type: "argument1", text: "First, good communication can strengthen emotional bonds between family members. By sharing stories and feelings with each other, every family member will feel heard and understood." },
+                    { type: "argument2", text: "Second, effective communication can prevent and resolve conflicts within the family. When there are problems, open communication allows each party to express opinions and find solutions together." },
+                    { type: "argument3", text: "Third, regular family communication helps children develop better social skills and emotional intelligence. They learn how to express themselves clearly and listen to others respectfully." },
+                    { type: "recommendation", text: "Therefore, considering the emotional bonding, conflict resolution, and child development benefits discussed above, set aside special time to communicate with family every day. Create a comfortable atmosphere, listen with empathy, and avoid using gadgets when talking with family members." }
+                ]
+            }
+        ];
+
+        let currentTopic = 0;
+        let currentDifficulty = 'easy';
+        let userOrder = [];
+        let selectedParagraph = null;
+
+        function modifyTextByDifficulty(text, type, topicIndex) {
+            if (currentDifficulty === 'easy') {
+                return text; // Keep all text unchanged
+            }
+            
+            let modifiedText = text;
+            
+            if (currentDifficulty === 'medium') {
+                // Remove sequence indicators
+                const sequenceReplacements = [
+                    { pattern: /^First,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' },
+                    { pattern: /^Second,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' },
+                    { pattern: /^Third,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' },
+                    { pattern: /^Therefore,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' }
+                ];
+                
+                sequenceReplacements.forEach(replacement => {
+                    if (modifiedText.match(replacement.pattern)) {
+                        modifiedText = modifiedText.replace(replacement.pattern, replacement.marker);
+                    }
+                });
+                
+                // Remove topic sentence from 1 argument paragraph (argument1)
+                if (type === 'argument1') {
+                    const sentences = modifiedText.split(/(?<=[.!?])\s+/);
+                    if (sentences.length > 1) {
+                        // Remove the first sentence (topic sentence) and replace with marker
+                        sentences[0] = '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Topic sentence removed]</span>';
+                        modifiedText = sentences.join(' ');
+                    }
+                }
+                
+                return modifiedText;
+            }
+            
+            if (currentDifficulty === 'hard') {
+                // Remove many sequence and structural indicators
+                const replacements = [
+                    { pattern: /^First,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Second,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Third,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Fourth,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Therefore,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^However,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Moreover,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Furthermore,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^In conclusion,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Finally,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Additionally,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Also,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^In addition,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^On the other hand,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^As a result,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Consequently,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^For example,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^For instance,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^In fact,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Indeed,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Thus,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /^Hence,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' }
+                ];
+                
+                replacements.forEach(replacement => {
+                    if (modifiedText.match(replacement.pattern)) {
+                        modifiedText = modifiedText.replace(replacement.pattern, replacement.marker);
+                    }
+                });
+                
+                // Remove topic sentences from 2 paragraphs (argument1 and argument2)
+                if (type === 'argument1' || type === 'argument2') {
+                    const sentences = modifiedText.split(/(?<=[.!?])\s+/);
+                    if (sentences.length > 1) {
+                        // Remove the first sentence (topic sentence) and replace with marker
+                        sentences[0] = '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Topic sentence removed]</span>';
+                        modifiedText = sentences.join(' ');
+                    }
+                }
+                
+                // Also remove topic sentence from recommendation in hard mode
+                if (type === 'recommendation') {
+                    const sentences = modifiedText.split(/(?<=[.!?])\s+/);
+                    if (sentences.length > 1) {
+                        // Remove the first sentence and replace with marker
+                        sentences[0] = '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Topic sentence removed]</span>';
+                        modifiedText = sentences.join(' ');
+                    }
+                }
+                
+                return modifiedText;
+            }
+            
+            return text;
+        }
+
+        function loadTopic() {
+            const topic = topics[currentTopic];
+            const pool = document.getElementById('paragraphPool');
+            const sortingArea = document.getElementById('sortingArea');
+            
+            pool.innerHTML = '';
+            sortingArea.innerHTML = '';
+            
+            // Create numbered slots based on topic structure
+            const numParagraphs = topic.paragraphs.length;
+            userOrder = new Array(numParagraphs).fill(null);
+            
+            // Create numbered slots
+            topic.paragraphs.forEach((paragraph, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'slot border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50';
+                slot.dataset.position = index;
+                
+                let label = '';
+                if (paragraph.type === 'thesis') label = `${index + 1}. Thesis (Position Statement)`;
+                else if (paragraph.type.startsWith('argument')) {
+                    const argNum = paragraph.type.replace('argument', '');
+                    label = `${index + 1}. Argument ${argNum}`;
+                } else if (paragraph.type === 'recommendation') label = `${index + 1}. Recommendation (Call to Action)`;
+                
+                slot.innerHTML = `
+                    <div class="text-sm font-medium text-gray-600 mb-2">${label}</div>
+                    <div class="slot-content text-gray-400 text-center py-8">
+                        <div class="text-4xl mb-2">${index + 1}</div>
+                        <div class="text-sm">Click a paragraph to place it here</div>
+                    </div>
+                `;
+                
+                slot.addEventListener('click', () => handleSlotClick(index));
+                sortingArea.appendChild(slot);
+            });
+
+            // Shuffle paragraphs
+            const shuffled = [...topic.paragraphs].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach((paragraph, index) => {
+                const div = document.createElement('div');
+                div.className = 'paragraph-item bg-blue-50 border border-blue-200 rounded-lg p-4';
+                div.dataset.type = paragraph.type;
+                div.dataset.originalIndex = topic.paragraphs.findIndex(p => p.type === paragraph.type);
+                
+                const modifiedText = modifyTextByDifficulty(paragraph.text, paragraph.type, currentTopic);
+                div.innerHTML = `<p class="text-sm text-gray-700">${modifiedText}</p>`;
+                
+                div.addEventListener('click', () => handleParagraphClick(div));
+                pool.appendChild(div);
+            });
+
+            selectedParagraph = null;
+            hideFeedback();
+            hideScore();
+        }
+
+        function handleParagraphClick(paragraphElement) {
+            // If this paragraph is already used, do nothing
+            if (paragraphElement.classList.contains('used')) return;
+            
+            // Clear previous selection
+            document.querySelectorAll('.paragraph-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Select this paragraph
+            selectedParagraph = paragraphElement;
+            paragraphElement.classList.add('selected');
+            
+            // Show instruction
+            showInstruction('Now click on a numbered slot to place this paragraph');
+        }
+
+        function handleSlotClick(position) {
+            if (!selectedParagraph) {
+                showInstruction('Please select a paragraph first by clicking on it');
+                return;
+            }
+            
+            // If slot is already filled, swap or replace
+            if (userOrder[position] !== null) {
+                // Find the paragraph that was in this slot and return it to pool
+                const previousType = userOrder[position];
+                const previousParagraph = document.querySelector(`[data-type="${previousType}"]`);
+                if (previousParagraph) {
+                    previousParagraph.classList.remove('used');
+                }
+            }
+            
+            // Place selected paragraph in slot
+            const slot = document.querySelector(`[data-position="${position}"]`);
+            const slotContent = slot.querySelector('.slot-content');
+            
+            slotContent.innerHTML = selectedParagraph.innerHTML;
+            slotContent.className = 'slot-content text-gray-700';
+            
+            slot.classList.add('filled');
+            userOrder[position] = selectedParagraph.dataset.type;
+            
+            // Mark paragraph as used
+            selectedParagraph.classList.add('used');
+            selectedParagraph.classList.remove('selected');
+            
+            selectedParagraph = null;
+            hideInstruction();
+        }
+
+        function showInstruction(message) {
+            let instruction = document.getElementById('instruction');
+            if (!instruction) {
+                instruction = document.createElement('div');
+                instruction.id = 'instruction';
+                instruction.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300';
+                document.body.appendChild(instruction);
+            }
+            instruction.textContent = message;
+            instruction.style.opacity = '1';
+        }
+
+        function hideInstruction() {
+            const instruction = document.getElementById('instruction');
+            if (instruction) {
+                instruction.style.opacity = '0';
+                setTimeout(() => {
+                    if (instruction.parentNode) {
+                        instruction.parentNode.removeChild(instruction);
+                    }
+                }, 300);
+            }
+        }
+
+        function shuffleParagraphs() {
+            // Pick a random topic different from current one
+            let newTopicIndex;
+            do {
+                newTopicIndex = Math.floor(Math.random() * topics.length);
+            } while (newTopicIndex === currentTopic && topics.length > 1);
+            
+            // Update current topic and dropdown
+            currentTopic = newTopicIndex;
+            document.getElementById('topicSelect').value = currentTopic;
+            
+            // Load the new topic completely
+            loadTopic();
+        }
+
+        function resetArrangement() {
+            // Reset all paragraphs to available state
+            document.querySelectorAll('.paragraph-item').forEach(item => {
+                item.classList.remove('used', 'selected');
+            });
+            
+            // Reset all slots
+            document.querySelectorAll('.slot').forEach((slot, index) => {
+                const slotContent = slot.querySelector('.slot-content');
+                slotContent.innerHTML = `
+                    <div class="text-4xl mb-2">${index + 1}</div>
+                    <div class="text-sm">Click a paragraph to place it here</div>
+                `;
+                slotContent.className = 'slot-content text-gray-400 text-center py-8';
+                slot.classList.remove('filled', 'correct', 'incorrect');
+            });
+            
+            // Reset user order and selection
+            userOrder = new Array(topics[currentTopic].paragraphs.length).fill(null);
+            selectedParagraph = null;
+            hideFeedback();
+            hideScore();
+            hideInstruction();
+        }
+
+        function checkAnswer() {
+            const topic = topics[currentTopic];
+            const correctOrder = topic.paragraphs.map(p => p.type);
+            const slots = document.querySelectorAll('.slot');
+            let correct = 0;
+            
+            slots.forEach((slot, index) => {
+                slot.classList.remove('correct', 'incorrect');
+                if (userOrder[index] === correctOrder[index]) {
+                    slot.classList.add('correct');
+                    correct++;
+                } else if (userOrder[index] !== null) {
+                    slot.classList.add('incorrect');
+                }
+            });
+            
+            let maxScore = 100;
+            if (currentDifficulty === 'easy') maxScore = 85;
+            else if (currentDifficulty === 'medium') maxScore = 90;
+            
+            const score = Math.round((correct / correctOrder.length) * maxScore);
+            showScore(score, correct, correctOrder.length, maxScore);
+            showFeedback(correct, correctOrder.length);
+        }
+
+        function showAnswer() {
+            const topic = topics[currentTopic];
+            const correctOrder = topic.paragraphs.map(p => p.type);
+            const slots = document.querySelectorAll('.slot');
+            
+            slots.forEach((slot, index) => {
+                const correctType = correctOrder[index];
+                const correctParagraph = topic.paragraphs.find(p => p.type === correctType);
+                const content = slot.querySelector('.slot-content');
+                const modifiedText = modifyTextByDifficulty(correctParagraph.text, correctParagraph.type, currentTopic);
+                content.innerHTML = `<p class="text-sm text-gray-700">${modifiedText}</p>`;
+                content.className = 'slot-content text-gray-700';
+                slot.classList.remove('incorrect');
+                slot.classList.add('correct', 'filled');
+                userOrder[index] = correctType;
+            });
+            
+            // Mark all paragraphs as used
+            document.querySelectorAll('.paragraph-item').forEach(item => {
+                item.classList.add('used');
+                item.classList.remove('selected');
+            });
+            
+            selectedParagraph = null;
+            hideInstruction();
+            showFeedback(topic.paragraphs.length, topic.paragraphs.length, true);
+        }
+
+        function showFeedback(correct, total, isAnswer = false) {
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'mt-6 p-4 rounded-lg';
+            
+            if (isAnswer) {
+                feedback.className += ' bg-blue-100 border border-blue-300';
+                feedback.innerHTML = `
+                    <h3 class="font-semibold text-blue-800 mb-2">Correct Answer:</h3>
+                    <p class="text-blue-700">The correct hortatory exposition structure is: Thesis → Argument 1 → Argument 2 → Recommendation</p>
+                `;
+            } else if (correct === total) {
+                feedback.className += ' bg-green-100 border border-green-300';
+                feedback.innerHTML = `
+                    <h3 class="font-semibold text-green-800 mb-2">🎉 Perfect!</h3>
+                    <p class="text-green-700">You successfully arranged all paragraphs correctly! The hortatory exposition structure is perfect.</p>
+                `;
+            } else if (correct > 0) {
+                feedback.className += ' bg-yellow-100 border border-yellow-300';
+                feedback.innerHTML = `
+                    <h3 class="font-semibold text-yellow-800 mb-2">Almost Correct!</h3>
+                    <p class="text-yellow-700">You successfully arranged ${correct} out of ${total} paragraphs correctly. Try checking the wrong order again.</p>
+                `;
+            } else {
+                feedback.className += ' bg-red-100 border border-red-300';
+                feedback.innerHTML = `
+                    <h3 class="font-semibold text-red-800 mb-2">Try Again!</h3>
+                    <p class="text-red-700">None are correct yet. Remember the structure: Thesis (position statement) → Argument 1 → Argument 2 → Recommendation (call to action).</p>
+                `;
+            }
+            
+            feedback.classList.remove('hidden');
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedback').classList.add('hidden');
+        }
+
+        function showScore(score, correct, total, maxScore = 100) {
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const scoreValue = document.getElementById('scoreValue');
+            const scoreBar = document.getElementById('scoreBar');
+            const scoreText = document.getElementById('scoreText');
+            
+            scoreValue.textContent = score;
+            const percentage = (score / maxScore) * 100;
+            scoreBar.style.width = percentage + '%';
+            
+            let message = '';
+            let barColor = '';
+            let difficultyLabel = '';
+            
+            if (currentDifficulty === 'easy') difficultyLabel = '🟢 Easy';
+            else if (currentDifficulty === 'medium') difficultyLabel = '🟡 Medium';
+            else difficultyLabel = '🔴 Hard';
+            
+            if (score === maxScore) {
+                message = `Perfect! All ${total} paragraphs correct! (${difficultyLabel})`;
+                barColor = 'from-green-500 to-emerald-500';
+                scoreValue.className = 'text-3xl font-bold text-green-600';
+            } else if (percentage >= 80) {
+                message = `Excellent! ${correct} out of ${total} paragraphs correct. (${difficultyLabel})`;
+                barColor = 'from-blue-500 to-cyan-500';
+                scoreValue.className = 'text-3xl font-bold text-blue-600';
+            } else if (percentage >= 60) {
+                message = `Good effort! ${correct} out of ${total} paragraphs correct. (${difficultyLabel})`;
+                barColor = 'from-yellow-500 to-orange-500';
+                scoreValue.className = 'text-3xl font-bold text-yellow-600';
+            } else {
+                message = `Keep trying! ${correct} out of ${total} paragraphs correct. (${difficultyLabel})`;
+                barColor = 'from-red-500 to-pink-500';
+                scoreValue.className = 'text-3xl font-bold text-red-600';
+            }
+            
+            scoreBar.className = `bg-gradient-to-r ${barColor} h-3 rounded-full transition-all duration-500`;
+            scoreText.textContent = message;
+            scoreDisplay.classList.remove('hidden');
+        }
+
+        function hideScore() {
+            document.getElementById('scoreDisplay').classList.add('hidden');
+        }
+
+        // Secret key sequence for show answer button
+        let keySequence = [];
+        const secretCode = ['t', 'e', 'a', 'c', 'h', 'e', 'r']; // Type "teacher" to unlock
+        
+        document.addEventListener('keydown', function(e) {
+            keySequence.push(e.key.toLowerCase());
+            
+            // Keep only the last 7 keys (length of secret code)
+            if (keySequence.length > secretCode.length) {
+                keySequence.shift();
+            }
+            
+            // Check if sequence matches secret code
+            if (keySequence.length === secretCode.length && 
+                keySequence.every((key, index) => key === secretCode[index])) {
+                
+                const showAnswerBtn = document.getElementById('showAnswerBtn');
+                showAnswerBtn.classList.remove('hidden');
+                
+                // Show temporary notification
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                notification.textContent = '🔓 Teacher mode activated!';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+                
+                // Reset sequence
+                keySequence = [];
+            }
+        });
+
+        // Event listeners
+        document.getElementById('difficultySelect').addEventListener('change', function() {
+            currentDifficulty = this.value;
+            loadTopic();
+        });
+        
+        document.getElementById('topicSelect').addEventListener('change', function() {
+            currentTopic = parseInt(this.value);
+            loadTopic();
+        });
+
+        // Initialize
+        loadTopic();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98677e41c226b251',t:'MTc1OTEwNzA5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
