@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Paragraf Deskriptif - Descriptive Text</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .paragraph-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .paragraph-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .paragraph-item.selected {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .paragraph-item.used {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .slot {
+            min-height: 120px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .slot:hover:not(.filled) {
+            background-color: #f0f9ff;
+            border-color: #0ea5e9;
+        }
+        .slot.filled {
+            background-color: #f8fafc;
+        }
+        .correct {
+            background-color: #dcfce7 !important;
+            border-color: #16a34a !important;
+        }
+        .incorrect {
+            background-color: #fef2f2 !important;
+            border-color: #dc2626 !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-center text-indigo-800 mb-2">Descriptive Text Sorting</h1>
+            <p class="text-center text-gray-600 mb-4">Arrange descriptive text paragraphs about places in the correct order</p>
+            
+            <div id="scoreDisplay" class="mb-4 p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg border border-blue-200 hidden">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800">Your Score</h3>
+                    <div class="text-3xl font-bold text-blue-600" id="scoreValue">0</div>
+                </div>
+                <div class="mt-2">
+                    <div class="bg-gray-200 rounded-full h-3">
+                        <div id="scoreBar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1" id="scoreText">Complete the arrangement to see your score</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 justify-center mb-6">
+                <select id="difficultySelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-green-50">
+                    <option value="easy">🟢 Easy (Max 85 points)</option>
+                    <option value="medium">🟡 Medium (Max 90 points)</option>
+                    <option value="hard">🔴 Hard (Max 100 points)</option>
+                </select>
+                <select id="topicSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="0">Borobudur Temple</option>
+                    <option value="1">Bali Island</option>
+                    <option value="2">Raja Ampat</option>
+                    <option value="3">Mount Bromo</option>
+                    <option value="4">Lake Toba</option>
+                </select>
+                <button onclick="shuffleParagraphs()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    Shuffle Again
+                </button>
+                <button onclick="resetArrangement()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Reset Arrangement
+                </button>
+                <button onclick="checkAnswer()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    Check Answer
+                </button>
+                <button onclick="showAnswer()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors hidden" id="showAnswerBtn">
+                    Show Answer
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6">
+            <!-- Paragraphs to be sorted -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">📝 Click paragraphs to arrange them in correct order</h2>
+                <div id="paragraphPool" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <!-- Paragraphs will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Sorting area -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">🎯 Your Arrangement</h2>
+                <div id="sortingArea" class="space-y-3">
+                    <!-- Numbered slots will be dynamically generated based on topic -->
+                </div>
+            </div>
+        </div>
+
+        <div id="feedback" class="mt-6 p-4 rounded-lg hidden">
+            <!-- Feedback akan muncul di sini -->
+        </div>
+    </div>
+
+    <script>
+        const topics = [
+            {
+                title: "Borobudur Temple",
+                paragraphs: [
+                    { type: "identification", text: "Borobudur Temple is one of the most magnificent Buddhist temples in the world and a UNESCO World Heritage Site. Located in Central Java, Indonesia, this ancient temple was built in the 8th and 9th centuries during the reign of the Sailendra Dynasty. The temple serves as both a shrine to Lord Buddha and a place for Buddhist pilgrimage, attracting millions of visitors from around the globe each year." },
+                    { type: "description1", text: "The temple's architecture is truly remarkable, featuring a massive stone structure built in the form of a mandala. Borobudur consists of nine stacked platforms, six square and three circular, topped by a central dome. The temple is decorated with 2,672 relief panels and 504 Buddha statues, each telling stories from Buddhist teachings and depicting the path to enlightenment." },
+                    { type: "description2", text: "The temple's location offers breathtaking panoramic views of the surrounding landscape. Visitors can witness stunning sunrises and sunsets from the temple's upper levels, with the silhouettes of distant mountains and lush green rice fields creating a mystical atmosphere. The temple is surrounded by tropical vegetation and traditional Javanese villages that maintain their cultural heritage." },
+                    { type: "description3", text: "The intricate stone carvings and reliefs throughout the temple showcase exceptional craftsmanship from ancient Indonesian artisans. Each relief panel depicts scenes from the life of Buddha, Jataka tales, and various aspects of daily life in ancient Java. The Buddha statues are positioned in different mudras (hand positions), each representing different stages of Buddha's path to enlightenment." },
+                    { type: "closing", text: "Borobudur Temple stands as a testament to Indonesia's rich cultural heritage and the remarkable achievements of ancient Indonesian civilization. This magnificent monument continues to inspire visitors with its spiritual significance, architectural brilliance, and historical importance, making it one of the most treasured landmarks in Southeast Asia." }
+                ]
+            },
+            {
+                title: "Bali Island",
+                paragraphs: [
+                    { type: "identification", text: "Bali is a beautiful tropical island province of Indonesia, known worldwide as the 'Island of the Gods.' Located between Java and Lombok, this enchanting island is famous for its stunning landscapes, rich Hindu culture, and warm hospitality. Bali has become one of the world's most popular tourist destinations, attracting millions of visitors annually with its unique blend of natural beauty and spiritual atmosphere." },
+                    { type: "description1", text: "The island boasts diverse and spectacular natural landscapes that captivate every visitor. From pristine white sand beaches with crystal-clear waters to lush green rice terraces carved into hillsides, Bali offers breathtaking scenery at every turn. The island features active volcanoes like Mount Batur and Mount Agung, tropical rainforests, and serene lakes that create a paradise for nature lovers." },
+                    { type: "description2", text: "Bali's rich Hindu culture is evident throughout the island in its thousands of ancient temples, colorful ceremonies, and traditional arts. The island is home to over 20,000 temples, including the famous Tanah Lot, Uluwatu, and Besakih temples. Visitors can witness traditional Balinese dances like Kecak and Legong, observe intricate wood carvings, and experience the island's unique spiritual practices." },
+                    { type: "description3", text: "The island offers world-class amenities and activities for every type of traveler. Luxury resorts and spas provide relaxation and pampering, while adventure seekers can enjoy surfing, diving, volcano trekking, and white-water rafting. The vibrant nightlife in areas like Seminyak and Kuta, combined with excellent restaurants serving both local and international cuisine, ensures unforgettable experiences." },
+                    { type: "closing", text: "Bali truly lives up to its reputation as a tropical paradise that perfectly balances natural beauty, cultural richness, and modern amenities. Whether seeking spiritual enlightenment, adventure, relaxation, or cultural immersion, visitors will find that Bali offers an extraordinary experience that touches the soul and creates lasting memories." }
+                ]
+            },
+            {
+                title: "Raja Ampat",
+                paragraphs: [
+                    { type: "identification", text: "Raja Ampat, meaning 'Four Kings' in Indonesian, is a stunning archipelago located in West Papua, Indonesia. This remote marine paradise consists of four main islands: Waigeo, Batanta, Salawati, and Misool, surrounded by hundreds of smaller islands and islets. Raja Ampat is globally recognized as the crown jewel of marine biodiversity and is considered the ultimate destination for diving and marine life enthusiasts." },
+                    { type: "description1", text: "The underwater world of Raja Ampat is absolutely extraordinary, hosting the richest marine biodiversity on Earth. These pristine waters are home to over 1,500 species of fish, 600 species of coral, and countless other marine creatures including manta rays, whale sharks, and various species of sharks. The coral reefs here are in pristine condition, displaying vibrant colors and formations that create an underwater wonderland." },
+                    { type: "description2", text: "Above the water, Raja Ampat features dramatic limestone karst islands covered in lush tropical vegetation. The islands are characterized by mushroom-shaped rock formations, hidden lagoons, and pristine beaches with powdery white sand. The landscape includes dense rainforests that are home to endemic bird species, including the famous Birds of Paradise, making it a paradise for both marine and terrestrial wildlife enthusiasts." },
+                    { type: "description3", text: "The crystal-clear waters surrounding the islands offer exceptional visibility for diving and snorkeling, often exceeding 30 meters. The area features diverse diving sites, from gentle coral gardens perfect for beginners to challenging drift dives for experienced divers. The remote location and limited tourism infrastructure help preserve the pristine condition of the marine ecosystem." },
+                    { type: "closing", text: "Raja Ampat represents one of the last frontiers of untouched marine wilderness on our planet. This extraordinary destination offers an unparalleled opportunity to witness the incredible diversity of marine life while contributing to conservation efforts that protect this precious ecosystem for future generations." }
+                ]
+            },
+            {
+                title: "Mount Bromo",
+                paragraphs: [
+                    { type: "identification", text: "Mount Bromo is an active volcano located in East Java, Indonesia, and one of the most iconic natural landmarks in the country. Standing at 2,329 meters above sea level, this majestic volcano is part of the Tengger Caldera and is surrounded by the vast Bromo Tengger Semeru National Park. Mount Bromo is famous for its otherworldly landscape and spectacular sunrise views that attract photographers and nature enthusiasts from around the world." },
+                    { type: "description1", text: "The volcano's most striking feature is its dramatic lunar-like landscape, characterized by a vast sea of volcanic sand called the Sand Sea of Tengger. This expansive plain of fine volcanic ash stretches for kilometers, creating an almost alien terrain that feels like stepping onto another planet. The contrast between the dark volcanic sand and the surrounding green hills creates a surreal and breathtaking panorama." },
+                    { type: "description2", text: "The sunrise view from Mount Bromo is absolutely spectacular and considered one of the most beautiful in Indonesia. Visitors typically wake up before dawn to witness the sun rising over the volcanic landscape, painting the sky in brilliant shades of orange, pink, and gold. The sight of the smoking crater against the backdrop of the colorful sky creates an unforgettable and almost mystical experience." },
+                    { type: "description3", text: "The active crater of Mount Bromo continuously emits white sulfurous smoke, creating an dramatic and dynamic landscape. Visitors can trek across the Sand Sea and climb the crater rim to peer into the active volcanic crater below. The area is also home to the Tengger people, who maintain their unique Hindu culture and regularly perform ceremonies at the volcano, adding cultural significance to the natural wonder." },
+                    { type: "closing", text: "Mount Bromo offers an extraordinary natural experience that combines volcanic activity, stunning landscapes, and cultural heritage. This remarkable destination provides visitors with the opportunity to witness the raw power of nature while experiencing one of the most photogenic and spiritually significant places in Indonesia." }
+                ]
+            },
+            {
+                title: "Lake Toba",
+                paragraphs: [
+                    { type: "identification", text: "Lake Toba is the largest volcanic lake in the world and one of Indonesia's most spectacular natural wonders. Located in North Sumatra, this massive lake was formed by a supervolcanic eruption approximately 74,000 years ago. Measuring 100 kilometers long and 30 kilometers wide, Lake Toba is not only a geological marvel but also the cultural heartland of the Batak people, offering visitors a unique combination of natural beauty and rich cultural heritage." },
+                    { type: "description1", text: "The lake's immense size and crystal-clear blue waters create a breathtaking panorama that resembles an inland sea. Surrounded by lush green hills and mountains, the lake offers stunning views from every angle. The water is remarkably clear and calm, reflecting the surrounding landscape like a giant mirror. The lake's depth reaches up to 450 meters, making it one of the deepest lakes in the world." },
+                    { type: "description2", text: "At the center of Lake Toba lies Samosir Island, a large island that is almost as big as Singapore. This island-within-a-lake is home to traditional Batak villages where visitors can experience authentic local culture, including traditional houses with distinctive boat-shaped roofs, ancient stone tombs, and cultural performances. The island offers a peaceful retreat with its rolling hills, traditional markets, and friendly local communities." },
+                    { type: "description3", text: "The area around Lake Toba features numerous hot springs, waterfalls, and scenic viewpoints that enhance its natural appeal. Visitors can enjoy various activities such as swimming in the lake's refreshing waters, boating, fishing, or simply relaxing while taking in the magnificent scenery. The cool mountain climate provides a pleasant escape from Indonesia's tropical heat, making it an ideal destination for relaxation and rejuvenation." },
+                    { type: "closing", text: "Lake Toba stands as one of Indonesia's most magnificent natural treasures, offering an perfect blend of geological wonder, natural beauty, and cultural richness. This extraordinary destination provides visitors with an opportunity to experience the grandeur of nature while immersing themselves in the unique traditions of the Batak people, creating memories that will last a lifetime." }
+                ]
+            }
+        ];
+
+        let currentTopic = 0;
+        let currentDifficulty = 'easy';
+        let userOrder = [];
+        let selectedParagraph = null;
+
+        function modifyTextByDifficulty(text, type, topicIndex) {
+            if (currentDifficulty === 'easy') {
+                return text; // Keep all text unchanged - perfect for beginners
+            }
+            
+            let modifiedText = text;
+            
+            if (currentDifficulty === 'medium') {
+                // MEDIUM: Remove structural markers and some identifying elements
+                
+                // 1. Remove location/positioning indicators
+                const locationPatterns = [
+                    { pattern: /Located in [^,]+,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' },
+                    { pattern: /Situated in [^,]+,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' },
+                    { pattern: /Found in [^,]+,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' },
+                    { pattern: /At the center of [^,]+,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' }
+                ];
+                
+                locationPatterns.forEach(replacement => {
+                    modifiedText = modifiedText.replace(replacement.pattern, replacement.marker);
+                });
+                
+                // 2. Remove descriptive transition phrases
+                const transitionPatterns = [
+                    { pattern: /The [^'s]+'s most striking feature is/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Transition removed]</span>' },
+                    { pattern: /Above the water,?\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">🟡</span>' },
+                    { pattern: /The underwater world of [^,]+\s*/i, marker: '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Subject removed]</span>' }
+                ];
+                
+                transitionPatterns.forEach(replacement => {
+                    modifiedText = modifiedText.replace(replacement.pattern, replacement.marker);
+                });
+                
+                // 3. Strategic topic sentence removal for specific paragraphs
+                if (type === 'description2') {
+                    const sentences = modifiedText.split(/(?<=[.!?])\s+/);
+                    if (sentences.length > 1) {
+                        sentences[0] = '<span class="inline-block bg-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Topic sentence removed]</span>';
+                        modifiedText = sentences.join(' ');
+                    }
+                }
+                
+                return modifiedText;
+            }
+            
+            if (currentDifficulty === 'hard') {
+                // HARD: Aggressive removal of structural and identifying elements
+                
+                // 1. Remove all location and measurement indicators
+                const identifierPatterns = [
+                    { pattern: /Located in [^,]+,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /Situated in [^,]+,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /Found in [^,]+,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /Standing at [^,]+,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /Measuring [^,]+,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /At the center of [^,]+,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' }
+                ];
+                
+                identifierPatterns.forEach(replacement => {
+                    modifiedText = modifiedText.replace(replacement.pattern, replacement.marker);
+                });
+                
+                // 2. Remove structural transition phrases and descriptive markers
+                const structuralPatterns = [
+                    { pattern: /The [^'s]+'s most striking feature is/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Structure removed]</span>' },
+                    { pattern: /Above the water,?\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' },
+                    { pattern: /The underwater world of [^,]+\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Subject removed]</span>' },
+                    { pattern: /The area around [^,]+\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Area reference removed]</span>' },
+                    { pattern: /The sunrise view from [^,]+\s*/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[View reference removed]</span>' }
+                ];
+                
+                structuralPatterns.forEach(replacement => {
+                    modifiedText = modifiedText.replace(replacement.pattern, replacement.marker);
+                });
+                
+                // 3. Remove definitive statements and conclusions
+                const conclusionPatterns = [
+                    { pattern: /This [^,]+ stands as/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Conclusion marker removed]</span>' },
+                    { pattern: /This [^,]+ represents/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Summary marker removed]</span>' },
+                    { pattern: /This [^,]+ offers/i, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Offer statement removed]</span>' }
+                ];
+                
+                conclusionPatterns.forEach(replacement => {
+                    modifiedText = modifiedText.replace(replacement.pattern, replacement.marker);
+                });
+                
+                // 4. Strategic topic sentence removal from multiple paragraphs
+                if (type === 'identification') {
+                    // Remove the defining statement from identification
+                    const sentences = modifiedText.split(/(?<=[.!?])\s+/);
+                    if (sentences.length > 1) {
+                        sentences[0] = '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Definition removed]</span>';
+                        modifiedText = sentences.join(' ');
+                    }
+                }
+                
+                if (type === 'description1' || type === 'description3') {
+                    // Remove topic sentences from description paragraphs
+                    const sentences = modifiedText.split(/(?<=[.!?])\s+/);
+                    if (sentences.length > 1) {
+                        sentences[0] = '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Topic sentence removed]</span>';
+                        modifiedText = sentences.join(' ');
+                    }
+                }
+                
+                if (type === 'closing') {
+                    // Remove concluding statement from closing
+                    const sentences = modifiedText.split(/(?<=[.!?])\s+/);
+                    if (sentences.length > 1) {
+                        sentences[0] = '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Conclusion removed]</span>';
+                        modifiedText = sentences.join(' ');
+                    }
+                }
+                
+                // 5. Remove specific descriptive adjectives and superlatives
+                const descriptivePatterns = [
+                    { pattern: /most magnificent/gi, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Superlative removed]</span>' },
+                    { pattern: /absolutely spectacular/gi, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Emphasis removed]</span>' },
+                    { pattern: /truly remarkable/gi, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">[Emphasis removed]</span>' },
+                    { pattern: /extraordinarily/gi, marker: '<span class="inline-block bg-red-300 text-red-800 text-xs px-2 py-1 rounded mr-1 font-medium">🔴</span>' }
+                ];
+                
+                descriptivePatterns.forEach(replacement => {
+                    modifiedText = modifiedText.replace(replacement.pattern, replacement.marker);
+                });
+                
+                return modifiedText;
+            }
+            
+            return text;
+        }
+
+        function loadTopic() {
+            const topic = topics[currentTopic];
+            const pool = document.getElementById('paragraphPool');
+            const sortingArea = document.getElementById('sortingArea');
+            
+            pool.innerHTML = '';
+            sortingArea.innerHTML = '';
+            
+            // Create numbered slots based on topic structure
+            const numParagraphs = topic.paragraphs.length;
+            userOrder = new Array(numParagraphs).fill(null);
+            
+            // Create numbered slots
+            topic.paragraphs.forEach((paragraph, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'slot border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50';
+                slot.dataset.position = index;
+                
+                let label = '';
+                if (paragraph.type === 'identification') label = `${index + 1}. Identification (General Information)`;
+                else if (paragraph.type.startsWith('description')) {
+                    const descNum = paragraph.type.replace('description', '');
+                    label = `${index + 1}. Description ${descNum} (Specific Features)`;
+                } else if (paragraph.type === 'closing') label = `${index + 1}. Closing (Summary/Conclusion)`;
+                
+                slot.innerHTML = `
+                    <div class="text-sm font-medium text-gray-600 mb-2">${label}</div>
+                    <div class="slot-content text-gray-400 text-center py-8">
+                        <div class="text-4xl mb-2">${index + 1}</div>
+                        <div class="text-sm">Click a paragraph to place it here</div>
+                    </div>
+                `;
+                
+                slot.addEventListener('click', () => handleSlotClick(index));
+                sortingArea.appendChild(slot);
+            });
+
+            // Shuffle paragraphs
+            const shuffled = [...topic.paragraphs].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach((paragraph, index) => {
+                const div = document.createElement('div');
+                div.className = 'paragraph-item bg-blue-50 border border-blue-200 rounded-lg p-4';
+                div.dataset.type = paragraph.type;
+                div.dataset.originalIndex = topic.paragraphs.findIndex(p => p.type === paragraph.type);
+                
+                const modifiedText = modifyTextByDifficulty(paragraph.text, paragraph.type, currentTopic);
+                div.innerHTML = `<p class="text-sm text-gray-700">${modifiedText}</p>`;
+                
+                div.addEventListener('click', () => handleParagraphClick(div));
+                pool.appendChild(div);
+            });
+
+            selectedParagraph = null;
+            hideFeedback();
+            hideScore();
+        }
+
+        function handleParagraphClick(paragraphElement) {
+            // If this paragraph is already used, do nothing
+            if (paragraphElement.classList.contains('used')) return;
+            
+            // Clear previous selection
+            document.querySelectorAll('.paragraph-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Select this paragraph
+            selectedParagraph = paragraphElement;
+            paragraphElement.classList.add('selected');
+            
+            // Show instruction
+            showInstruction('Now click on a numbered slot to place this paragraph');
+        }
+
+        function handleSlotClick(position) {
+            if (!selectedParagraph) {
+                showInstruction('Please select a paragraph first by clicking on it');
+                return;
+            }
+            
+            // If slot is already filled, swap or replace
+            if (userOrder[position] !== null) {
+                // Find the paragraph that was in this slot and return it to pool
+                const previousType = userOrder[position];
+                const previousParagraph = document.querySelector(`[data-type="${previousType}"]`);
+                if (previousParagraph) {
+                    previousParagraph.classList.remove('used');
+                }
+            }
+            
+            // Place selected paragraph in slot
+            const slot = document.querySelector(`[data-position="${position}"]`);
+            const slotContent = slot.querySelector('.slot-content');
+            
+            slotContent.innerHTML = selectedParagraph.innerHTML;
+            slotContent.className = 'slot-content text-gray-700';
+            
+            slot.classList.add('filled');
+            userOrder[position] = selectedParagraph.dataset.type;
+            
+            // Mark paragraph as used
+            selectedParagraph.classList.add('used');
+            selectedParagraph.classList.remove('selected');
+            
+            selectedParagraph = null;
+            hideInstruction();
+        }
+
+        function showInstruction(message) {
+            let instruction = document.getElementById('instruction');
+            if (!instruction) {
+                instruction = document.createElement('div');
+                instruction.id = 'instruction';
+                instruction.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300';
+                document.body.appendChild(instruction);
+            }
+            instruction.textContent = message;
+            instruction.style.opacity = '1';
+        }
+
+        function hideInstruction() {
+            const instruction = document.getElementById('instruction');
+            if (instruction) {
+                instruction.style.opacity = '0';
+                setTimeout(() => {
+                    if (instruction.parentNode) {
+                        instruction.parentNode.removeChild(instruction);
+                    }
+                }, 300);
+            }
+        }
+
+        function shuffleParagraphs() {
+            // Pick a random topic different from current one
+            let newTopicIndex;
+            do {
+                newTopicIndex = Math.floor(Math.random() * topics.length);
+            } while (newTopicIndex === currentTopic && topics.length > 1);
+            
+            // Update current topic and dropdown
+            currentTopic = newTopicIndex;
+            document.getElementById('topicSelect').value = currentTopic;
+            
+            // Load the new topic completely
+            loadTopic();
+        }
+
+        function resetArrangement() {
+            // Reset all paragraphs to available state
+            document.querySelectorAll('.paragraph-item').forEach(item => {
+                item.classList.remove('used', 'selected');
+            });
+            
+            // Reset all slots
+            document.querySelectorAll('.slot').forEach((slot, index) => {
+                const slotContent = slot.querySelector('.slot-content');
+                slotContent.innerHTML = `
+                    <div class="text-4xl mb-2">${index + 1}</div>
+                    <div class="text-sm">Click a paragraph to place it here</div>
+                `;
+                slotContent.className = 'slot-content text-gray-400 text-center py-8';
+                slot.classList.remove('filled', 'correct', 'incorrect');
+            });
+            
+            // Reset user order and selection
+            userOrder = new Array(topics[currentTopic].paragraphs.length).fill(null);
+            selectedParagraph = null;
+            hideFeedback();
+            hideScore();
+            hideInstruction();
+        }
+
+        function checkAnswer() {
+            const topic = topics[currentTopic];
+            const correctOrder = topic.paragraphs.map(p => p.type);
+            const slots = document.querySelectorAll('.slot');
+            let correct = 0;
+            
+            slots.forEach((slot, index) => {
+                slot.classList.remove('correct', 'incorrect');
+                if (userOrder[index] === correctOrder[index]) {
+                    slot.classList.add('correct');
+                    correct++;
+                } else if (userOrder[index] !== null) {
+                    slot.classList.add('incorrect');
+                }
+            });
+            
+            let maxScore = 100;
+            if (currentDifficulty === 'easy') maxScore = 85;
+            else if (currentDifficulty === 'medium') maxScore = 90;
+            
+            const score = Math.round((correct / correctOrder.length) * maxScore);
+            showScore(score, correct, correctOrder.length, maxScore);
+            showFeedback(correct, correctOrder.length);
+        }
+
+        function showAnswer() {
+            const topic = topics[currentTopic];
+            const correctOrder = topic.paragraphs.map(p => p.type);
+            const slots = document.querySelectorAll('.slot');
+            
+            slots.forEach((slot, index) => {
+                const correctType = correctOrder[index];
+                const correctParagraph = topic.paragraphs.find(p => p.type === correctType);
+                const content = slot.querySelector('.slot-content');
+                const modifiedText = modifyTextByDifficulty(correctParagraph.text, correctParagraph.type, currentTopic);
+                content.innerHTML = `<p class="text-sm text-gray-700">${modifiedText}</p>`;
+                content.className = 'slot-content text-gray-700';
+                slot.classList.remove('incorrect');
+                slot.classList.add('correct', 'filled');
+                userOrder[index] = correctType;
+            });
+            
+            // Mark all paragraphs as used
+            document.querySelectorAll('.paragraph-item').forEach(item => {
+                item.classList.add('used');
+                item.classList.remove('selected');
+            });
+            
+            selectedParagraph = null;
+            hideInstruction();
+            showFeedback(topic.paragraphs.length, topic.paragraphs.length, true);
+        }
+
+        function showFeedback(correct, total, isAnswer = false) {
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'mt-6 p-4 rounded-lg';
+            
+            if (isAnswer) {
+                feedback.className += ' bg-blue-100 border border-blue-300';
+                feedback.innerHTML = `
+                    <h3 class="font-semibold text-blue-800 mb-2">Correct Answer:</h3>
+                    <p class="text-blue-700">The correct descriptive text structure is: Identification → Description 1 → Description 2 → Description 3 → Closing</p>
+                `;
+            } else if (correct === total) {
+                feedback.className += ' bg-green-100 border border-green-300';
+                feedback.innerHTML = `
+                    <h3 class="font-semibold text-green-800 mb-2">🎉 Perfect!</h3>
+                    <p class="text-green-700">You successfully arranged all paragraphs correctly! The descriptive text structure is perfect.</p>
+                `;
+            } else if (correct > 0) {
+                feedback.className += ' bg-yellow-100 border border-yellow-300';
+                feedback.innerHTML = `
+                    <h3 class="font-semibold text-yellow-800 mb-2">Almost Correct!</h3>
+                    <p class="text-yellow-700">You successfully arranged ${correct} out of ${total} paragraphs correctly. Try checking the wrong order again.</p>
+                `;
+            } else {
+                feedback.className += ' bg-red-100 border border-red-300';
+                feedback.innerHTML = `
+                    <h3 class="font-semibold text-red-800 mb-2">Try Again!</h3>
+                    <p class="text-red-700">None are correct yet. Remember the structure: Identification (general info) → Description (specific features) → Closing (summary).</p>
+                `;
+            }
+            
+            feedback.classList.remove('hidden');
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedback').classList.add('hidden');
+        }
+
+        function showScore(score, correct, total, maxScore = 100) {
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const scoreValue = document.getElementById('scoreValue');
+            const scoreBar = document.getElementById('scoreBar');
+            const scoreText = document.getElementById('scoreText');
+            
+            scoreValue.textContent = score;
+            const percentage = (score / maxScore) * 100;
+            scoreBar.style.width = percentage + '%';
+            
+            let message = '';
+            let barColor = '';
+            let difficultyLabel = '';
+            
+            if (currentDifficulty === 'easy') difficultyLabel = '🟢 Easy';
+            else if (currentDifficulty === 'medium') difficultyLabel = '🟡 Medium';
+            else difficultyLabel = '🔴 Hard';
+            
+            if (score === maxScore) {
+                message = `Perfect! All ${total} paragraphs correct! (${difficultyLabel})`;
+                barColor = 'from-green-500 to-emerald-500';
+                scoreValue.className = 'text-3xl font-bold text-green-600';
+            } else if (percentage >= 80) {
+                message = `Excellent! ${correct} out of ${total} paragraphs correct. (${difficultyLabel})`;
+                barColor = 'from-blue-500 to-cyan-500';
+                scoreValue.className = 'text-3xl font-bold text-blue-600';
+            } else if (percentage >= 60) {
+                message = `Good effort! ${correct} out of ${total} paragraphs correct. (${difficultyLabel})`;
+                barColor = 'from-yellow-500 to-orange-500';
+                scoreValue.className = 'text-3xl font-bold text-yellow-600';
+            } else {
+                message = `Keep trying! ${correct} out of ${total} paragraphs correct. (${difficultyLabel})`;
+                barColor = 'from-red-500 to-pink-500';
+                scoreValue.className = 'text-3xl font-bold text-red-600';
+            }
+            
+            scoreBar.className = `bg-gradient-to-r ${barColor} h-3 rounded-full transition-all duration-500`;
+            scoreText.textContent = message;
+            scoreDisplay.classList.remove('hidden');
+        }
+
+        function hideScore() {
+            document.getElementById('scoreDisplay').classList.add('hidden');
+        }
+
+        // Secret key sequence for show answer button
+        let keySequence = [];
+        const secretCode = ['t', 'e', 'a', 'c', 'h', 'e', 'r']; // Type "teacher" to unlock
+        
+        document.addEventListener('keydown', function(e) {
+            keySequence.push(e.key.toLowerCase());
+            
+            // Keep only the last 7 keys (length of secret code)
+            if (keySequence.length > secretCode.length) {
+                keySequence.shift();
+            }
+            
+            // Check if sequence matches secret code
+            if (keySequence.length === secretCode.length && 
+                keySequence.every((key, index) => key === secretCode[index])) {
+                
+                const showAnswerBtn = document.getElementById('showAnswerBtn');
+                showAnswerBtn.classList.remove('hidden');
+                
+                // Show temporary notification
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                notification.textContent = '🔓 Teacher mode activated!';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+                
+                // Reset sequence
+                keySequence = [];
+            }
+        });
+
+        // Event listeners
+        document.getElementById('difficultySelect').addEventListener('change', function() {
+            currentDifficulty = this.value;
+            loadTopic();
+        });
+        
+        document.getElementById('topicSelect').addEventListener('change', function() {
+            currentTopic = parseInt(this.value);
+            loadTopic();
+        });
+
+        // Initialize
+        loadTopic();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98aa3da742f25f32',t:'MTc1OTgwNjk5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
