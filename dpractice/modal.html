@@ -2,39 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Modal Verbs Fill-in Quiz</title>
+    <title>Modal Verbs Worksheet</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial, sans-serif; margin: 10px; background: #f8f9fa; color: #333; }
-        .container { max-width: 500px; margin: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 16px; }
-        .info-box input, .info-box select { width: 98%; padding: 6px; margin-bottom: 8px; border-radius: 3px; border: 1px solid #aaa; }
-        .questions { margin: 16px 0; }
-        .question { margin-bottom: 15px; }
-        .question span { display: inline-block; min-width: 19px; }
-        .export-box { margin-top: 16px; display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr);}
-        .grade-box { margin-bottom: 8px; background: #e8eafb; padding: 6px 16px; border-radius: 4px; display: inline-block; cursor: pointer; font-weight: bold; transition: background 0.2s;}
+        body { font-family: Arial, sans-serif; background: #f9f9ff; margin: 0; }
+        .container { max-width: 540px; margin: 12px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 16px; }
+        .info-box input, .info-box select { width: 98%; padding: 6px; margin-bottom: 8px; border-radius: 3px; border: 1px solid #aaa;}
+        .questions, .rewrite { margin: 16px 0; }
+        .question, .rewrite-q { margin-bottom: 13px;}
+        .question span, .rewrite-q span { min-width: 19px; display: inline-block;}
+        .export-box { margin: 21px 0 8px 0; display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr);}
+        .grade-box { margin-bottom: 8px; background: #e8eafb; padding: 6px 16px; border-radius: 4px; display: inline-block; cursor: pointer; font-weight: bold; }
         .answers { display: none; margin-top: 14px; background: #fffbdb; padding: 10px; border-radius: 6px;}
+        h2, h3 { margin-bottom: 7px; }
+        .subtitle {color: #1115bb;}
         @media (max-width: 600px) {
-            .container { padding: 6px; }
+            .container { padding: 4px; }
         }
     </style>
+    <!-- External scripts for export functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
 </head>
 <body>
 <div class="container">
-    <h2>Modal Verbs Fill-in-the-Blank Quiz</h2>
-    <div class="info-box">
-        <input type="text" placeholder="Student Name" id="studentName">
-        <input type="text" placeholder="Student ID or Roll Number" id="studentID">
-        <select id="gradeSelect">
-            <option value="">Select Grade</option>
-            <option value="10">Grade 10</option>
-            <option value="11">Grade 11</option>
-            <option value="12">Grade 12</option>
-        </select>
-        <div class="grade-box" id="gradeBox">Grade: <span id="gradeValue"> - </span></div>
+    <h2>Modal Verbs Worksheet</h2>
+    <div class="subtitle">Student: <input type="text" placeholder="Name"> 
+    ID: <input type="text" placeholder="ID/Roll No.">
+    Grade: 
+    <select id="gradeSelect">
+        <option value="">Select</option><option>7</option><option>8</option>
+        <option>9</option><option>10</option><option>11</option><option>12</option>
+    </select>
+    <div class="grade-box" id="gradeBox">Grade: <span id="gradeValue"> - </span></div>
     </div>
 
     <form id="modalForm">
+        <h3>Part 1: Fill in the Blanks</h3>
         <div class="questions">
             <div class="question">1. <span>______</span> I borrow your ruler, please? <input name="q1"></div>
             <div class="question">2. My father <span>______</span> speak four languages fluently. He can also write in two more languages. <input name="q2"></div>
@@ -61,6 +66,18 @@
             <div class="question">23. You <span>______</span> not touch anything in the laboratory! <input name="q23"></div>
             <div class="question">24. All students <span>______</span> bring their books to school. <input name="q24"></div>
         </div>
+        <h3>Part 2: Rewrite with Modal Verbs</h3>
+        <div class="rewrite">
+            <div class="rewrite-q">1. Some people just don’t know how to sing. (can’t) <input name="r1"></div>
+            <div class="rewrite-q">2. There’s a chance that she’s the airport. (could/might) <input name="r2"></div>
+            <div class="rewrite-q">3. I have loved her for three years! (must) <input name="r3"></div>
+            <div class="rewrite-q">4. I can’t run in the park: it’s rainy today. (can’t) <input name="r4"></div>
+            <div class="rewrite-q">5. Sue lost track of this emergency exit. (mustn’t) <input name="r5"></div>
+            <div class="rewrite-q">6. It’s dangerous to use mobile phones on the plane. (mustn’t) <input name="r6"></div>
+            <div class="rewrite-q">7. It is impossible: my father never went to the foreign land! (can’t) <input name="r7"></div>
+            <div class="rewrite-q">8. It’s possible that he’ll miss the train! (may) <input name="r8"></div>
+            <div class="rewrite-q">9. This is a surprise. Can’t tell anybody about it. (shouldn’t) <input name="r9"></div>
+        </div>
         <div class="export-box">
             <button type="button" onclick="window.print()">Print</button>
             <button type="button" onclick="copyPage()">Copy</button>
@@ -70,35 +87,23 @@
         </div>
     </form>
     <div class="answers" id="answersBox">
-        <h4>Answers</h4>
-        1. Can<br>
-        2. Can<br>
-        3. Must<br>
-        4. Will<br>
-        5. Can<br>
-        6. Could<br>
-        7. Had to<br>
-        8. Should<br>
-        9. Can<br>
-        10. Is<br>
-        11. Must<br>
-        12. Could<br>
-        13. May<br>
-        14. Might<br>
-        15. Could<br>
-        16. Must<br>
-        17. Can / Can<br>
-        18. Should<br>
-        19. Can / Can<br>
-        20. Must<br>
-        21. Could<br>
-        22. May<br>
-        23. Must<br>
-        24. Must
+        <h4>Part 1 Answers</h4>
+        1. Can<br>2. Can<br>3. Must<br>4. Will<br>5. Can<br>6. Could<br>7. Had to<br>8. Should<br>
+        9. Can<br>10. Is<br>11. Must<br>12. Could<br>13. May<br>14. Might<br>15. Could<br>
+        16. Must<br>17. Can / Can<br>18. Should<br>19. Can / Can<br>20. Must<br>21. Could<br>
+        22. May<br>23. Must<br>24. Must
+        <h4>Part 2 Answers</h4>
+        1. Some people can’t sing.<br>
+        2. She could/might be at the airport.<br>
+        3. You must have loved her for three years.<br>
+        4. I can’t run in the park today.<br>
+        5. Sue mustn’t lose track of this emergency exit.<br>
+        6. You mustn’t use mobile phones on the plane.<br>
+        7. It can’t be true; my father never went to the foreign land.<br>
+        8. He may miss the train.<br>
+        9. This is a surprise. You shouldn’t tell anybody about it.
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
 <script>
 let taps = 0, lastTap = 0;
 document.getElementById("gradeBox").addEventListener("click", function() {
@@ -115,13 +120,9 @@ document.getElementById("gradeBox").addEventListener("click", function() {
     lastTap = now;
 });
 document.getElementById("pdfBtn").onclick = function() {
-    import('jspdf').then((module) => {
-        const doc = new module.jsPDF();
-        doc.html(document.body, {
-            callback: function (doc) { doc.save('modal-quiz.pdf'); },
-            x: 10, y: 10
-        });
-    });
+    const doc = new window.jspdf.jsPDF();
+    doc.text(document.body.innerText, 10, 10);
+    doc.save('modal-quiz.pdf');
 };
 document.getElementById("docxBtn").onclick = function() {
     let content = document.querySelector('.container').innerHTML;
@@ -140,13 +141,11 @@ function copyPage() {
     document.body.removeChild(temp);
 }
 document.getElementById("screenshotBtn").onclick = function () {
-    import('html2canvas').then((module) => {
-        module.default(document.querySelector(".container")).then(canvas => {
-            let a = document.createElement('a');
-            a.href = canvas.toDataURL();
-            a.download = 'modal-quiz.png';
-            a.click();
-        });
+    html2canvas(document.querySelector(".container")).then(canvas => {
+        let a = document.createElement('a');
+        a.href = canvas.toDataURL();
+        a.download = 'modal-quiz.png';
+        a.click();
     });
 };
 </script>
