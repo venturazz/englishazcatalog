@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Modal Verbs Fill-in Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 10px; background: #f8f9fa; color: #333; }
+        .container { max-width: 500px; margin: auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 16px; }
+        .info-box input, .info-box select { width: 98%; padding: 6px; margin-bottom: 8px; border-radius: 3px; border: 1px solid #aaa; }
+        .questions { margin: 16px 0; }
+        .question { margin-bottom: 15px; }
+        .question span { display: inline-block; min-width: 19px; }
+        .export-box { margin-top: 16px; display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr);}
+        .grade-box { margin-bottom: 8px; background: #e8eafb; padding: 6px 16px; border-radius: 4px; display: inline-block; cursor: pointer; font-weight: bold; transition: background 0.2s;}
+        .answers { display: none; margin-top: 14px; background: #fffbdb; padding: 10px; border-radius: 6px;}
+        @media (max-width: 600px) {
+            .container { padding: 6px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Modal Verbs Fill-in-the-Blank Quiz</h2>
+    <div class="info-box">
+        <input type="text" placeholder="Student Name" id="studentName">
+        <input type="text" placeholder="Student ID or Roll Number" id="studentID">
+        <select id="gradeSelect">
+            <option value="">Select Grade</option>
+            <option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+            <option value="12">Grade 12</option>
+        </select>
+        <div class="grade-box" id="gradeBox">Grade: <span id="gradeValue"> - </span></div>
+    </div>
+
+    <form id="modalForm">
+        <div class="questions">
+            <div class="question">1. <span>______</span> I borrow your ruler, please? <input name="q1"></div>
+            <div class="question">2. My father <span>______</span> speak four languages fluently. He can also write in two more languages. <input name="q2"></div>
+            <div class="question">3. If you want to pass your exams, you <span>______</span> work very hard. <input name="q3"></div>
+            <div class="question">4. You <span>______</span> get wet because it’s raining outside! <input name="q4"></div>
+            <div class="question">5. <span>______</span> you lend me your pen for a moment? <input name="q5"></div>
+            <div class="question">6. Do you think you <span>______</span> help me with my homework tonight? <input name="q6"></div>
+            <div class="question">7. He <span>______</span> go home early yesterday, because he felt ill. <input name="q7"></div>
+            <div class="question">8. You <span>______</span> smoke because it’s bad for your health. <input name="q8"></div>
+            <div class="question">9. <span>______</span> I go home now because I am tired? <input name="q9"></div>
+            <div class="question">10. That student <span>______</span> not coming tomorrow. He is sick. <input name="q10"></div>
+            <div class="question">11. You <span>______</span> not enter the library with food or drink. <input name="q11"></div>
+            <div class="question">12. She <span>______</span> sing when she was four. <input name="q12"></div>
+            <div class="question">13. <span>______</span> I take my bag with me? <input name="q13"></div>
+            <div class="question">14. I am not sure, but he <span>______</span> come to my party. <input name="q14"></div>
+            <div class="question">15. We <span>______</span> not go on holiday because we didn’t have enough money. <input name="q15"></div>
+            <div class="question">16. You <span>______</span> not park here, it’s forbidden. <input name="q16"></div>
+            <div class="question">17. He <span>______</span> understand English, but he <span>______</span> not speak it very well. <input name="q17a"> <input name="q17b"></div>
+            <div class="question">18. You <span>______</span> not drive so fast, it’s not safe. <input name="q18"></div>
+            <div class="question">19. My brother <span>______</span> not swim, but he <span>______</span> play basketball. <input name="q19a"> <input name="q19b"></div>
+            <div class="question">20. Children under twelve <span>______</span> not come into the museum without an adult. <input name="q20"></div>
+            <div class="question">21. <span>______</span> you open the window, please? It’s so hot. <input name="q21"></div>
+            <div class="question">22. <span>______</span> I go out tonight with my friends? <input name="q22"></div>
+            <div class="question">23. You <span>______</span> not touch anything in the laboratory! <input name="q23"></div>
+            <div class="question">24. All students <span>______</span> bring their books to school. <input name="q24"></div>
+        </div>
+        <div class="export-box">
+            <button type="button" onclick="window.print()">Print</button>
+            <button type="button" onclick="copyPage()">Copy</button>
+            <button type="button" id="pdfBtn">Export PDF</button>
+            <button type="button" id="screenshotBtn">Screenshot</button>
+            <button type="button" id="docxBtn">Export DOCX</button>
+        </div>
+    </form>
+    <div class="answers" id="answersBox">
+        <h4>Answers</h4>
+        1. Can<br>
+        2. Can<br>
+        3. Must<br>
+        4. Will<br>
+        5. Can<br>
+        6. Could<br>
+        7. Had to<br>
+        8. Should<br>
+        9. Can<br>
+        10. Is<br>
+        11. Must<br>
+        12. Could<br>
+        13. May<br>
+        14. Might<br>
+        15. Could<br>
+        16. Must<br>
+        17. Can / Can<br>
+        18. Should<br>
+        19. Can / Can<br>
+        20. Must<br>
+        21. Could<br>
+        22. May<br>
+        23. Must<br>
+        24. Must
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+<script>
+let taps = 0, lastTap = 0;
+document.getElementById("gradeBox").addEventListener("click", function() {
+    let now = Date.now();
+    if (now - lastTap < 1500) {
+        taps++;
+        if (taps >= 7) {
+            document.getElementById('answersBox').style.display = 'block';
+            taps = 0;
+        }
+    } else {
+        taps = 1;
+    }
+    lastTap = now;
+});
+document.getElementById("pdfBtn").onclick = function() {
+    import('jspdf').then((module) => {
+        const doc = new module.jsPDF();
+        doc.html(document.body, {
+            callback: function (doc) { doc.save('modal-quiz.pdf'); },
+            x: 10, y: 10
+        });
+    });
+};
+document.getElementById("docxBtn").onclick = function() {
+    let content = document.querySelector('.container').innerHTML;
+    let blob = window.htmlDocx.asBlob('<html><body>' + content + '</body></html>');
+    let link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'modal-quiz.docx';
+    link.click();
+};
+function copyPage() {
+    let temp = document.createElement("textarea");
+    temp.value = document.body.innerText;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    document.body.removeChild(temp);
+}
+document.getElementById("screenshotBtn").onclick = function () {
+    import('html2canvas').then((module) => {
+        module.default(document.querySelector(".container")).then(canvas => {
+            let a = document.createElement('a');
+            a.href = canvas.toDataURL();
+            a.download = 'modal-quiz.png';
+            a.click();
+        });
+    });
+};
+</script>
+</body>
+</html>
