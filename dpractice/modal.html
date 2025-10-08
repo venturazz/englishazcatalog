@@ -2,227 +2,920 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modal Verbs Worksheet</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { font-family: Arial, sans-serif; background: #f9f9ff; margin: 0; }
-        .container { max-width: 540px; margin: 12px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 16px; }
-        .info-box input, .info-box select { width: 98%; padding: 6px; margin-bottom: 8px; border-radius: 3px; border: 1px solid #aaa;}
-        .questions, .rewrite { margin: 16px 0; }
-        .question, .rewrite-q { margin-bottom: 13px;}
-        .question span, .rewrite-q span { min-width: 19px; display: inline-block;}
-        .export-box { margin: 21px 0 8px 0; display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr);}
-        .grade-box { margin-bottom: 8px; background: #e8eafb; padding: 6px 16px; border-radius: 4px; display: inline-block; cursor: pointer; font-weight: bold; }
-        .answers { display: none; margin-top: 14px; background: #fffbdb; padding: 10px; border-radius: 6px;}
-        h2, h3 { margin-bottom: 7px; }
-        .subtitle {color: #1115bb;}
-        #scoreResult { margin-bottom: 10px; font-size: 1.1em; color: #0944ab; }
-        @media (max-width: 600px) {
-            .container { padding: 4px; }
-        }
-        .check-grade { margin: 8px 0; padding: 8px 20px; background: #48a34e; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-    </style>
-    <!-- External scripts for export functionality -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .worksheet-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .grade-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            min-width: 100px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .grade-box:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.02);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(40, 167, 69, 0.8); }
+            100% { transform: scale(1); }
+        }
+
+        .grade-label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .grade-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .teacher-mode-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .teacher-mode-indicator.active {
+            display: block;
+            background: #28a745 !important;
+            border-color: #28a745 !important;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200"><rect fill="%234facfe" width="800" height="200"/><circle fill="%23ffffff" opacity="0.1" cx="100" cy="50" r="30"/><circle fill="%23ffffff" opacity="0.1" cx="300" cy="120" r="40"/><circle fill="%23ffffff" opacity="0.1" cx="600" cy="80" r="25"/><path fill="%23ffffff" opacity="0.2" d="M0,150 Q200,100 400,130 T800,120 L800,200 L0,200 Z"/></svg>');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .student-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4facfe;
+        }
+
+        .student-info h3 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-field label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .info-field input {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .info-field input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .info-field input:disabled {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .save-btn:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        .save-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .exercise-section {
+            margin-bottom: 30px;
+        }
+
+        .exercise-section h3 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #2196f3;
+        }
+
+        .instructions p {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .conjunction-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .conjunction-tag {
+            background: #4facfe;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .question {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .question:hover {
+            border-color: #4facfe;
+        }
+
+        .question-number {
+            background: #4facfe;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        .question-text {
+            display: inline-block;
+            vertical-align: top;
+            width: calc(100% - 45px);
+            line-height: 1.8;
+        }
+
+        .blank {
+            display: inline-block;
+            min-width: 120px;
+            padding: 8px 12px;
+            margin: 0 5px;
+            border: none;
+            border-bottom: 2px solid #4facfe;
+            background: transparent;
+            font-size: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .blank:focus {
+            outline: none;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .blank.correct {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .blank.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+
+
+        .teacher-answer {
+            display: none;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .teacher-answer.show {
+            display: block;
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 30px auto;
+            display: block;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .check-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .check-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 25px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .footer-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            min-width: 100px;
+        }
+
+        .footer-btn:hover {
+            background: #5a6268;
+        }
+
+        .footer-btn.print { background: #17a2b8; }
+        .footer-btn.copy { background: #ffc107; color: #212529; }
+        .footer-btn.pdf { background: #dc3545; }
+        .footer-btn.docx { background: #007bff; }
+        .footer-btn.screenshot { background: #28a745; }
+
+        .footer-btn.print:hover { background: #138496; }
+        .footer-btn.copy:hover { background: #e0a800; }
+        .footer-btn.pdf:hover { background: #c82333; }
+        .footer-btn.docx:hover { background: #0056b3; }
+        .footer-btn.screenshot:hover { background: #1e7e34; }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .grade-box, .teacher-mode-indicator {
+                position: static;
+                margin-top: 20px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .question-number {
+                margin-bottom: 10px;
+            }
+
+            .question-text {
+                width: 100%;
+                display: block;
+            }
+
+            .blank {
+                min-width: 100px;
+                margin: 5px 2px;
+            }
+
+            .footer {
+                padding: 20px;
+            }
+
+            .footer-btn {
+                flex: 1;
+                min-width: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <h2>Modal Verbs Worksheet</h2>
-    <div class="subtitle info-box">
-        Student: <input type="text" placeholder="Name" id="studentName">
-        ID: <input type="text" placeholder="ID/Roll No." id="studentID">
-        Grade: 
-        <select id="gradeSelect">
-            <option value="">Select</option><option>7</option><option>8</option>
-            <option>9</option><option>10</option><option>11</option><option>12</option>
-        </select>
-        <div class="grade-box" id="gradeBox">Grade: <span id="gradeValue"> - </span></div>
-    </div>
-    <div id="scoreResult"></div>
-    <form id="modalForm">
-        <h3>Part 1: Fill in the Blanks</h3>
-        <div class="questions">
-            <div class="question">1. <span>______</span> I borrow your ruler, please? <input name="q1"></div>
-            <div class="question">2. My father <span>______</span> speak four languages fluently. He can also write in two more languages. <input name="q2"></div>
-            <div class="question">3. If you want to pass your exams, you <span>______</span> work very hard. <input name="q3"></div>
-            <div class="question">4. You <span>______</span> get wet because it’s raining outside! <input name="q4"></div>
-            <div class="question">5. <span>______</span> you lend me your pen for a moment? <input name="q5"></div>
-            <div class="question">6. Do you think you <span>______</span> help me with my homework tonight? <input name="q6"></div>
-            <div class="question">7. He <span>______</span> go home early yesterday, because he felt ill. <input name="q7"></div>
-            <div class="question">8. You <span>______</span> smoke because it’s bad for your health. <input name="q8"></div>
-            <div class="question">9. <span>______</span> I go home now because I am tired? <input name="q9"></div>
-            <div class="question">10. That student <span>______</span> not coming tomorrow. He is sick. <input name="q10"></div>
-            <div class="question">11. You <span>______</span> not enter the library with food or drink. <input name="q11"></div>
-            <div class="question">12. She <span>______</span> sing when she was four. <input name="q12"></div>
-            <div class="question">13. <span>______</span> I take my bag with me? <input name="q13"></div>
-            <div class="question">14. I am not sure, but he <span>______</span> come to my party. <input name="q14"></div>
-            <div class="question">15. We <span>______</span> not go on holiday because we didn’t have enough money. <input name="q15"></div>
-            <div class="question">16. You <span>______</span> not park here, it’s forbidden. <input name="q16"></div>
-            <div class="question">17. He <span>______</span> understand English, but he <span>______</span> not speak it very well. <input name="q17a"> <input name="q17b"></div>
-            <div class="question">18. You <span>______</span> not drive so fast, it’s not safe. <input name="q18"></div>
-            <div class="question">19. My brother <span>______</span> not swim, but he <span>______</span> play basketball. <input name="q19a"> <input name="q19b"></div>
-            <div class="question">20. Children under twelve <span>______</span> not come into the museum without an adult. <input name="q20"></div>
-            <div class="question">21. <span>______</span> you open the window, please? It’s so hot. <input name="q21"></div>
-            <div class="question">22. <span>______</span> I go out tonight with my friends? <input name="q22"></div>
-            <div class="question">23. You <span>______</span> not touch anything in the laboratory! <input name="q23"></div>
-            <div class="question">24. All students <span>______</span> bring their books to school. <input name="q24"></div>
+    <div class="worksheet-container" id="worksheet">
+        <div class="header">
+            <div class="teacher-mode-indicator" id="teacherIndicator">👨‍🏫 Teacher Mode ON</div>
+            <h1>Modal Verbs Worksheet</h1>
+            <div class="grade-box" id="gradeBox" onclick="handleGradeBoxClick()">
+                <div class="grade-label">Grade</div>
+                <div class="grade-score" id="gradeScore">-</div>
+            </div>
         </div>
-        <h3>Part 2: Rewrite with Modal Verbs</h3>
-        <div class="rewrite">
-            <div class="rewrite-q">1. Some people just don’t know how to sing. (can’t) <input name="r1"></div>
-            <div class="rewrite-q">2. There’s a chance that she’s at the airport. (could/might) <input name="r2"></div>
-            <div class="rewrite-q">3. I have loved her for three years! (must) <input name="r3"></div>
-            <div class="rewrite-q">4. I can’t run in the park: it’s rainy today. (can’t) <input name="r4"></div>
-            <div class="rewrite-q">5. Sue lost track of this emergency exit. (mustn’t) <input name="r5"></div>
-            <div class="rewrite-q">6. It’s dangerous to use mobile phones on the plane. (mustn’t) <input name="r6"></div>
-            <div class="rewrite-q">7. It is impossible: my father never went to the foreign land! (can’t) <input name="r7"></div>
-            <div class="rewrite-q">8. It’s possible that he’ll miss the train! (may) <input name="r8"></div>
-            <div class="rewrite-q">9. This is a surprise. Can’t tell anybody about it. (shouldn’t) <input name="r9"></div>
-        </div>
-        <button type="button" class="check-grade" onclick="checkGrade()">Check Grade</button>
-        <div class="export-box">
-            <button type="button" onclick="window.print()">Print</button>
-            <button type="button" onclick="copyPage()">Copy</button>
-            <button type="button" id="pdfBtn">Export PDF</button>
-            <button type="button" id="screenshotBtn">Screenshot</button>
-            <button type="button" id="docxBtn">Export DOCX</button>
-        </div>
-    </form>
-    <div class="answers" id="answersBox">
-        <h4>Part 1 Answers</h4>
-        1. Can<br>2. Can<br>3. Must<br>4. Will<br>5. Can<br>6. Could<br>7. Had to<br>8. Should<br>
-        9. Can<br>10. Is<br>11. Must<br>12. Could<br>13. May<br>14. Might<br>15. Could<br>
-        16. Must<br>17. Can / Can<br>18. Should<br>19. Can / Can<br>20. Must<br>21. Could<br>
-        22. May<br>23. Must<br>24. Must
-        <h4>Part 2 Answers</h4>
-        1. Some people can’t sing.<br>
-        2. She could/might be at the airport.<br>
-        3. You must have loved her for three years.<br>
-        4. I can’t run in the park today.<br>
-        5. Sue mustn’t lose track of this emergency exit.<br>
-        6. You mustn’t use mobile phones on the plane.<br>
-        7. It can’t be true; my father never went to the foreign land.<br>
-        8. He may miss the train.<br>
-        9. This is a surprise. You shouldn’t tell anybody about it.
-    </div>
-</div>
-<script>
-let taps = 0, lastTap = 0;
-document.getElementById("gradeBox").addEventListener("click", function() {
-    let now = Date.now();
-    if (now - lastTap < 1500) {
-        taps++;
-        if (taps >= 7) {
-            document.getElementById('answersBox').style.display = 'block';
-            taps = 0;
-        }
-    } else {
-        taps = 1;
-    }
-    lastTap = now;
-});
-document.getElementById("pdfBtn").onclick = function() {
-    const doc = new window.jspdf.jsPDF();
-    doc.text(collectOutputText(), 10, 10);
-    doc.save('modal-quiz.pdf');
-};
-document.getElementById("docxBtn").onclick = function() {
-    let htmlContent = "<h2>Modal Verbs Worksheet</h2>";
-    htmlContent += "<b>Name:</b> " + document.getElementById("studentName").value + "<br>";
-    htmlContent += "<b>ID:</b> " + document.getElementById("studentID").value + "<br>";
-    htmlContent += "<b>Grade:</b> " + document.getElementById("gradeSelect").value + "<br><br>";
-    htmlContent += "<b>Part 1: Fill in the Blanks</b><br>";
-    let form = document.getElementById('modalForm');
-    let answers = [];
-    for(let i=1; i<=24; i++) {
-        let value = form['q'+i].value || "";
-        htmlContent += i + ". ____ " + value + "<br>";
-    }
-    htmlContent += "<b>Part 2: Rewrite</b><br>";
-    for(let i=1; i<=9; i++) {
-        let value = form['r'+i].value || "";
-        htmlContent += "R" + i + ". " + value + "<br>";
-    }
-    let blob = window.htmlDocx.asBlob('<html><body>' + htmlContent + '</body></html>');
-    let link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'modal-quiz.docx';
-    link.click();
-};
-function copyPage() {
-    let temp = document.createElement("textarea");
-    temp.value = collectOutputText();
-    document.body.appendChild(temp);
-    temp.select();
-    document.execCommand("copy");
-    document.body.removeChild(temp);
-}
-document.getElementById("screenshotBtn").onclick = function () {
-    html2canvas(document.querySelector(".container")).then(canvas => {
-        let a = document.createElement('a');
-        a.href = canvas.toDataURL();
-        a.download = 'modal-quiz.png';
-        a.click();
-    });
-};
 
-function collectOutputText(){
-    let output = "Name: " + document.getElementById("studentName").value + "\n";
-    output += "ID: " + document.getElementById("studentID").value + "\n";
-    output += "Grade: " + document.getElementById("gradeSelect").value + "\n";
-    output += "Part 1:\n";
-    let form = document.getElementById('modalForm');
-    for(let i=1; i<=24; i++) {
-        let value = form['q'+i].value || "";
-        output += i + ". ____ " + value + "\n";
-    }
-    output += "Part 2:\n";
-    for(let i=1; i<=9; i++) {
-        let value = form['r'+i].value || "";
-        output += "R" + i + ". " + value + "\n";
-    }
-    return output;
-}
+        <div class="hero-image">
+            <span>📚 Master Modal Verbs - B1 Level</span>
+        </div>
 
-function checkGrade() {
-    // Correct answers arrays for part 1 and part 2 (main keywords, lowercase)
-    let correct1 = [
-        "can", "can", "must", "will", "can", "could", "had to", "should", "can", "is", "must", "could",
-        "may", "might", "could", "must", ["can","can"], "should", ["can","can"], "must", "could", "may", "must", "must"
-    ];
-    let correct2 = [
-        "can’t", "could", "must", "can’t", "mustn’t", "mustn’t", "can’t", "may", "shouldn’t"
-    ];
-    let form = document.getElementById('modalForm');
-    let score = 0;
-    // Part 1
-    for(let i=1; i<=24; i++) {
-        let ans = (form['q'+i].value||"").trim().toLowerCase();
-        let corr = correct1[i-1];
-        if(Array.isArray(corr)){
-            let a = (form['q'+i+'a']?.value||"").trim().toLowerCase();
-            let b = (form['q'+i+'b']?.value||"").trim().toLowerCase();
-            score += (a==corr[0]?1:0)+(b==corr[1]?1:0);
-        }else{
-            if(ans==corr) score++;
+        <div class="content">
+            <div class="student-info">
+                <h3>Student Information</h3>
+                <div class="info-grid">
+                    <div class="info-field">
+                        <label for="studentName">Student's Name:</label>
+                        <input type="text" id="studentName" placeholder="Enter your name">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentClass">Class:</label>
+                        <input type="text" id="studentClass" placeholder="Enter your class">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentNumber">Student's Number:</label>
+                        <input type="text" id="studentNumber" placeholder="Enter your number">
+                    </div>
+                    <div class="info-field">
+                        <label for="studentDate">Date:</label>
+                        <input type="date" id="studentDate">
+                    </div>
+                </div>
+                <button class="save-btn" id="saveBtn" onclick="saveStudentInfo()">Save Information</button>
+            </div>
+
+            <div class="exercise-section">
+                <h3>Modal Verbs Exercise: Complete the Sentences</h3>
+                <div class="instructions">
+                    <p><strong>Instructions:</strong> Complete the sentences below by filling in the blanks with appropriate modal verbs. Choose the modal verb that best expresses the meaning (ability, permission, obligation, possibility, etc.) in each context.</p>
+                    <div class="conjunction-list">
+                        <span class="conjunction-tag">can</span>
+                        <span class="conjunction-tag">can't</span>
+                        <span class="conjunction-tag">could</span>
+                        <span class="conjunction-tag">couldn't</span>
+                        <span class="conjunction-tag">may</span>
+                        <span class="conjunction-tag">might</span>
+                        <span class="conjunction-tag">must</span>
+                        <span class="conjunction-tag">mustn't</span>
+                        <span class="conjunction-tag">should</span>
+                        <span class="conjunction-tag">shouldn't</span>
+                        <span class="conjunction-tag">will</span>
+                        <span class="conjunction-tag">would</span>
+                        <span class="conjunction-tag">have to</span>
+                        <span class="conjunction-tag">don't have to</span>
+                        <span class="conjunction-tag">need to</span>
+                        <span class="conjunction-tag">needn't</span>
+                    </div>
+                </div>
+
+                <!-- Questions will be dynamically generated here -->
+
+                <button class="check-btn" id="checkBtn" onclick="checkAnswers()">Check Answers</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="footer-btn print" onclick="printWorksheet()">🖨️ Print</button>
+            <button class="footer-btn copy" onclick="copyContent()">📋 Copy</button>
+            <button class="footer-btn pdf" onclick="downloadPDF()">📄 Download PDF</button>
+            <button class="footer-btn docx" onclick="downloadDocx()">📝 Download DOCX</button>
+            <button class="footer-btn screenshot" onclick="takeScreenshot()">📸 Screenshot</button>
+        </div>
+    </div>
+
+    <script>
+        let isInfoSaved = false;
+        let isChecked = false;
+        let isTeacherMode = false;
+        let tapCount = 0;
+        let tapTimer = null;
+
+        // Question data for shuffling - Part 1
+        const questionData = [
+            {
+                title: "Permission",
+                text: "_____ I borrow your ruler, please? Yes, of course.",
+                answer: "May",
+                explanation: "(Polite request for permission)"
+            },
+            {
+                title: "Ability",
+                text: "My father _____ speak four languages fluently. He can also write in two more languages.",
+                answer: "can",
+                explanation: "(Present ability)"
+            },
+            {
+                title: "Necessity",
+                text: "If you want to pass your exams, you _____ work very hard.",
+                answer: "must",
+                explanation: "(Strong necessity/obligation)"
+            },
+            {
+                title: "Possibility",
+                text: "You _____ get wet because it's raining outside!",
+                answer: "might",
+                explanation: "(Possibility/warning)"
+            },
+            {
+                title: "Request",
+                text: "_____ you lend me your pen for a moment?",
+                answer: "Could",
+                explanation: "(Polite request)"
+            },
+            {
+                title: "Ability Question",
+                text: "Do you think you _____ help me with my homework tonight?",
+                answer: "could",
+                explanation: "(Asking about ability/possibility)"
+            },
+            {
+                title: "Past Necessity",
+                text: "He _____ go home early yesterday, because he felt ill.",
+                answer: "had to",
+                explanation: "(Past necessity/obligation)"
+            },
+            {
+                title: "Advice",
+                text: "You _____ smoke because it's bad for your health.",
+                answer: "shouldn't",
+                explanation: "(Strong advice against)"
+            },
+            {
+                title: "Permission Request",
+                text: "_____ I go home now because I am tired?",
+                answer: "May",
+                explanation: "(Asking for permission)"
+            },
+            {
+                title: "Future Possibility",
+                text: "That student _____ not coming tomorrow. He is sick.",
+                answer: "might",
+                explanation: "(Uncertain future possibility)"
+            },
+            {
+                title: "Prohibition",
+                text: "You _____ not enter the library with food or drink.",
+                answer: "must",
+                explanation: "(Strong prohibition/rule)"
+            },
+            {
+                title: "Past Ability",
+                text: "She _____ sing when she was four.",
+                answer: "could",
+                explanation: "(Past ability)"
+            },
+            {
+                title: "Permission",
+                text: "_____ I take my bag with me?",
+                answer: "May",
+                explanation: "(Asking for permission)"
+            },
+            {
+                title: "Uncertainty",
+                text: "I am not sure, but he _____ come to my party.",
+                answer: "might",
+                explanation: "(Uncertain possibility)"
+            },
+            {
+                title: "Past Inability",
+                text: "We _____ not go on holiday because we didn't have enough money.",
+                answer: "could",
+                explanation: "(Past inability due to circumstances)"
+            },
+            {
+                title: "Prohibition",
+                text: "You _____ not park here, it's forbidden.",
+                answer: "must",
+                explanation: "(Strong prohibition)"
+            },
+            {
+                title: "Ability Contrast",
+                text: "He _____ understand English, but he _____ not speak it very well.",
+                answer: "can",
+                explanation: "(Present ability vs inability)"
+            },
+            {
+                title: "Advice",
+                text: "You _____ not drive so fast, it's not safe.",
+                answer: "should",
+                explanation: "(Advice for safety)"
+            },
+            {
+                title: "Ability Contrast",
+                text: "My brother _____ not swim, but he _____ play basketball.",
+                answer: "cannot",
+                explanation: "(Inability vs ability)"
+            },
+            {
+                title: "Rule",
+                text: "Children under twelve _____ not come into the museum without an adult.",
+                answer: "may",
+                explanation: "(Rule/regulation)"
+            },
+            {
+                title: "Polite Request",
+                text: "_____ you open the window, please? It's so hot.",
+                answer: "Could",
+                explanation: "(Polite request for action)"
+            },
+            {
+                title: "Permission",
+                text: "_____ I go out tonight with my friends?",
+                answer: "May",
+                explanation: "(Asking for permission)"
+            },
+            {
+                title: "Strong Prohibition",
+                text: "You _____ not touch anything in the laboratory!",
+                answer: "must",
+                explanation: "(Strong prohibition for safety)"
+            },
+            {
+                title: "Obligation",
+                text: "All students _____ bring their books to school.",
+                answer: "must",
+                explanation: "(School rule/obligation)"
+            }
+        ];
+
+        // Shuffle function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
         }
-    }
-    // Part 2 (accept 'could' or 'might' for r2)
-    for(let i=1; i<=9; i++) {
-        let ans = (form['r'+i].value||"").replace(/’/g,"'").trim().toLowerCase();
-        if(i===2){
-            if(ans.includes("could")||ans.includes("might")) score++;
-        }else if(ans.includes(correct2[i-1])){
-            score++;
+
+        // Generate shuffled questions on page load
+        function generateQuestions() {
+            const shuffledQuestions = shuffleArray(questionData);
+            const questionsContainer = document.querySelector('.exercise-section');
+            const checkButton = questionsContainer.querySelector('.check-btn');
+            
+            // Remove existing questions
+            const existingQuestions = questionsContainer.querySelectorAll('.question');
+            existingQuestions.forEach(q => q.remove());
+            
+            // Add shuffled questions
+            shuffledQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <span class="question-number">${index + 1}</span>
+                    <div class="question-text">
+                        <strong>${q.title}</strong><br><br>
+                        ${q.text.replace('_____', `<input type="text" class="blank" data-answer="${q.answer}">`)}
+                    </div>
+                    <div class="teacher-answer">✅ Correct Answer: <strong>${q.answer}</strong> ${q.explanation}</div>
+                `;
+                questionsContainer.insertBefore(questionDiv, checkButton);
+            });
         }
-    }
-    let maxScore = 24+2+9; // q17, q19 have 2 blanks each
-    let percent = Math.round(100*score/maxScore);
-    document.getElementById("scoreResult").innerText = "Score: " + score + " / " + maxScore + " (" + percent + "%)";
-    document.getElementById("gradeValue").innerText = percent + "%";
-}
-</script>
-</body>
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            generateQuestions();
+        });
+
+        // Set today's date by default
+        document.getElementById('studentDate').value = new Date().toISOString().split('T')[0];
+
+        function saveStudentInfo() {
+            const inputs = ['studentName', 'studentClass', 'studentNumber', 'studentDate'];
+            inputs.forEach(id => {
+                document.getElementById(id).disabled = true;
+            });
+            document.getElementById('saveBtn').disabled = true;
+            document.getElementById('saveBtn').textContent = 'Information Saved ✓';
+            isInfoSaved = true;
+        }
+
+        function handleGradeBoxClick() {
+            tapCount++;
+            
+            // Visual feedback for taps
+            const gradeBox = document.getElementById('gradeBox');
+            gradeBox.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                gradeBox.style.transform = 'scale(1)';
+            }, 100);
+            
+            // Clear existing timer
+            if (tapTimer) {
+                clearTimeout(tapTimer);
+            }
+            
+            // Set timer to reset tap count after 3 seconds
+            tapTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 3000);
+            
+            // Show progress indicator
+            if (tapCount >= 3 && tapCount < 7) {
+                gradeBox.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.6)';
+                setTimeout(() => {
+                    gradeBox.style.boxShadow = '';
+                }, 500);
+            }
+            
+            // Check if 7 taps reached
+            if (tapCount === 7) {
+                toggleTeacherMode();
+                tapCount = 0;
+                clearTimeout(tapTimer);
+                
+                // Success animation
+                gradeBox.style.animation = 'pulse 0.6s ease-in-out';
+                setTimeout(() => {
+                    gradeBox.style.animation = '';
+                }, 600);
+            }
+        }
+
+        function toggleTeacherMode() {
+            isTeacherMode = !isTeacherMode;
+            const teacherIndicator = document.getElementById('teacherIndicator');
+            const teacherAnswers = document.querySelectorAll('.teacher-answer');
+            
+            if (isTeacherMode) {
+                teacherIndicator.classList.add('active');
+                teacherAnswers.forEach(answer => answer.classList.add('show'));
+            } else {
+                teacherIndicator.classList.remove('active');
+                teacherAnswers.forEach(answer => answer.classList.remove('show'));
+            }
+        }
+
+
+
+        function checkAnswers() {
+            if (isChecked) return;
+
+            const blanks = document.querySelectorAll('.blank');
+            let correct = 0;
+            let total = blanks.length;
+
+            blanks.forEach(blank => {
+                const userAnswer = blank.value.toLowerCase().trim();
+                const correctAnswer = blank.dataset.answer.toLowerCase();
+                
+                if (userAnswer === correctAnswer) {
+                    blank.classList.add('correct');
+                    blank.classList.remove('incorrect');
+                    correct++;
+                } else {
+                    blank.classList.add('incorrect');
+                    blank.classList.remove('correct');
+                }
+                blank.disabled = true;
+            });
+
+            const percentage = Math.round((correct / total) * 100);
+            document.getElementById('gradeScore').textContent = `${correct}/${total} (${percentage}%)`;
+            
+            document.getElementById('checkBtn').disabled = true;
+            document.getElementById('checkBtn').textContent = 'Answers Checked ✓';
+            isChecked = true;
+        }
+
+        function printWorksheet() {
+            window.print();
+        }
+
+        function copyContent() {
+            const worksheet = document.getElementById('worksheet');
+            const range = document.createRange();
+            range.selectNode(worksheet);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            
+            try {
+                document.execCommand('copy');
+                alert('Worksheet content copied to clipboard!');
+            } catch (err) {
+                alert('Failed to copy content. Please try again.');
+            }
+            
+            window.getSelection().removeAllRanges();
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            
+            html2canvas(document.getElementById('worksheet'), {
+                scale: 1.5,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                removeContainer: true,
+                imageTimeout: 0,
+                logging: false
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save('modal-verbs-worksheet.pdf');
+            });
+        }
+
+        function downloadDocx() {
+            // Get student information
+            const studentName = document.getElementById('studentName').value || 'Not provided';
+            const studentClass = document.getElementById('studentClass').value || 'Not provided';
+            const studentNumber = document.getElementById('studentNumber').value || 'Not provided';
+            const studentDate = document.getElementById('studentDate').value || 'Not provided';
+            const grade = document.getElementById('gradeScore').textContent;
+
+            // Get answers
+            const blanks = document.querySelectorAll('.blank');
+            let answersText = '';
+            blanks.forEach((blank, index) => {
+                const userAnswer = blank.value || '(blank)';
+                const correctAnswer = blank.dataset.answer;
+                const isCorrect = blank.classList.contains('correct') ? '✓' : (blank.classList.contains('incorrect') ? '✗' : '');
+                answersText += `${index + 1}. ${userAnswer} ${isCorrect}\n`;
+            });
+
+            const docContent = `MODAL VERBS WORKSHEET
+Student: ${studentName} | Class: ${studentClass} | Number: ${studentNumber} | Date: ${studentDate}
+Grade: ${grade}
+
+STUDENT ANSWERS:
+${answersText}`;
+
+            const blob = new Blob([docContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'modal-verbs-worksheet.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function takeScreenshot() {
+            html2canvas(document.getElementById('worksheet'), {
+                scale: 1.5,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                removeContainer: true,
+                imageTimeout: 0,
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'modal-verbs-worksheet-screenshot.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98b3ba1ed27a0a9d',t:'MTc1OTkwNjQ2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
