@@ -16,28 +16,31 @@
         .answers { display: none; margin-top: 14px; background: #fffbdb; padding: 10px; border-radius: 6px;}
         h2, h3 { margin-bottom: 7px; }
         .subtitle {color: #1115bb;}
+        #scoreResult { margin-bottom: 10px; font-size: 1.1em; color: #0944ab; }
         @media (max-width: 600px) {
             .container { padding: 4px; }
         }
+        .check-grade { margin: 8px 0; padding: 8px 20px; background: #48a34e; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
     </style>
     <!-- External scripts for export functionality -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
 </head>
 <body>
 <div class="container">
     <h2>Modal Verbs Worksheet</h2>
-    <div class="subtitle">Student: <input type="text" placeholder="Name"> 
-    ID: <input type="text" placeholder="ID/Roll No.">
-    Grade: 
-    <select id="gradeSelect">
-        <option value="">Select</option><option>7</option><option>8</option>
-        <option>9</option><option>10</option><option>11</option><option>12</option>
-    </select>
-    <div class="grade-box" id="gradeBox">Grade: <span id="gradeValue"> - </span></div>
+    <div class="subtitle info-box">
+        Student: <input type="text" placeholder="Name" id="studentName">
+        ID: <input type="text" placeholder="ID/Roll No." id="studentID">
+        Grade: 
+        <select id="gradeSelect">
+            <option value="">Select</option><option>7</option><option>8</option>
+            <option>9</option><option>10</option><option>11</option><option>12</option>
+        </select>
+        <div class="grade-box" id="gradeBox">Grade: <span id="gradeValue"> - </span></div>
     </div>
-
+    <div id="scoreResult"></div>
     <form id="modalForm">
         <h3>Part 1: Fill in the Blanks</h3>
         <div class="questions">
@@ -69,7 +72,7 @@
         <h3>Part 2: Rewrite with Modal Verbs</h3>
         <div class="rewrite">
             <div class="rewrite-q">1. Some people just don’t know how to sing. (can’t) <input name="r1"></div>
-            <div class="rewrite-q">2. There’s a chance that she’s the airport. (could/might) <input name="r2"></div>
+            <div class="rewrite-q">2. There’s a chance that she’s at the airport. (could/might) <input name="r2"></div>
             <div class="rewrite-q">3. I have loved her for three years! (must) <input name="r3"></div>
             <div class="rewrite-q">4. I can’t run in the park: it’s rainy today. (can’t) <input name="r4"></div>
             <div class="rewrite-q">5. Sue lost track of this emergency exit. (mustn’t) <input name="r5"></div>
@@ -78,6 +81,7 @@
             <div class="rewrite-q">8. It’s possible that he’ll miss the train! (may) <input name="r8"></div>
             <div class="rewrite-q">9. This is a surprise. Can’t tell anybody about it. (shouldn’t) <input name="r9"></div>
         </div>
+        <button type="button" class="check-grade" onclick="checkGrade()">Check Grade</button>
         <div class="export-box">
             <button type="button" onclick="window.print()">Print</button>
             <button type="button" onclick="copyPage()">Copy</button>
@@ -121,12 +125,27 @@ document.getElementById("gradeBox").addEventListener("click", function() {
 });
 document.getElementById("pdfBtn").onclick = function() {
     const doc = new window.jspdf.jsPDF();
-    doc.text(document.body.innerText, 10, 10);
+    doc.text(collectOutputText(), 10, 10);
     doc.save('modal-quiz.pdf');
 };
 document.getElementById("docxBtn").onclick = function() {
-    let content = document.querySelector('.container').innerHTML;
-    let blob = window.htmlDocx.asBlob('<html><body>' + content + '</body></html>');
+    let htmlContent = "<h2>Modal Verbs Worksheet</h2>";
+    htmlContent += "<b>Name:</b> " + document.getElementById("studentName").value + "<br>";
+    htmlContent += "<b>ID:</b> " + document.getElementById("studentID").value + "<br>";
+    htmlContent += "<b>Grade:</b> " + document.getElementById("gradeSelect").value + "<br><br>";
+    htmlContent += "<b>Part 1: Fill in the Blanks</b><br>";
+    let form = document.getElementById('modalForm');
+    let answers = [];
+    for(let i=1; i<=24; i++) {
+        let value = form['q'+i].value || "";
+        htmlContent += i + ". ____ " + value + "<br>";
+    }
+    htmlContent += "<b>Part 2: Rewrite</b><br>";
+    for(let i=1; i<=9; i++) {
+        let value = form['r'+i].value || "";
+        htmlContent += "R" + i + ". " + value + "<br>";
+    }
+    let blob = window.htmlDocx.asBlob('<html><body>' + htmlContent + '</body></html>');
     let link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'modal-quiz.docx';
@@ -134,7 +153,7 @@ document.getElementById("docxBtn").onclick = function() {
 };
 function copyPage() {
     let temp = document.createElement("textarea");
-    temp.value = document.body.innerText;
+    temp.value = collectOutputText();
     document.body.appendChild(temp);
     temp.select();
     document.execCommand("copy");
@@ -148,6 +167,62 @@ document.getElementById("screenshotBtn").onclick = function () {
         a.click();
     });
 };
+
+function collectOutputText(){
+    let output = "Name: " + document.getElementById("studentName").value + "\n";
+    output += "ID: " + document.getElementById("studentID").value + "\n";
+    output += "Grade: " + document.getElementById("gradeSelect").value + "\n";
+    output += "Part 1:\n";
+    let form = document.getElementById('modalForm');
+    for(let i=1; i<=24; i++) {
+        let value = form['q'+i].value || "";
+        output += i + ". ____ " + value + "\n";
+    }
+    output += "Part 2:\n";
+    for(let i=1; i<=9; i++) {
+        let value = form['r'+i].value || "";
+        output += "R" + i + ". " + value + "\n";
+    }
+    return output;
+}
+
+function checkGrade() {
+    // Correct answers arrays for part 1 and part 2 (main keywords, lowercase)
+    let correct1 = [
+        "can", "can", "must", "will", "can", "could", "had to", "should", "can", "is", "must", "could",
+        "may", "might", "could", "must", ["can","can"], "should", ["can","can"], "must", "could", "may", "must", "must"
+    ];
+    let correct2 = [
+        "can’t", "could", "must", "can’t", "mustn’t", "mustn’t", "can’t", "may", "shouldn’t"
+    ];
+    let form = document.getElementById('modalForm');
+    let score = 0;
+    // Part 1
+    for(let i=1; i<=24; i++) {
+        let ans = (form['q'+i].value||"").trim().toLowerCase();
+        let corr = correct1[i-1];
+        if(Array.isArray(corr)){
+            let a = (form['q'+i+'a']?.value||"").trim().toLowerCase();
+            let b = (form['q'+i+'b']?.value||"").trim().toLowerCase();
+            score += (a==corr[0]?1:0)+(b==corr[1]?1:0);
+        }else{
+            if(ans==corr) score++;
+        }
+    }
+    // Part 2 (accept 'could' or 'might' for r2)
+    for(let i=1; i<=9; i++) {
+        let ans = (form['r'+i].value||"").replace(/’/g,"'").trim().toLowerCase();
+        if(i===2){
+            if(ans.includes("could")||ans.includes("might")) score++;
+        }else if(ans.includes(correct2[i-1])){
+            score++;
+        }
+    }
+    let maxScore = 24+2+9; // q17, q19 have 2 blanks each
+    let percent = Math.round(100*score/maxScore);
+    document.getElementById("scoreResult").innerText = "Score: " + score + " / " + maxScore + " (" + percent + "%)";
+    document.getElementById("gradeValue").innerText = percent + "%";
+}
 </script>
 </body>
 </html>
