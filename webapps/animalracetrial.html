@@ -1,0 +1,1994 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ostrich Race: Discussion Text Game</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Nunito', sans-serif; }
+    .title-font { font-family: 'Fredoka', sans-serif; }
+    
+    @keyframes bounce-ostrich {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    
+    @keyframes run-ostrich {
+      0% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(5px) rotate(3deg); }
+      50% { transform: translateX(0) rotate(0deg); }
+      75% { transform: translateX(-5px) rotate(-3deg); }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+    
+    @keyframes celebrate {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.1) rotate(-5deg); }
+      50% { transform: scale(1.2) rotate(5deg); }
+      75% { transform: scale(1.1) rotate(-3deg); }
+    }
+    
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 5px currentColor; }
+      50% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+    }
+    
+    @keyframes float-feather {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(15deg); }
+    }
+    
+    .ostrich-idle { animation: bounce-ostrich 1s ease-in-out infinite; }
+    .ostrich-running { animation: run-ostrich 0.3s ease-in-out infinite; }
+    .celebrating { animation: celebrate 0.5s ease-in-out infinite; }
+    .confetti { animation: confetti-fall 3s linear forwards; }
+    .pulse-button { animation: pulse-glow 2s ease-in-out infinite; }
+    .float-feather { animation: float-feather 2s ease-in-out infinite; }
+    
+    .track-lane {
+      background: linear-gradient(90deg, 
+        rgba(194, 178, 128, 0.3) 0%, 
+        rgba(194, 178, 128, 0.5) 50%, 
+        rgba(194, 178, 128, 0.3) 100%);
+      border-top: 2px dashed rgba(139, 119, 101, 0.5);
+      border-bottom: 2px dashed rgba(139, 119, 101, 0.5);
+    }
+    
+    .desert-bg {
+      background: linear-gradient(180deg, 
+        #87CEEB 0%, 
+        #F4D03F 40%, 
+        #E67E22 70%, 
+        #D35400 100%);
+    }
+    
+    .sand-pattern {
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(210, 180, 140, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(210, 180, 140, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(255, 223, 186, 0.2) 0%, transparent 60%);
+    }
+    
+    .option-btn {
+      transition: all 0.2s ease;
+    }
+    
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .correct-answer {
+      background: linear-gradient(135deg, #10B981, #059669) !important;
+      color: white !important;
+    }
+    
+    .wrong-answer {
+      background: linear-gradient(135deg, #EF4444, #DC2626) !important;
+      color: white !important;
+    }
+    
+    .milestone-marker {
+      position: absolute;
+      top: -30px;
+      transform: translateX(-50%);
+    }
+    
+    .team-badge {
+      transition: all 0.3s ease;
+    }
+    
+    .team-badge:hover {
+      transform: scale(1.05);
+    }
+
+    .character-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      gap: 8px;
+    }
+
+    .character-btn {
+      border: 3px solid transparent;
+      border-radius: 12px;
+      padding: 8px;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .character-btn:hover {
+      transform: scale(1.15);
+      background: #f3f4f6;
+    }
+
+    .character-btn.selected {
+      border-color: #14B8A6;
+      background: #CCFBF1;
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
+    }
+
+    .color-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+      gap: 8px;
+    }
+
+    .color-btn {
+      width: 50px;
+      height: 50px;
+      border: 3px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .color-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .color-btn.selected {
+      border-color: #1F2937;
+      transform: scale(1.15);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .team-card {
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-auto">
+  <div id="app" class="min-h-full desert-bg sand-pattern">
+   <!-- Title Screen -->
+   <div id="title-screen" class="min-h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <!-- Floating Feathers Decoration -->
+    <div class="absolute inset-0 pointer-events-none">
+     <div class="absolute top-10 left-10 text-4xl float-feather" style="animation-delay: 0s;">
+      🪶
+     </div>
+     <div class="absolute top-20 right-20 text-3xl float-feather" style="animation-delay: 0.5s;">
+      🪶
+     </div>
+     <div class="absolute bottom-32 left-20 text-5xl float-feather" style="animation-delay: 1s;">
+      🪶
+     </div>
+     <div class="absolute bottom-20 right-10 text-4xl float-feather" style="animation-delay: 1.5s;">
+      🪶
+     </div>
+    </div><!-- Title Card -->
+    <div class="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl text-center max-w-2xl mx-auto relative z-10">
+     <div class="text-6xl mb-4">
+      🦩
+     </div>
+     <h1 id="main-title" class="title-font text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-500 via-yellow-500 to-teal-500 bg-clip-text text-transparent mb-4">Ostrich Race</h1>
+     <p class="text-xl md:text-2xl font-semibold text-gray-700 mb-6">Race to Master Discussion Texts! 📚</p>
+     <div class="bg-gradient-to-r from-teal-50 to-orange-50 rounded-2xl p-6 mb-6 text-left">
+      <h2 class="title-font text-xl font-bold text-teal-700 mb-3">🎯 Learning Objectives</h2>
+      <ul class="space-y-2 text-gray-700 text-sm">
+       <li class="flex items-start gap-2"><span class="text-teal-500">✓</span> Identify Discussion Text structure</li>
+       <li class="flex items-start gap-2"><span class="text-teal-500">✓</span> Analyze language features &amp; connectors</li>
+       <li class="flex items-start gap-2"><span class="text-teal-500">✓</span> Master vocabulary &amp; pronoun references</li>
+       <li class="flex items-start gap-2"><span class="text-teal-500">✓</span> Demonstrate critical comprehension</li>
+      </ul>
+     </div>
+     <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 mb-6 text-left">
+      <h2 class="title-font text-xl font-bold text-orange-600 mb-3">🏁 Game Rules</h2>
+      <ul class="space-y-2 text-gray-700 text-sm">
+       <li class="flex items-start gap-2"><span class="text-orange-500">🦩</span> Each team controls one character</li>
+       <li class="flex items-start gap-2"><span class="text-orange-500">⚡</span> Correct = 1 point, Fastest correct = 2 points</li>
+       <li class="flex items-start gap-2"><span class="text-orange-500">🏆</span> First to finish wins!</li>
+       <li class="flex items-start gap-2"><span class="text-orange-500">💬</span> Discuss with your team before answering</li>
+      </ul>
+     </div>
+     <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-6 text-left">
+      <h2 class="title-font text-xl font-bold text-purple-600 mb-3">⚡ Power-Ups (Earned by Winning Streaks!)</h2>
+      <ul class="space-y-3 text-gray-700 text-sm">
+       <li class="flex items-start gap-3"><span class="text-lg">⏭️</span>
+        <div><span class="font-bold">Skip (2 uses)</span> - Earned with 2 correct answers in a row. Skip a question without penalty.
+        </div></li>
+       <li class="flex items-start gap-3"><span class="text-lg">🛡️</span>
+        <div><span class="font-bold">Shield (1 use)</span> - Earned with 3 correct answers in a row. Block one wrong answer and stay in place.
+        </div></li>
+       <li class="flex items-start gap-3"><span class="text-lg">➡️</span>
+        <div><span class="font-bold">Push Back (1 use)</span> - Earned with 4 correct answers in a row. Push any rival team back 2 spaces.
+        </div></li>
+       <li class="flex items-start gap-3"><span class="text-lg">⚡</span>
+        <div><span class="font-bold">Speed Boost (1 use)</span> - Earned with 5 correct answers in a row. Double your points for the next correct answer!
+        </div></li>
+      </ul>
+     </div><button onclick="goToTeamSetup()" class="pulse-button bg-gradient-to-r from-teal-500 to-teal-600 text-white px-10 py-4 rounded-full text-xl font-bold shadow-lg hover:from-teal-600 hover:to-teal-700 transition-all"> 🚀 Start Race! </button>
+    </div><!-- Ostrich Parade -->
+    <div class="flex justify-center gap-4 mt-8">
+     <div class="ostrich-idle text-5xl">
+      🦩
+     </div>
+     <div class="ostrich-idle text-5xl" style="animation-delay: 0.2s;">
+      🦩
+     </div>
+     <div class="ostrich-idle text-5xl" style="animation-delay: 0.4s;">
+      🦩
+     </div>
+     <div class="ostrich-idle text-5xl" style="animation-delay: 0.6s;">
+      🦩
+     </div>
+    </div>
+   </div><!-- Team Setup Screen -->
+   <div id="team-setup-screen" class="hidden min-h-full flex flex-col p-4">
+    <!-- Header -->
+    <div class="bg-white/95 backdrop-blur rounded-2xl p-6 mb-4 shadow-lg text-center">
+     <h1 class="title-font text-3xl font-bold bg-gradient-to-r from-teal-500 to-orange-500 bg-clip-text text-transparent mb-2">⚙️ Team Setup</h1>
+     <p class="text-gray-600">Name your teams and pick their characters!</p>
+    </div><!-- Number of Teams Selector -->
+    <div class="bg-white/95 backdrop-blur rounded-2xl p-6 mb-4 shadow-lg"><label class="block text-lg font-bold text-gray-700 mb-4">How many teams? (2-10)</label>
+     <div class="flex gap-2 flex-wrap"><button onclick="setTeamCount(2)" class="team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-teams="2">2 Teams</button> <button onclick="setTeamCount(3)" class="team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-teams="3">3 Teams</button> <button onclick="setTeamCount(4)" class="team-count-btn bg-teal-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-600 transition-all" data-teams="4" style="background: linear-gradient(to right, #14B8A6, #0D9488);">4 Teams</button> <button onclick="setTeamCount(5)" class="team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-teams="5">5 Teams</button> <button onclick="setTeamCount(6)" class="team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-teams="6">6 Teams</button> <button onclick="setTeamCount(7)" class="team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-teams="7">7 Teams</button> <button onclick="setTeamCount(8)" class="team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-teams="8">8 Teams</button> <button onclick="setTeamCount(9)" class="team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-teams="9">9 Teams</button> <button onclick="setTeamCount(10)" class="team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-teams="10">10 Teams</button>
+     </div>
+    </div><!-- Timer Selection -->
+    <div class="bg-white/95 backdrop-blur rounded-2xl p-6 mb-4 shadow-lg"><label class="block text-lg font-bold text-gray-700 mb-4">⏱️ Question Timer</label>
+     <div class="flex gap-2 flex-wrap"><button onclick="setQuestionTimer(15)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="15">15s</button> <button onclick="setQuestionTimer(20)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="20">20s</button> <button onclick="setQuestionTimer(30)" class="timer-btn bg-teal-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-teal-600 transition-all" data-timer="30" style="background: linear-gradient(to right, #14B8A6, #0D9488);">30s</button> <button onclick="setQuestionTimer(45)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="45">45s</button> <button onclick="setQuestionTimer(60)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="60">1:00</button> <button onclick="setQuestionTimer(90)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="90">1:30</button> <button onclick="setQuestionTimer(120)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="120">2:00</button> <button onclick="setQuestionTimer(180)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="180">3:00</button> <button onclick="setQuestionTimer(300)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="300">5:00</button> <button onclick="setQuestionTimer(600)" class="timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all" data-timer="600">10:00</button>
+     </div>
+    </div><!-- Teams Setup Container -->
+    <div id="teams-container" class="flex-1 overflow-y-auto mb-4 space-y-4">
+     <!-- Team setups will be generated here -->
+    </div><!-- Action Buttons -->
+    <div class="bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg flex gap-3 justify-center flex-wrap"><button onclick="goBackToTitle()" class="bg-gray-400 text-white px-6 py-3 rounded-full font-bold hover:bg-gray-500 transition-all">← Back</button> <button onclick="startGameAfterSetup()" class="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-full font-bold hover:from-teal-600 hover:to-teal-700 transition-all shadow-lg">🚀 Start Race!</button>
+    </div>
+   </div><!-- Game Screen -->
+   <div id="game-screen" class="hidden min-h-full flex flex-col p-4">
+    <!-- Header -->
+    <div class="bg-white/95 backdrop-blur rounded-2xl p-4 mb-4 shadow-lg">
+     <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+       <span class="text-3xl">🦩</span>
+       <div>
+        <h2 id="round-title" class="title-font text-xl font-bold text-teal-700">Round 1</h2>
+        <p id="round-subtitle" class="text-sm text-gray-600">Text Structure Sprint</p>
+       </div>
+      </div>
+      <div class="flex items-center gap-4">
+       <div class="bg-yellow-100 px-4 py-2 rounded-full">
+        <span class="font-bold text-yellow-700">Question: <span id="question-num">1</span>/<span id="total-questions">10</span></span>
+       </div>
+       <div id="timer-display" class="bg-orange-100 px-4 py-2 rounded-full">
+        <span class="font-bold text-orange-700">⏱️ <span id="timer">30</span>s</span>
+       </div>
+      </div>
+     </div>
+    </div><!-- Race Track -->
+    <div class="bg-white/90 backdrop-blur rounded-2xl p-4 mb-4 shadow-lg">
+     <div class="relative">
+      <!-- Track Labels -->
+      <div class="flex justify-between mb-2 px-2 text-xs font-bold text-gray-600">
+       <span>🏁 START</span> <span>CHECKPOINT 1</span> <span>CHECKPOINT 2</span> <span>🏆 FINISH</span>
+      </div><!-- Track -->
+      <div class="relative bg-gradient-to-r from-yellow-200 via-orange-100 to-yellow-200 rounded-xl p-3 overflow-hidden">
+       <!-- Track Lines -->
+       <div class="absolute inset-0 flex flex-col justify-around pointer-events-none">
+        <div class="border-t-2 border-dashed border-orange-300/50"></div>
+        <div class="border-t-2 border-dashed border-orange-300/50"></div>
+        <div class="border-t-2 border-dashed border-orange-300/50"></div>
+       </div><!-- Milestone Markers -->
+       <div class="absolute top-0 bottom-0 left-0 w-full pointer-events-none">
+        <div class="absolute left-1/4 top-0 bottom-0 border-l-2 border-dashed border-teal-400/50"></div>
+        <div class="absolute left-1/2 top-0 bottom-0 border-l-2 border-dashed border-teal-400/50"></div>
+        <div class="absolute left-3/4 top-0 bottom-0 border-l-2 border-dashed border-teal-400/50"></div>
+       </div><!-- Finish Line -->
+       <div class="absolute right-2 top-0 bottom-0 w-4 bg-gradient-to-b from-black via-white to-black bg-[length:100%_10px] opacity-30"></div><!-- Team Lanes -->
+       <div id="race-track" class="space-y-2 relative z-10">
+        <!-- Lanes will be generated by JavaScript -->
+       </div>
+      </div>
+     </div>
+    </div><!-- Question Area -->
+    <div class="flex-1 bg-white/95 backdrop-blur rounded-2xl p-6 shadow-lg mb-4">
+     <!-- Reading Passage (if applicable) -->
+     <div id="passage-container" class="hidden bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4 mb-4 max-h-40 overflow-y-auto">
+      <p id="passage-text" class="text-gray-700 text-sm leading-relaxed"></p>
+     </div><!-- Question -->
+     <div class="mb-6">
+      <h3 id="question-text" class="text-xl font-bold text-gray-800 text-center"></h3>
+     </div><!-- Options -->
+     <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto">
+      <!-- Options will be generated by JavaScript -->
+     </div><!-- Power-Ups Section -->
+     <div id="powerups-section" class="hidden mt-6 pt-4 border-t-2 border-gray-200">
+      <p class="text-center text-gray-600 mb-3 font-semibold">⚡ Available Power-Ups</p>
+      <div id="powerups-container" class="flex flex-wrap justify-center gap-2">
+       <!-- Power-up buttons will be generated -->
+      </div>
+     </div><!-- Team Selection for Answer -->
+     <div id="team-selector" class="hidden mt-6">
+      <p class="text-center text-gray-600 mb-3 font-semibold">Which team answered first?</p>
+      <div id="team-buttons" class="flex flex-wrap justify-center gap-2">
+       <!-- Team buttons will be generated -->
+      </div>
+     </div><!-- Feedback -->
+     <div id="feedback-container" class="hidden mt-6 text-center">
+      <div id="feedback-text" class="text-2xl font-bold mb-4"></div><button onclick="nextQuestion()" class="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:from-teal-600 hover:to-teal-700 transition-all"> Next Question ➡️ </button>
+     </div>
+    </div><!-- Scoreboard -->
+    <div class="bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg">
+     <h3 class="title-font text-lg font-bold text-center text-gray-700 mb-3">📊 Scoreboard</h3>
+     <div id="scoreboard" class="flex flex-wrap justify-center gap-3">
+      <!-- Scores will be generated by JavaScript -->
+     </div>
+    </div>
+   </div><!-- Results Screen -->
+   <div id="results-screen" class="hidden min-h-full flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <!-- Confetti Container -->
+    <div id="confetti-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div><!-- Results Card -->
+    <div class="bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl text-center max-w-2xl mx-auto relative z-10">
+     <div id="winner-icon" class="text-8xl mb-4 celebrating">
+      🏆
+     </div>
+     <h1 class="title-font text-4xl font-bold text-yellow-500 mb-2">Race Complete!</h1>
+     <h2 id="winner-text" class="text-2xl font-bold text-gray-700 mb-6"></h2><!-- Final Standings -->
+     <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 mb-6">
+      <h3 class="title-font text-xl font-bold text-orange-600 mb-4">🏅 Final Standings</h3>
+      <div id="final-standings" class="space-y-3">
+       <!-- Standings will be generated -->
+      </div>
+     </div><!-- Badges -->
+     <div class="bg-gradient-to-r from-teal-50 to-blue-50 rounded-2xl p-6 mb-6">
+      <h3 class="title-font text-xl font-bold text-teal-600 mb-4">🎖️ Special Awards</h3>
+      <div id="badges-container" class="flex flex-wrap justify-center gap-3">
+       <!-- Badges will be generated -->
+      </div>
+     </div><!-- Reflection -->
+     <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-6 text-left">
+      <h3 class="title-font text-xl font-bold text-purple-600 mb-3">💭 Reflection Questions</h3>
+      <ul class="space-y-2 text-gray-700 text-sm">
+       <li>• What strategies helped your team answer quickly?</li>
+       <li>• Which type of question was most challenging?</li>
+       <li>• What did you learn about Discussion Texts?</li>
+      </ul>
+     </div><button onclick="restartGame()" class="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-10 py-4 rounded-full text-xl font-bold shadow-lg hover:from-teal-600 hover:to-teal-700 transition-all"> 🔄 Play Again </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Animal Characters
+    const characters = [
+      { emoji: '🦩', name: 'Ostrich' },
+      { emoji: '🦁', name: 'Lion' },
+      { emoji: '🐘', name: 'Elephant' },
+      { emoji: '🦒', name: 'Giraffe' },
+      { emoji: '🐆', name: 'Leopard' },
+      { emoji: '🦓', name: 'Zebra' },
+      { emoji: '🦅', name: 'Eagle' },
+      { emoji: '🐪', name: 'Camel' },
+      { emoji: '🦊', name: 'Fox' },
+      { emoji: '🐢', name: 'Turtle' },
+      { emoji: '🦘', name: 'Kangaroo' },
+      { emoji: '🐅', name: 'Tiger' }
+    ];
+
+    // Color Palette
+    const colors = [
+      { hex: '#EF4444', name: 'Red', light: 'bg-red-100', dark: 'bg-red-500', text: 'text-red-700', emoji: '🔴' },
+      { hex: '#3B82F6', name: 'Blue', light: 'bg-blue-100', dark: 'bg-blue-500', text: 'text-blue-700', emoji: '🔵' },
+      { hex: '#10B981', name: 'Green', light: 'bg-green-100', dark: 'bg-green-500', text: 'text-green-700', emoji: '🟢' },
+      { hex: '#F59E0B', name: 'Amber', light: 'bg-amber-100', dark: 'bg-amber-500', text: 'text-amber-700', emoji: '🟡' },
+      { hex: '#8B5CF6', name: 'Purple', light: 'bg-purple-100', dark: 'bg-purple-500', text: 'text-purple-700', emoji: '🟣' },
+      { hex: '#EC4899', name: 'Pink', light: 'bg-pink-100', dark: 'bg-pink-500', text: 'text-pink-700', emoji: '🩷' },
+      { hex: '#06B6D4', name: 'Cyan', light: 'bg-cyan-100', dark: 'bg-cyan-500', text: 'text-cyan-700', emoji: '🔷' },
+      { hex: '#D97706', name: 'Orange', light: 'bg-orange-100', dark: 'bg-orange-500', text: 'text-orange-700', emoji: '🟠' }
+    ];
+
+    // Default configuration
+    const defaultConfig = {
+      game_title: "Animal Race",
+      team_a_name: "Team A",
+      team_b_name: "Team B",
+      team_c_name: "Team C",
+      team_d_name: "Team D",
+      primary_color: "#14B8A6",
+      secondary_color: "#F59E0B",
+      background_color: "#FEF3C7",
+      text_color: "#1F2937",
+      accent_color: "#EC4899"
+    };
+
+    let config = { ...defaultConfig };
+
+    // Game State
+    let gameState = {
+      currentRound: 0,
+      currentQuestion: 0,
+      teams: [],
+      timer: 30,
+      timerInterval: null,
+      selectedAnswer: null,
+      answeredTeams: [],
+      fastestTeam: null,
+      teamCount: 4,
+      questionTimer: 30, // Customizable timer per question
+      powerUpsUsed: {} // Track power-ups per team
+    };
+
+    // Quiz Data - 5 Rounds with 10 questions each (50 total)
+    const quizData = [
+      // Round 1: Text Structure Sprint (10 questions)
+      {
+        title: "Round 1",
+        subtitle: "Text Structure Sprint",
+        icon: "📋",
+        questions: [
+          {
+            passage: "Social media has become an integral part of modern life. However, there is ongoing debate about its impact on teenagers. Supporters argue that it helps young people connect and express themselves. Critics, on the other hand, warn about cyberbullying and addiction. Ultimately, responsible usage and parental guidance are key to maximizing benefits while minimizing risks.",
+            question: "Which sentence presents the ISSUE of the discussion?",
+            options: [
+              "Social media has become an integral part of modern life.",
+              "However, there is ongoing debate about its impact on teenagers.",
+              "Supporters argue that it helps young people connect.",
+              "Ultimately, responsible usage and parental guidance are key."
+            ],
+            correct: 1,
+            explanation: "The issue is the debatable topic being discussed - the impact of social media on teenagers."
+          },
+          {
+            passage: "Many schools are considering implementing a four-day school week. Proponents believe this would reduce operational costs and give students more family time. However, opponents argue it could harm working parents and reduce instructional time. A balanced approach considering all stakeholders is necessary.",
+            question: "Which part shows an ARGUMENT AGAINST the topic?",
+            options: [
+              "Many schools are considering implementing a four-day school week.",
+              "Proponents believe this would reduce operational costs.",
+              "Opponents argue it could harm working parents.",
+              "A balanced approach considering all stakeholders is necessary."
+            ],
+            correct: 2,
+            explanation: "Arguments against present the negative aspects or opposition to the issue."
+          },
+          {
+            passage: "Online learning has transformed education globally. It offers flexibility and accessibility to students worldwide. Nevertheless, it lacks face-to-face interaction and can be challenging for those without reliable internet. In conclusion, a hybrid model combining both approaches may be the most effective solution.",
+            question: "What type of statement is 'In conclusion, a hybrid model combining both approaches may be the most effective solution'?",
+            options: [
+              "Issue statement",
+              "Argument for",
+              "Argument against",
+              "Conclusion/Recommendation"
+            ],
+            correct: 3,
+            explanation: "This sentence summarizes the writer's position and provides a recommendation."
+          },
+          {
+            passage: "Video games have become a major form of entertainment. Some argue they improve problem-solving skills and coordination. Others worry about addiction and violent content. Despite concerns, games are here to stay in modern society.",
+            question: "Where is the ISSUE identified in this text?",
+            options: [
+              "Video games have become a major form of entertainment.",
+              "Some argue they improve problem-solving skills.",
+              "Others worry about addiction and violent content.",
+              "Games are here to stay in modern society."
+            ],
+            correct: 0,
+            explanation: "The issue is introduced in the first sentence, which presents the topic for discussion."
+          },
+          {
+            passage: "Remote work has changed the employment landscape. It provides flexibility for employees and reduces office costs for employers. Nevertheless, it can create isolation and make supervision difficult. Companies must find the right balance for their needs.",
+            question: "How many PERSPECTIVES are presented in this text?",
+            options: [
+              "One - only supporting remote work",
+              "Two - supporting and opposing remote work",
+              "Three - supporting, opposing, and neutral",
+              "Four - multiple viewpoints with no balance"
+            ],
+            correct: 1,
+            explanation: "The text presents both positive aspects (flexibility, reduced costs) and negative ones (isolation, supervision)."
+          },
+          {
+            passage: "Public transportation systems have both advantages and disadvantages. Cities with strong transit networks see reduced traffic congestion. However, initial infrastructure costs are enormous. Citizens must decide if the long-term benefits outweigh the costs.",
+            question: "What is the PRIMARY STRUCTURE of this discussion text?",
+            options: [
+              "Issue → One Argument → Conclusion",
+              "Issue → Argument For → Argument Against → Recommendation",
+              "Story → Explanation → Moral",
+              "Problem → Solution → Effect"
+            ],
+            correct: 1,
+            explanation: "Discussion texts follow the pattern of presenting an issue, arguments for and against, and a conclusion."
+          },
+          {
+            passage: "Should students wear uniforms? This question divides educators and parents. Supporters believe uniforms reduce bullying and improve focus. Opponents claim they limit self-expression. The answer depends on each school's priorities.",
+            question: "Which word signals an ARGUMENT FOR uniforms?",
+            options: [
+              "Should",
+              "Supporters",
+              "divides",
+              "limits"
+            ],
+            correct: 1,
+            explanation: "'Supporters' introduces the argument in favor of the topic."
+          },
+          {
+            passage: "Fast food offers convenience but raises health concerns. Many enjoy quick meals after work. Doctors warn about high calories and poor nutrition. Society must find ways to balance convenience with health.",
+            question: "Which sentence contains an ARGUMENT AGAINST fast food?",
+            options: [
+              "Fast food offers convenience but raises health concerns.",
+              "Many enjoy quick meals after work.",
+              "Doctors warn about high calories and poor nutrition.",
+              "Society must find ways to balance convenience with health."
+            ],
+            correct: 2,
+            explanation: "This sentence presents the negative argument about fast food's health impacts."
+          },
+          {
+            passage: "Tourist attractions bring economic benefits to local communities. Hotels and restaurants thrive with increased visitors. However, tourism can damage local environments and cultures. Towns should manage tourism carefully to maximize benefits.",
+            question: "What is the RECOMMENDED ACTION in this text?",
+            options: [
+              "Eliminate all tourism",
+              "Welcome unlimited tourists",
+              "Manage tourism carefully",
+              "Ignore environmental concerns"
+            ],
+            correct: 2,
+            explanation: "The text recommends managing tourism carefully to balance positive and negative effects."
+          },
+          {
+            passage: "Artificial lighting has revolutionized human life. It enables night work and extends productive hours. Yet artificial light disrupts natural sleep patterns. We must use technology wisely to protect human health.",
+            question: "Which part of a discussion text is 'We must use technology wisely'?",
+            options: [
+              "Issue statement",
+              "Supporting argument",
+              "Opposing argument",
+              "Conclusion with recommendation"
+            ],
+            correct: 3,
+            explanation: "This is a concluding statement that recommends an action based on the arguments presented."
+          }
+        ]
+      },
+      // Round 2: Language Feature Loop (10 questions)
+      {
+        title: "Round 2",
+        subtitle: "Language Feature Loop",
+        icon: "🔤",
+        questions: [
+          {
+            passage: "Although technology has improved healthcare significantly, some people remain skeptical about telemedicine. On the other hand, many patients appreciate the convenience of virtual consultations.",
+            question: "Identify the connector showing CONTRAST in this passage.",
+            options: [
+              "Although",
+              "significantly",
+              "appreciate",
+              "convenience"
+            ],
+            correct: 0,
+            explanation: "'Although' is a connector that introduces a contrasting idea."
+          },
+          {
+            passage: "Electric vehicles might reduce carbon emissions significantly. This technology could revolutionize transportation. However, the infrastructure must be developed first.",
+            question: "Which words show MODALITY (possibility/probability)?",
+            options: [
+              "reduce, significantly",
+              "might, could, must",
+              "Electric, carbon",
+              "transportation, infrastructure"
+            ],
+            correct: 1,
+            explanation: "Modal verbs like 'might', 'could', and 'must' express degrees of certainty or necessity."
+          },
+          {
+            passage: "The new policy was implemented last year. Several changes were made to accommodate different needs. Students are expected to follow the updated guidelines.",
+            question: "Which sentence is written in PASSIVE VOICE?",
+            options: [
+              "Several changes were made to accommodate different needs.",
+              "Students follow the updated guidelines.",
+              "The policy helps students learn better.",
+              "Teachers explain the new rules clearly."
+            ],
+            correct: 0,
+            explanation: "Passive voice: subject receives the action. 'Changes were made' - changes receive the action of making."
+          },
+          {
+            passage: "While traditional shopping offers personal interaction, online shopping provides convenience. Nevertheless, many customers still prefer trying clothes before buying. In contrast, younger shoppers embrace digital platforms.",
+            question: "Which connector is used to show COMPARISON?",
+            options: [
+              "While",
+              "Nevertheless",
+              "In contrast",
+              "before"
+            ],
+            correct: 0,
+            explanation: "'While' is used to compare and contrast two ideas being presented simultaneously."
+          },
+          {
+            passage: "The researcher conducted the experiment carefully. It was discovered that plants respond to music. The findings were published in a major scientific journal.",
+            question: "Which sentence uses ACTIVE VOICE?",
+            options: [
+              "The researcher conducted the experiment carefully.",
+              "It was discovered that plants respond to music.",
+              "The findings were published in a major journal.",
+              "None of the above"
+            ],
+            correct: 0,
+            explanation: "Active voice: the subject performs the action. 'The researcher conducted' shows the subject doing the action."
+          },
+          {
+            passage: "Essentially, exercise is vital for health. Furthermore, it can prevent chronic diseases. Consequently, governments should promote physical activity programs.",
+            question: "Which connector shows RESULT or CONSEQUENCE?",
+            options: [
+              "Essentially",
+              "Furthermore",
+              "Consequently",
+              "Vital"
+            ],
+            correct: 2,
+            explanation: "'Consequently' shows a result or effect based on the previous statements."
+          },
+          {
+            passage: "Some argue that smartphones enhance learning. Conversely, others believe they create distractions. Undoubtedly, they have changed education significantly.",
+            question: "Which connector introduces an OPPOSING VIEW?",
+            options: [
+              "Some argue",
+              "Conversely",
+              "Undoubtedly",
+              "changed"
+            ],
+            correct: 1,
+            explanation: "'Conversely' introduces an opposing or contrasting viewpoint."
+          },
+          {
+            passage: "Students should study hard. It is recommended that they practice regularly. Success requires dedication and effort.",
+            question: "Which sentence contains an IMPERATIVE (command)?",
+            options: [
+              "Students should study hard.",
+              "It is recommended that they practice regularly.",
+              "Success requires dedication and effort.",
+              "All contain imperatives."
+            ],
+            correct: 0,
+            explanation: "'Should' expresses a strong recommendation or obligation, making it imperative in tone."
+          },
+          {
+            passage: "The project was planned by the team. The budget was approved yesterday. They will execute the plan next week.",
+            question: "How many sentences use PASSIVE VOICE?",
+            options: [
+              "None",
+              "One",
+              "Two",
+              "Three"
+            ],
+            correct: 2,
+            explanation: "First two sentences are passive: 'was planned by', 'was approved'. The third is active: 'will execute'."
+          },
+          {
+            passage: "Rather than avoiding exercise, people should embrace fitness. Instead of watching TV, they could play sports. Obviously, healthy choices improve wellbeing.",
+            question: "Which phrase shows RECOMMENDATION or SUGGESTION?",
+            options: [
+              "Rather than avoiding",
+              "Instead of watching",
+              "people should embrace",
+              "Obviously"
+            ],
+            correct: 2,
+            explanation: "'Should' expresses a recommendation about what people ought to do."
+          }
+        ]
+      },
+      // Round 3: Vocabulary Dash (10 questions)
+      {
+        title: "Round 3",
+        subtitle: "Vocabulary Dash",
+        icon: "📚",
+        questions: [
+          {
+            passage: "The beneficial effects of regular exercise are well-documented. Physical activity improves both mental and physical health.",
+            question: "The word 'beneficial' can be replaced by...",
+            options: [
+              "harmful",
+              "advantageous",
+              "temporary",
+              "unusual"
+            ],
+            correct: 1,
+            explanation: "'Beneficial' means helpful or advantageous - they are synonyms."
+          },
+          {
+            passage: "The government's stringent regulations have faced opposition from business owners who prefer more flexible policies.",
+            question: "What is the ANTONYM of 'stringent'?",
+            options: [
+              "strict",
+              "harsh",
+              "lenient",
+              "severe"
+            ],
+            correct: 2,
+            explanation: "'Stringent' means strict, so 'lenient' (relaxed/flexible) is its antonym."
+          },
+          {
+            passage: "The proliferation of smartphones has fundamentally altered how people communicate and access information.",
+            question: "Based on context, 'proliferation' most likely means...",
+            options: [
+              "Decrease",
+              "Rapid spread/increase",
+              "Color",
+              "Destruction"
+            ],
+            correct: 1,
+            explanation: "Context clues about smartphones changing communication suggest proliferation means rapid spread."
+          },
+          {
+            passage: "The policy has ambiguous wording that creates confusion. Different departments interpret it in various ways.",
+            question: "What does 'ambiguous' mean?",
+            options: [
+              "Clear and definite",
+              "Having two or more meanings; unclear",
+              "Complicated to read",
+              "Written in code"
+            ],
+            correct: 1,
+            explanation: "'Ambiguous' describes something that can be understood in multiple ways, causing confusion."
+          },
+          {
+            passage: "The city implemented stringent environmental policies to mitigate climate change impacts.",
+            question: "In this context, 'mitigate' means to...",
+            options: [
+              "Increase or worsen",
+              "Ignore completely",
+              "Make less severe or reduce",
+              "Completely eliminate"
+            ],
+            correct: 2,
+            explanation: "'Mitigate' means to make something less severe or reduce its impact."
+          },
+          {
+            passage: "The study's findings were inconclusive because the sample size was too small.",
+            question: "What is an ANTONYM for 'inconclusive'?",
+            options: [
+              "Definitive",
+              "Unclear",
+              "Questionable",
+              "Incomplete"
+            ],
+            correct: 0,
+            explanation: "'Inconclusive' means not definitely proving something; 'definitive' means final and conclusive."
+          },
+          {
+            passage: "The novel's vivid descriptions transported readers to a fantastical world.",
+            question: "The word 'vivid' suggests the descriptions are...",
+            options: [
+              "Dull and boring",
+              "Clear, bright, and striking",
+              "Long and detailed",
+              "Confusing and unclear"
+            ],
+            correct: 1,
+            explanation: "'Vivid' means producing strong, clear images or impressions in the mind."
+          },
+          {
+            passage: "The company's benevolent donation to the charity showed their commitment to social responsibility.",
+            question: "What does 'benevolent' mean?",
+            options: [
+              "Self-interested and profit-driven",
+              "Kind and generous",
+              "Reluctant and forced",
+              "Calculated and strategic"
+            ],
+            correct: 1,
+            explanation: "'Benevolent' means kind, generous, and showing goodwill toward others."
+          },
+          {
+            passage: "The controversial proposal sparked intense debate among lawmakers.",
+            question: "A 'controversial' topic is one that...",
+            options: [
+              "Everyone agrees about",
+              "Is boring and unimportant",
+              "Causes disagreement or debate",
+              "Is easily solved"
+            ],
+            correct: 2,
+            explanation: "'Controversial' describes something that causes disagreement and debate."
+          },
+          {
+            passage: "The athlete's resilience allowed her to recover from injury and return to competition.",
+            question: "What does 'resilience' mean?",
+            options: [
+              "Weakness and fragility",
+              "Ability to bounce back and adapt",
+              "Physical strength alone",
+              "Giving up easily"
+            ],
+            correct: 1,
+            explanation: "'Resilience' is the ability to recover from difficulties and adapt to challenges."
+          }
+        ]
+      },
+      // Round 4: Pronoun Power (10 questions)
+      {
+        title: "Round 4",
+        subtitle: "Pronoun Power",
+        icon: "🎯",
+        questions: [
+          {
+            passage: "The school introduced a new attendance policy. This policy requires students to notify teachers before any absence. It has been effective in reducing truancy rates.",
+            question: "What does 'this policy' refer to in the passage?",
+            options: [
+              "Truancy rates",
+              "The new attendance policy",
+              "Teachers",
+              "Students"
+            ],
+            correct: 1,
+            explanation: "'This policy' refers back to 'a new attendance policy' mentioned in the first sentence."
+          },
+          {
+            passage: "Scientists have been studying climate change for decades. They have concluded that human activities significantly contribute to global warming. These findings have influenced international policies.",
+            question: "Who does 'they' refer to?",
+            options: [
+              "Climate change",
+              "Human activities",
+              "Scientists",
+              "International policies"
+            ],
+            correct: 2,
+            explanation: "'They' is a pronoun referring back to 'Scientists' - the subject performing the action."
+          },
+          {
+            passage: "Renewable energy sources such as solar and wind power are becoming more affordable. These alternatives offer a sustainable solution to the world's energy needs.",
+            question: "'These alternatives' refers to...",
+            options: [
+              "Energy needs",
+              "Solar and wind power",
+              "The world",
+              "Affordable prices"
+            ],
+            correct: 1,
+            explanation: "'These alternatives' refers to the renewable energy sources mentioned: solar and wind power."
+          },
+          {
+            passage: "The committee reviewed the proposal. Members discussed it for hours. They finally reached a consensus.",
+            question: "What does 'it' refer to?",
+            options: [
+              "The committee",
+              "The proposal",
+              "Members",
+              "Hours"
+            ],
+            correct: 1,
+            explanation: "'It' is a pronoun referring to 'the proposal', which is what was discussed."
+          },
+          {
+            passage: "Maria and John conducted the research. She analyzed the data while he wrote the report. Both of them presented their findings.",
+            question: "What does 'their' refer to?",
+            options: [
+              "Only Maria's",
+              "Only John's",
+              "Both Maria and John's",
+              "Someone else's"
+            ],
+            correct: 2,
+            explanation: "'Their' is a plural pronoun referring to both Maria and John."
+          },
+          {
+            passage: "The education system needs reform. It must adapt to modern challenges. This requires significant investment.",
+            question: "What does 'This' refer to?",
+            options: [
+              "The education system",
+              "Reform of the education system",
+              "Modern challenges",
+              "Investment"
+            ],
+            correct: 1,
+            explanation: "'This' refers to the idea of adapting the education system to modern challenges."
+          },
+          {
+            passage: "Environmental pollution has increased. Governments recognize the problem and are taking action. These efforts are necessary but insufficient.",
+            question: "What do 'these efforts' refer to?",
+            options: [
+              "Environmental pollution",
+              "Government recognition",
+              "Government actions to address pollution",
+              "Insufficient measures"
+            ],
+            correct: 2,
+            explanation: "'These efforts' refers to the actions governments are taking in response to pollution."
+          },
+          {
+            passage: "Technology companies launched new products. Consumers eagerly purchased them. The success exceeded expectations.",
+            question: "What does 'them' refer to?",
+            options: [
+              "Technology companies",
+              "New products",
+              "Consumers",
+              "Expectations"
+            ],
+            correct: 1,
+            explanation: "'Them' is a pronoun referring to 'new products', which is what consumers purchased."
+          },
+          {
+            passage: "The report contains important data. Researchers will use it to make decisions. They believe it will improve outcomes.",
+            question: "How many times does 'it' appear and what does it refer to each time?",
+            options: [
+              "Once; refers to researchers",
+              "Twice; both times refers to the report",
+              "Three times; refers to different things",
+              "Once; refers to outcomes"
+            ],
+            correct: 1,
+            explanation: "'It' appears twice and both times refers to the report that contains data."
+          },
+          {
+            passage: "Healthcare professionals developed a new treatment. Patients who received it showed improvement. This advancement could save thousands of lives.",
+            question: "What does 'This advancement' refer to?",
+            options: [
+              "Patient improvement",
+              "Healthcare professionals",
+              "The development of the new treatment",
+              "Treatment for life"
+            ],
+            correct: 2,
+            explanation: "'This advancement' refers to the new treatment that healthcare professionals developed."
+          }
+        ]
+      },
+      // Round 5: Reading Race (10 questions)
+      {
+        title: "Round 5",
+        subtitle: "Reading Race",
+        icon: "🏃",
+        questions: [
+          {
+            passage: "School uniforms have been a subject of debate for years. Advocates claim they promote equality and reduce peer pressure related to clothing. Critics argue that uniforms suppress individuality and burden families financially. While there is no perfect solution, schools should consider their specific community's needs when making this decision.",
+            question: "What is the author's STANCE in the conclusion?",
+            options: [
+              "Strongly supports uniforms",
+              "Strongly opposes uniforms",
+              "Neutral - suggests context-based decisions",
+              "Ignores the issue completely"
+            ],
+            correct: 2,
+            explanation: "The author takes a balanced, neutral stance suggesting schools decide based on their community."
+          },
+          {
+            passage: "The rapid development of artificial intelligence has sparked both excitement and concern. While AI promises efficiency and innovation, it also raises questions about job displacement and ethical use. As this technology continues to evolve, society must establish guidelines to ensure AI benefits humanity while minimizing potential risks.",
+            question: "What is the MAIN PURPOSE of this text?",
+            options: [
+              "To entertain readers with AI stories",
+              "To present both sides of the AI debate",
+              "To convince readers AI is dangerous",
+              "To explain how to build AI"
+            ],
+            correct: 1,
+            explanation: "This is a discussion text presenting both positive and negative aspects of AI."
+          },
+          {
+            passage: "Homework has long been considered essential for academic success. Research shows it reinforces learning and develops time management skills. However, excessive homework can lead to stress and reduce family time. Therefore, educators should assign meaningful tasks in reasonable amounts.",
+            question: "What RECOMMENDATION does the author make?",
+            options: [
+              "Eliminate all homework",
+              "Assign as much homework as possible",
+              "Give meaningful homework in reasonable amounts",
+              "Let students decide their own homework"
+            ],
+            correct: 2,
+            explanation: "The author recommends 'meaningful tasks in reasonable amounts' as a balanced approach."
+          },
+          {
+            passage: "Social networking has revolutionized communication. Young people can connect with friends worldwide and share experiences instantly. On the flip side, excessive use can damage face-to-face relationships and mental health. Finding balance is key to maximizing benefits.",
+            question: "Which ARGUMENT is presented AGAINST social networking?",
+            options: [
+              "It revolutionized communication",
+              "Young people can connect with friends worldwide",
+              "Excessive use can damage relationships and mental health",
+              "It allows instant sharing of experiences"
+            ],
+            correct: 2,
+            explanation: "This is the negative argument about social networking's potential harms."
+          },
+          {
+            passage: "Autonomous vehicles offer potential safety improvements and efficiency gains. However, cybersecurity concerns and ethical dilemmas about decision-making remain unresolved. Before widespread adoption, these issues must be thoroughly addressed by manufacturers and policymakers.",
+            question: "What is the text's PRIMARY CONCERN about autonomous vehicles?",
+            options: [
+              "They should be adopted immediately",
+              "They cannot be developed successfully",
+              "Important issues need resolution before widespread use",
+              "Only wealthy people should have them"
+            ],
+            correct: 2,
+            explanation: "The text emphasizes that cybersecurity and ethical issues must be addressed first."
+          },
+          {
+            passage: "Public libraries serve vital community functions beyond lending books. They provide internet access, educational programs, and safe spaces for vulnerable populations. Unfortunately, many cities are reducing library funding. Communities must recognize their value and support their preservation.",
+            question: "What is the author's MAIN ARGUMENT in favor of libraries?",
+            options: [
+              "They have expensive book collections",
+              "They serve multiple vital community functions",
+              "They reduce technology spending",
+              "They employ many librarians"
+            ],
+            correct: 1,
+            explanation: "The author highlights the various community functions that libraries provide."
+          },
+          {
+            passage: "Vegetarian diets can provide complete nutrition when carefully planned. Studies show they reduce the risk of heart disease and obesity. Nevertheless, obtaining sufficient vitamin B12 and iron requires attention. Individuals considering this lifestyle change should consult nutritionists.",
+            question: "What ADVICE does the author give?",
+            options: [
+              "Everyone should become vegetarian",
+              "Vegetarian diets are impossible",
+              "Consult a nutritionist before changing diet",
+              "Ignore nutritional concerns"
+            ],
+            correct: 2,
+            explanation: "The author recommends consulting nutritionists for those considering a vegetarian diet."
+          },
+          {
+            passage: "Flexible work arrangements have increased productivity for many companies. Remote workers report higher job satisfaction and better work-life balance. Yet, collaboration can suffer and workplace culture may weaken. Organizations should thoughtfully implement policies suited to their specific needs.",
+            question: "What is the author's OVERALL TONE?",
+            options: [
+              "Extremely negative about flexible work",
+              "Extremely positive without reservations",
+              "Balanced - acknowledging both benefits and challenges",
+              "Neutral - refusing to take any position"
+            ],
+            correct: 2,
+            explanation: "The author presents both positive aspects and potential challenges in a balanced way."
+          },
+          {
+            passage: "Three-day school weeks have been piloted in some rural districts. Supporters claim they reduce transportation costs and give students study time. Critics worry about childcare challenges for working parents and reduced instructional hours. Further research is needed before widespread implementation.",
+            question: "What does the author suggest should happen next?",
+            options: [
+              "All schools should adopt three-day weeks",
+              "Three-day weeks should be abandoned",
+              "More research is needed before wider adoption",
+              "Only rural areas should use this model"
+            ],
+            correct: 2,
+            explanation: "The author calls for further research before making broader decisions about implementation."
+          },
+          {
+            passage: "Cyberbullying presents unprecedented challenges to young people's wellbeing. Unlike traditional bullying, it follows victims home and can go viral rapidly. Schools and parents must collaborate on education and monitoring strategies. Legal frameworks are also evolving to address this growing problem.",
+            question: "What SOLUTIONS does the author suggest for cyberbullying?",
+            options: [
+              "Banning social media completely",
+              "Ignoring the problem",
+              "School-parent collaboration, education, monitoring, and legal frameworks",
+              "Punishing victims"
+            ],
+            correct: 2,
+            explanation: "The author suggests multiple solutions: collaboration, education, monitoring, and legal action."
+          }
+        ]
+      }
+    ];
+
+    // Initialize Element SDK
+    async function initSDK() {
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (newConfig) => {
+            config = { ...defaultConfig, ...newConfig };
+            updateUI();
+          },
+          mapToCapabilities: (cfg) => ({
+            recolorables: [
+              {
+                get: () => cfg.primary_color || defaultConfig.primary_color,
+                set: (v) => { cfg.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
+              },
+              {
+                get: () => cfg.secondary_color || defaultConfig.secondary_color,
+                set: (v) => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
+              },
+              {
+                get: () => cfg.background_color || defaultConfig.background_color,
+                set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+              },
+              {
+                get: () => cfg.text_color || defaultConfig.text_color,
+                set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+              },
+              {
+                get: () => cfg.accent_color || defaultConfig.accent_color,
+                set: (v) => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
+              }
+            ],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (cfg) => new Map([
+            ["game_title", cfg.game_title || defaultConfig.game_title],
+            ["team_a_name", cfg.team_a_name || defaultConfig.team_a_name],
+            ["team_b_name", cfg.team_b_name || defaultConfig.team_b_name],
+            ["team_c_name", cfg.team_c_name || defaultConfig.team_c_name],
+            ["team_d_name", cfg.team_d_name || defaultConfig.team_d_name]
+          ])
+        });
+        config = { ...defaultConfig, ...window.elementSdk.config };
+      }
+      updateUI();
+    }
+
+    function updateUI() {
+      const title = document.getElementById('main-title');
+      if (title) {
+        title.textContent = config.game_title || defaultConfig.game_title;
+      }
+    }
+
+    // Set Team Count
+    function setTeamCount(count) {
+      gameState.teamCount = count;
+      
+      // Update button styles
+      document.querySelectorAll('.team-count-btn').forEach(btn => {
+        if (parseInt(btn.dataset.teams) === count) {
+          btn.style.background = 'linear-gradient(to right, #14B8A6, #0D9488)';
+          btn.style.color = 'white';
+        } else {
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.className = 'team-count-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all';
+        }
+      });
+      
+      renderTeamSetup();
+    }
+
+    // Set Question Timer
+    function setQuestionTimer(seconds) {
+      gameState.questionTimer = seconds;
+      
+      // Update button styles
+      document.querySelectorAll('.timer-btn').forEach(btn => {
+        if (parseInt(btn.dataset.timer) === seconds) {
+          btn.style.background = 'linear-gradient(to right, #14B8A6, #0D9488)';
+          btn.style.color = 'white';
+        } else {
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.className = 'timer-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-all';
+        }
+      });
+    }
+
+    // Render Team Setup Form
+    function renderTeamSetup() {
+      const container = document.getElementById('teams-container');
+      container.innerHTML = '';
+      
+      const defaultNames = [
+        config.team_a_name || defaultConfig.team_a_name,
+        config.team_b_name || defaultConfig.team_b_name,
+        config.team_c_name || defaultConfig.team_c_name,
+        config.team_d_name || defaultConfig.team_d_name,
+        "Team E",
+        "Team F",
+        "Team G",
+        "Team H",
+        "Team I",
+        "Team J"
+      ];
+      
+      for (let i = 0; i < gameState.teamCount; i++) {
+        const teamCard = document.createElement('div');
+        teamCard.className = 'team-card bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg';
+        
+        const currentColor = colors[i % colors.length];
+        const currentCharacter = characters[i % characters.length];
+        
+        teamCard.innerHTML = `
+          <div class="mb-4">
+            <label class="block font-bold text-gray-700 mb-2">Team ${i + 1} Name</label>
+            <input type="text" id="team-name-${i}" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg font-semibold focus:border-teal-500 focus:outline-none" value="${defaultNames[i]}" placeholder="Enter team name">
+          </div>
+          
+          <div class="mb-4">
+            <label class="block font-bold text-gray-700 mb-3">Choose Character (Team ${i + 1})</label>
+            <div class="character-selector">
+              ${characters.map((char, idx) => `
+                <button class="character-btn ${idx === (i % characters.length) ? 'selected' : ''}" onclick="selectCharacter(${i}, ${idx})" title="${char.name}">
+                  ${char.emoji}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div class="mb-2">
+            <label class="block font-bold text-gray-700 mb-3">Choose Team Color (Team ${i + 1})</label>
+            <div class="color-selector">
+              ${colors.map((col, idx) => `
+                <button class="color-btn ${idx === (i % colors.length) ? 'selected' : ''}" onclick="selectColor(${i}, ${idx})" title="${col.name}" style="background-color: ${col.hex};">
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(teamCard);
+      }
+    }
+
+    // Select Character
+    function selectCharacter(teamIdx, charIdx) {
+      // Find all character buttons in this team's card
+      const teamCard = document.querySelectorAll('.team-card')[teamIdx];
+      const buttons = teamCard.querySelectorAll('.character-btn');
+      
+      buttons.forEach((btn, idx) => {
+        if (idx === charIdx) {
+          btn.classList.add('selected');
+        } else {
+          btn.classList.remove('selected');
+        }
+      });
+      
+      // Store the selected character
+      if (!gameState.teams[teamIdx]) {
+        gameState.teams[teamIdx] = {};
+      }
+      gameState.teams[teamIdx].character = characters[charIdx];
+    }
+
+    // Select Color
+    function selectColor(teamIdx, colorIdx) {
+      // Find all color buttons in this team's card
+      const teamCard = document.querySelectorAll('.team-card')[teamIdx];
+      const buttons = teamCard.querySelectorAll('.color-btn');
+      
+      buttons.forEach((btn, idx) => {
+        if (idx === colorIdx) {
+          btn.classList.add('selected');
+        } else {
+          btn.classList.remove('selected');
+        }
+      });
+      
+      // Store the selected color
+      if (!gameState.teams[teamIdx]) {
+        gameState.teams[teamIdx] = {};
+      }
+      gameState.teams[teamIdx].color = colors[colorIdx];
+    }
+
+    // Go to Team Setup
+    function goToTeamSetup() {
+      document.getElementById('title-screen').classList.add('hidden');
+      document.getElementById('team-setup-screen').classList.remove('hidden');
+      
+      gameState.teamCount = 4;
+      setTeamCount(4);
+    }
+
+    // Go Back to Title
+    function goBackToTitle() {
+      document.getElementById('team-setup-screen').classList.add('hidden');
+      document.getElementById('title-screen').classList.remove('hidden');
+    }
+
+    // Start Game After Setup
+    function startGameAfterSetup() {
+      // Collect team data
+      gameState.teams = [];
+      
+      const defaultNames = [
+        config.team_a_name || defaultConfig.team_a_name,
+        config.team_b_name || defaultConfig.team_b_name,
+        config.team_c_name || defaultConfig.team_c_name,
+        config.team_d_name || defaultConfig.team_d_name,
+        "Team E",
+        "Team F",
+        "Team G",
+        "Team H",
+        "Team I",
+        "Team J"
+      ];
+      
+      for (let i = 0; i < gameState.teamCount; i++) {
+        const name = document.getElementById(`team-name-${i}`)?.value || defaultNames[i];
+        const charIdx = i % characters.length;
+        const colorIdx = i % colors.length;
+        
+        gameState.teams.push({
+          id: i,
+          name: name,
+          character: characters[charIdx],
+          color: colors[colorIdx],
+          score: 0,
+          position: 0,
+          fastAnswers: 0,
+          correctAnswers: 0,
+          correctStreak: 0, // Track consecutive correct answers
+          lives: 1,
+          powerUps: {
+            skip: 0,
+            shield: 0,
+            pushBack: 0,
+            speedBoost: 0
+          }
+        });
+      }
+      
+      gameState.currentRound = 0;
+      gameState.currentQuestion = 0;
+      
+      document.getElementById('team-setup-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      
+      renderRaceTrack();
+      renderScoreboard();
+      loadQuestion();
+    }
+
+    // Render Race Track
+    function renderRaceTrack() {
+      const track = document.getElementById('race-track');
+      track.innerHTML = '';
+      
+      gameState.teams.forEach((team, index) => {
+        const lane = document.createElement('div');
+        lane.className = 'flex items-center h-12 relative';
+        
+        const maxSteps = 15;
+        const positionPercent = (team.position / maxSteps) * 100;
+        
+        lane.innerHTML = `
+          <div class="${team.color.light} ${team.color.text} rounded-l-lg px-2 py-1 text-xs font-bold truncate" style="width: 120px;">
+            ${team.character.emoji} ${team.name}
+          </div>
+          <div class="flex-1 relative h-full track-lane">
+            <div class="absolute transition-all duration-500 ease-out" 
+                 style="left: calc(${positionPercent}% - 20px); top: 50%; transform: translateY(-50%);"
+                 id="character-${team.id}">
+              <span class="text-3xl ostrich-idle" id="character-emoji-${team.id}">${team.character.emoji}</span>
+            </div>
+          </div>
+          <div class="w-8 flex-shrink-0 flex items-center justify-center">
+            ${team.position >= maxSteps ? '🏆' : ''}
+          </div>
+        `;
+        
+        track.appendChild(lane);
+      });
+    }
+
+    // Render Scoreboard
+    function renderScoreboard() {
+      const scoreboard = document.getElementById('scoreboard');
+      scoreboard.innerHTML = '';
+      
+      const sortedTeams = [...gameState.teams].sort((a, b) => b.score - a.score);
+      
+      sortedTeams.forEach((team, index) => {
+        const card = document.createElement('div');
+        card.className = `${team.color.light} rounded-xl p-3 flex flex-col items-center gap-2 min-w-[140px]`;
+        
+        let powerUpHtml = `
+          <div class="flex items-center gap-2 w-full">
+            <span>${index === 0 ? '👑' : team.character.emoji}</span>
+            <div class="flex-1">
+              <div class="font-bold ${team.color.text}">${team.name}</div>
+              <div class="text-sm font-bold text-gray-600">${team.score} pts</div>
+            </div>
+          </div>
+          <div class="w-full border-t ${team.color.light} pt-2">
+            <div class="flex gap-1 flex-wrap justify-center">
+              <button onclick="usePowerUp(${team.id}, 'skip')" class="power-up-btn ${team.powerUps.skip > 0 ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} px-2 py-1 rounded text-xs font-bold transition-all" title="Skip (${team.powerUps.skip})" ${team.powerUps.skip === 0 ? 'disabled' : ''}>
+                ⏭️
+              </button>
+              <button onclick="usePowerUp(${team.id}, 'shield')" class="power-up-btn ${team.powerUps.shield > 0 ? 'bg-blue-400 hover:bg-blue-500 text-blue-900' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} px-2 py-1 rounded text-xs font-bold transition-all" title="Shield (${team.powerUps.shield})" ${team.powerUps.shield === 0 ? 'disabled' : ''}>
+                🛡️
+              </button>
+              <button onclick="usePowerUp(${team.id}, 'pushBack')" class="power-up-btn ${team.powerUps.pushBack > 0 ? 'bg-red-400 hover:bg-red-500 text-red-900' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} px-2 py-1 rounded text-xs font-bold transition-all" title="Push Back (${team.powerUps.pushBack})" ${team.powerUps.pushBack === 0 ? 'disabled' : ''}>
+                ➡️
+              </button>
+              <button onclick="usePowerUp(${team.id}, 'speedBoost')" class="power-up-btn ${team.powerUps.speedBoost > 0 ? 'bg-purple-400 hover:bg-purple-500 text-purple-900' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} px-2 py-1 rounded text-xs font-bold transition-all" title="Speed Boost (${team.powerUps.speedBoost})" ${team.powerUps.speedBoost === 0 ? 'disabled' : ''}>
+                ⚡
+              </button>
+            </div>
+          </div>
+        `;
+        
+        card.innerHTML = powerUpHtml;
+        scoreboard.appendChild(card);
+      });
+    }
+
+    // Load Question
+    function loadQuestion() {
+      const round = quizData[gameState.currentRound];
+      const question = round.questions[gameState.currentQuestion];
+      
+      // Update header
+      document.getElementById('round-title').textContent = round.title;
+      document.getElementById('round-subtitle').textContent = `${round.icon} ${round.subtitle}`;
+      document.getElementById('question-num').textContent = gameState.currentQuestion + 1;
+      document.getElementById('total-questions').textContent = round.questions.length;
+      
+      // Show passage if exists
+      const passageContainer = document.getElementById('passage-container');
+      if (question.passage) {
+        passageContainer.classList.remove('hidden');
+        document.getElementById('passage-text').textContent = question.passage;
+      } else {
+        passageContainer.classList.add('hidden');
+      }
+      
+      // Show question
+      document.getElementById('question-text').textContent = question.question;
+      
+      // Render options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+      
+      question.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn bg-gradient-to-r from-white to-gray-50 border-2 border-gray-200 p-4 rounded-xl text-left font-semibold text-gray-700 hover:border-teal-400 hover:from-teal-50 hover:to-white';
+        btn.innerHTML = `
+          <span class="inline-block w-8 h-8 bg-gray-400 text-white rounded-full text-center leading-8 mr-2 font-bold">
+            ${String.fromCharCode(65 + index)}
+          </span>
+          ${option}
+        `;
+        btn.onclick = () => selectAnswer(index);
+        optionsContainer.appendChild(btn);
+      });
+      
+      // Render power-ups for current team (if multiplayer voting needed)
+      renderPowerUps();
+      
+      // Reset state
+      gameState.selectedAnswer = null;
+      gameState.answeredTeams = [];
+      gameState.fastestTeam = null;
+      
+      // Hide feedback and team selector
+      document.getElementById('feedback-container').classList.add('hidden');
+      document.getElementById('team-selector').classList.add('hidden');
+      
+      // Start timer
+      startTimer();
+    }
+
+    // Render Power-Ups
+    function renderPowerUps() {
+      const container = document.getElementById('powerups-container');
+      container.innerHTML = '';
+      
+      // Show all teams' available power-ups
+      gameState.teams.forEach(team => {
+        const teamPowerUpDiv = document.createElement('div');
+        teamPowerUpDiv.className = `${team.color.light} p-3 rounded-lg`;
+        teamPowerUpDiv.innerHTML = `<div class="text-xs font-bold ${team.color.text} mb-2">${team.character.emoji} ${team.name} (Streak: ${team.correctStreak})</div>`;
+        
+        // Skip power-up - Earned at 2 correct streak
+        if (team.powerUps.skip > 0) {
+          const btn = document.createElement('button');
+          btn.className = 'block w-full mb-1 bg-yellow-400 text-yellow-900 px-3 py-1 rounded text-xs font-bold hover:bg-yellow-500 transition-all';
+          btn.textContent = `⏭️ Skip (${team.powerUps.skip})`;
+          btn.onclick = () => usePowerUp(team.id, 'skip');
+          teamPowerUpDiv.appendChild(btn);
+        }
+        
+        // Shield power-up - Earned at 3 correct streak
+        if (team.powerUps.shield > 0) {
+          const btn = document.createElement('button');
+          btn.className = 'block w-full mb-1 bg-blue-400 text-blue-900 px-3 py-1 rounded text-xs font-bold hover:bg-blue-500 transition-all';
+          btn.textContent = `🛡️ Shield (${team.powerUps.shield})`;
+          btn.onclick = () => usePowerUp(team.id, 'shield');
+          teamPowerUpDiv.appendChild(btn);
+        }
+        
+        // Push Back power-up - Earned at 4 correct streak
+        if (team.powerUps.pushBack > 0) {
+          const btn = document.createElement('button');
+          btn.className = 'block w-full mb-1 bg-red-400 text-red-900 px-3 py-1 rounded text-xs font-bold hover:bg-red-500 transition-all';
+          btn.textContent = `➡️ Push Back (${team.powerUps.pushBack})`;
+          btn.onclick = () => usePowerUp(team.id, 'pushBack');
+          teamPowerUpDiv.appendChild(btn);
+        }
+        
+        // Speed Boost power-up - Earned at 5 correct streak
+        if (team.powerUps.speedBoost > 0) {
+          const btn = document.createElement('button');
+          btn.className = 'block w-full bg-purple-400 text-purple-900 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500 transition-all';
+          btn.textContent = `⚡ Speed Boost (${team.powerUps.speedBoost})`;
+          btn.onclick = () => usePowerUp(team.id, 'speedBoost');
+          teamPowerUpDiv.appendChild(btn);
+        }
+        
+        // Only add to container if team has power-ups
+        if (Object.values(team.powerUps).some(count => count > 0)) {
+          container.appendChild(teamPowerUpDiv);
+        }
+      });
+      
+      const section = document.getElementById('powerups-section');
+      if (container.children.length > 0) {
+        section.classList.remove('hidden');
+      } else {
+        section.classList.add('hidden');
+      }
+    }
+
+    // Use Power-Up
+    function usePowerUp(teamId, powerUpType) {
+      const team = gameState.teams[teamId];
+      if (team.powerUps[powerUpType] <= 0) return;
+      
+      team.powerUps[powerUpType]--;
+      
+      switch(powerUpType) {
+        case 'skip':
+          // Skip the question without answering
+          gameState.selectedAnswer = 'skip';
+          clearInterval(gameState.timerInterval);
+          document.getElementById('feedback-container').classList.remove('hidden');
+          const feedback = document.getElementById('feedback-text');
+          feedback.innerHTML = `<p class="text-blue-600">⏭️ ${team.name} skipped this question!</p>`;
+          break;
+          
+        case 'shield':
+          // Protect against wrong answer for this question
+          team.shield = true;
+          showNotification(`🛡️ ${team.name} activated Shield!`, team.color);
+          break;
+          
+        case 'pushBack':
+          // Select a team to push backward
+          showPushBackSelector(teamId);
+          break;
+          
+        case 'speedBoost':
+          // Mark team for double points
+          team.speedBoosted = true;
+          showNotification(`⚡ ${team.name} activated Speed Boost!`, team.color);
+          break;
+      }
+      
+      renderPowerUps();
+    }
+
+    // Show Push Back Selector
+    function showPushBackSelector(activatingTeamId) {
+      const team = gameState.teams[activatingTeamId];
+      const selector = document.getElementById('team-selector');
+      const buttonsContainer = document.getElementById('team-buttons');
+      
+      selector.classList.remove('hidden');
+      buttonsContainer.innerHTML = '';
+      
+      selector.querySelector('p').textContent = `➡️ ${team.name} uses Push Back! Which team moves backward?`;
+      
+      gameState.teams.forEach(targetTeam => {
+        if (targetTeam.id === activatingTeamId) return; // Can't push self
+        
+        const btn = document.createElement('button');
+        btn.className = `${targetTeam.color.dark} text-white px-4 py-2 rounded-full font-bold hover:opacity-90 transition-all`;
+        btn.textContent = `${targetTeam.character.emoji} ${targetTeam.name}`;
+        btn.onclick = () => executePushBack(targetTeam.id, selector, buttonsContainer);
+        buttonsContainer.appendChild(btn);
+      });
+    }
+
+    // Execute Push Back
+    function executePushBack(targetTeamId, selector, buttonsContainer) {
+      const team = gameState.teams[targetTeamId];
+      team.position = Math.max(0, team.position - 2); // Move back 2 spaces
+      
+      renderRaceTrack();
+      renderScoreboard();
+      selector.classList.add('hidden');
+      
+      showNotification(`➡️ ${team.name} was pushed back 2 spaces!`, team.color);
+    }
+
+    // Show Notification
+    function showNotification(message, teamColor) {
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 ${teamColor.light} ${teamColor.text} px-6 py-3 rounded-lg font-bold shadow-lg animate-bounce z-50`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.remove(), 3000);
+    }
+
+    // Timer - Format display to show MM:SS for times over 60 seconds
+    function formatTimer(seconds) {
+      if (seconds < 60) {
+        return seconds + 's';
+      }
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startTimer() {
+      gameState.timer = gameState.questionTimer;
+      document.getElementById('timer').textContent = formatTimer(gameState.timer);
+      
+      if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+      }
+      
+      gameState.timerInterval = setInterval(() => {
+        gameState.timer--;
+        document.getElementById('timer').textContent = formatTimer(gameState.timer);
+        
+        if (gameState.timer <= 10) {
+          document.getElementById('timer-display').classList.add('bg-red-100');
+          document.getElementById('timer-display').querySelector('span').classList.add('text-red-700');
+        }
+        
+        if (gameState.timer <= 0) {
+          clearInterval(gameState.timerInterval);
+          timeUp();
+        }
+      }, 1000);
+    }
+
+    // Time Up
+    function timeUp() {
+      if (gameState.selectedAnswer === null) {
+        showFeedback(false, -1);
+      }
+    }
+
+    // Select Answer
+    function selectAnswer(index) {
+      if (gameState.selectedAnswer !== null) return;
+      
+      clearInterval(gameState.timerInterval);
+      gameState.selectedAnswer = index;
+      
+      // Highlight selected option
+      const options = document.querySelectorAll('.option-btn');
+      const question = quizData[gameState.currentRound].questions[gameState.currentQuestion];
+      
+      options.forEach((opt, i) => {
+        opt.disabled = true;
+        if (i === question.correct) {
+          opt.classList.add('correct-answer');
+        } else if (i === index && index !== question.correct) {
+          opt.classList.add('wrong-answer');
+        }
+      });
+      
+      // Show team selector
+      showTeamSelector(index === question.correct);
+    }
+
+    // Show Team Selector
+    function showTeamSelector(isCorrect) {
+      const selector = document.getElementById('team-selector');
+      const buttonsContainer = document.getElementById('team-buttons');
+      
+      selector.classList.remove('hidden');
+      buttonsContainer.innerHTML = '';
+      
+      if (isCorrect) {
+        selector.querySelector('p').textContent = '🎉 Correct! Which team answered first?';
+      } else {
+        selector.querySelector('p').textContent = '❌ Incorrect! Which team answered?';
+      }
+      
+      gameState.teams.forEach(team => {
+        const btn = document.createElement('button');
+        btn.className = `${team.color.dark} text-white px-4 py-2 rounded-full font-bold hover:opacity-90 transition-all`;
+        btn.textContent = `${team.character.emoji} ${team.name}`;
+        btn.onclick = () => assignPoints(team.id, isCorrect);
+        buttonsContainer.appendChild(btn);
+      });
+      
+      // Add "No Team" button
+      const noTeamBtn = document.createElement('button');
+      noTeamBtn.className = 'bg-gray-400 text-white px-4 py-2 rounded-full font-bold hover:opacity-90 transition-all';
+      noTeamBtn.textContent = '⏭️ Skip';
+      noTeamBtn.onclick = () => showFeedback(isCorrect, -1);
+      buttonsContainer.appendChild(noTeamBtn);
+    }
+
+    // Assign Points
+    function assignPoints(teamId, isCorrect) {
+      const team = gameState.teams[teamId];
+      
+      if (isCorrect) {
+        // Check shield protection
+        if (!team.shield) {
+          // Increment correct streak
+          team.correctStreak++;
+          
+          // Award power-ups based on streak (only once per team)
+          if (team.correctStreak === 2 && team.powerUps.skip === 0) {
+            team.powerUps.skip = 2;
+            team.earnedSkip = true;
+            showNotification(`🎯 ${team.name} earned 2 Skip power-ups!`, team.color);
+          } else if (team.correctStreak === 3 && team.powerUps.shield === 0) {
+            team.powerUps.shield = 1;
+            team.earnedShield = true;
+            showNotification(`🛡️ ${team.name} earned Shield power-up!`, team.color);
+          } else if (team.correctStreak === 4 && team.powerUps.pushBack === 0) {
+            team.powerUps.pushBack = 1;
+            team.earnedPushBack = true;
+            showNotification(`➡️ ${team.name} earned Push Back power-up!`, team.color);
+          } else if (team.correctStreak === 5 && team.powerUps.speedBoost === 0) {
+            team.powerUps.speedBoost = 1;
+            team.earnedSpeedBoost = true;
+            showNotification(`⚡ ${team.name} earned Speed Boost power-up!`, team.color);
+          }
+          
+          // Check if this is the fastest answer
+          if (gameState.fastestTeam === null) {
+            let points = 2;
+            // Apply speed boost multiplier
+            if (team.speedBoosted) {
+              points = 4; // Double the fastest answer points
+              team.speedBoosted = false;
+            }
+            gameState.fastestTeam = teamId;
+            team.score += points;
+            team.fastAnswers++;
+          } else {
+            let points = 1;
+            // Apply speed boost multiplier
+            if (team.speedBoosted) {
+              points = 2; // Double the normal points
+              team.speedBoosted = false;
+            }
+            team.score += points;
+          }
+          team.correctAnswers++;
+          team.position += 1;
+        } else {
+          // Shield blocks the wrong answer penalty - no movement
+          team.shield = false;
+          team.correctStreak = 0; // Streak broken
+          showNotification(`🛡️ ${team.name}'s Shield protected them!`, team.color);
+        }
+        
+        // Animate character
+        const character = document.getElementById(`character-${teamId}`);
+        if (character) {
+          const emoji = character.querySelector('span');
+          emoji.classList.remove('ostrich-idle');
+          emoji.classList.add('ostrich-running');
+          setTimeout(() => {
+            emoji.classList.remove('ostrich-running');
+            emoji.classList.add('ostrich-idle');
+          }, 1000);
+        }
+      } else {
+        // Check shield protection
+        if (team.shield) {
+          // Shield blocks the wrong answer penalty
+          team.shield = false;
+          team.correctStreak = 0; // Streak broken
+          showNotification(`🛡️ ${team.name}'s Shield protected them!`, team.color);
+        } else {
+          // Move backward on incorrect answer
+          team.position = Math.max(0, team.position - 1);
+          team.correctStreak = 0; // Streak broken
+          
+          // Animate character moving backward
+          const character = document.getElementById(`character-${teamId}`);
+          if (character) {
+            const emoji = character.querySelector('span');
+            emoji.style.transform = 'scaleX(-1)';
+            emoji.classList.remove('ostrich-idle');
+            emoji.classList.add('ostrich-running');
+            setTimeout(() => {
+              emoji.classList.remove('ostrich-running');
+              emoji.classList.add('ostrich-idle');
+              emoji.style.transform = '';
+            }, 1000);
+          }
+        }
+      }
+      
+      gameState.answeredTeams.push(teamId);
+      renderRaceTrack();
+      renderScoreboard();
+      renderPowerUps();
+      showFeedback(isCorrect, teamId);
+    }
+
+    // Show Feedback
+    function showFeedback(isCorrect, teamId) {
+      const feedbackContainer = document.getElementById('feedback-container');
+      const feedbackText = document.getElementById('feedback-text');
+      const question = quizData[gameState.currentRound].questions[gameState.currentQuestion];
+      
+      document.getElementById('team-selector').classList.add('hidden');
+      feedbackContainer.classList.remove('hidden');
+      
+      let message = '';
+      if (teamId === -1) {
+        message = isCorrect ? 
+          `✅ Correct! No team claimed the point.` :
+          `⏰ Time's up! The answer was: ${String.fromCharCode(65 + question.correct)}`;
+      } else {
+        const team = gameState.teams[teamId];
+        if (gameState.selectedAnswer === 'skip') {
+          message = `⏭️ ${team.name} skipped this question!`;
+        } else {
+          message = isCorrect ?
+            `🎉 ${team.name} scores ${gameState.fastestTeam === teamId ? '2 points' : '1 point'}${team.speedBoosted ? ' (Speed Boost!)' : ''}!` :
+            `❌ ${team.name} answered incorrectly.`;
+        }
+      }
+      
+      feedbackText.innerHTML = `
+        <p class="${isCorrect ? 'text-green-600' : 'text-red-600'}">${message}</p>
+        <p class="text-sm text-gray-600 mt-2">💡 ${question.explanation}</p>
+      `;
+    }
+
+    // Next Question
+    function nextQuestion() {
+      gameState.currentQuestion++;
+      
+      // Check if round is complete
+      if (gameState.currentQuestion >= quizData[gameState.currentRound].questions.length) {
+        gameState.currentRound++;
+        gameState.currentQuestion = 0;
+        
+        // Check if game is complete
+        if (gameState.currentRound >= quizData.length) {
+          endGame();
+          return;
+        }
+      }
+      
+      // Check if any team has finished
+      const finishedTeam = gameState.teams.find(t => t.position >= 15);
+      if (finishedTeam) {
+        endGame();
+        return;
+      }
+      
+      // Reset timer display
+      document.getElementById('timer-display').classList.remove('bg-red-100');
+      document.getElementById('timer-display').querySelector('span').classList.remove('text-red-700');
+      document.getElementById('timer-display').classList.add('bg-orange-100');
+      document.getElementById('timer-display').querySelector('span').classList.add('text-orange-700');
+      
+      loadQuestion();
+    }
+
+    // End Game
+    function endGame() {
+      clearInterval(gameState.timerInterval);
+      
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+      
+      // Sort teams by score
+      const sortedTeams = [...gameState.teams].sort((a, b) => b.score - a.score);
+      
+      // Show winner
+      document.getElementById('winner-text').textContent = `${sortedTeams[0].character.emoji} ${sortedTeams[0].name} wins the race!`;
+      
+      // Show standings
+      const standingsContainer = document.getElementById('final-standings');
+      standingsContainer.innerHTML = '';
+      
+      const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '⭐'];
+      sortedTeams.forEach((team, index) => {
+        const standing = document.createElement('div');
+        standing.className = `flex items-center justify-between ${team.color.light} p-3 rounded-xl`;
+        standing.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">${medals[index]}</span>
+            <span class="font-bold ${team.color.text}">${team.character.emoji} ${team.name}</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-600">${team.correctAnswers} correct</span>
+            <span class="font-bold text-lg">${team.score} pts</span>
+          </div>
+        `;
+        standingsContainer.appendChild(standing);
+      });
+      
+      // Show badges
+      const badgesContainer = document.getElementById('badges-container');
+      badgesContainer.innerHTML = '';
+      
+      const badges = [
+        { 
+          name: "Structure Strategist", 
+          emoji: "📋", 
+          team: sortedTeams.reduce((best, t) => t.correctAnswers > best.correctAnswers ? t : best, sortedTeams[0])
+        },
+        { 
+          name: "Speed Thinker", 
+          emoji: "⚡", 
+          team: sortedTeams.reduce((best, t) => t.fastAnswers > best.fastAnswers ? t : best, sortedTeams[0])
+        },
+        { 
+          name: "Grammar Guru", 
+          emoji: "🔤", 
+          team: sortedTeams[Math.floor(Math.random() * sortedTeams.length)]
+        },
+        { 
+          name: "Team Unity", 
+          emoji: "🤝", 
+          team: sortedTeams[sortedTeams.length - 1]
+        }
+      ];
+      
+      badges.forEach(badge => {
+        const badgeEl = document.createElement('div');
+        badgeEl.className = `${badge.team.color.light} ${badge.team.color.text} px-4 py-2 rounded-xl text-center`;
+        badgeEl.innerHTML = `
+          <div class="text-2xl mb-1">${badge.emoji}</div>
+          <div class="font-bold text-sm">${badge.name}</div>
+          <div class="text-xs">${badge.team.character.emoji} ${badge.team.name}</div>
+        `;
+        badgesContainer.appendChild(badgeEl);
+      });
+      
+      // Create confetti
+      createConfetti();
+    }
+
+    // Create Confetti
+    function createConfetti() {
+      const container = document.getElementById('confetti-container');
+      const confettiColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181', '#AA96DA'];
+      
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti absolute w-3 h-3 rounded-sm';
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        confetti.style.animationDelay = `${Math.random() * 2}s`;
+        container.appendChild(confetti);
+      }
+    }
+
+    // Restart Game
+    function restartGame() {
+      document.getElementById('confetti-container').innerHTML = '';
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('title-screen').classList.remove('hidden');
+    }
+
+    // Initialize
+    initSDK();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d6d9f7f922740f1',t:'MTc3MjU5MzE0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
