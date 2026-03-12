@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytical Exposition - Kelas 10</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&amp;family=Source+Serif+4:wght@400;600&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+    .serif { font-family: 'Source Serif 4', serif; }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #1e3a5f 100%);
+    }
+    
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .nav-btn {
+      transition: all 0.2s ease;
+    }
+    
+    .nav-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .nav-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+    
+    .correct-answer {
+      animation: correctPulse 0.5s ease;
+    }
+    
+    .wrong-answer {
+      animation: wrongShake 0.5s ease;
+    }
+    
+    @keyframes correctPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+    
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    
+    .highlight-box {
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+      border-left: 4px solid #f59e0b;
+    }
+    
+    .structure-card {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .structure-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    
+    .quiz-option {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .quiz-option:hover:not(.selected):not(.correct):not(.wrong) {
+      background: #f0f9ff;
+      border-color: #3b82f6;
+    }
+    
+    .quiz-option.selected {
+      background: #dbeafe;
+      border-color: #3b82f6;
+    }
+    
+    .quiz-option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    
+    .quiz-option.wrong {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    
+    .progress-bar {
+      transition: width 0.5s ease;
+    }
+    
+    .tooltip {
+      position: relative;
+    }
+    
+    .tooltip::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      background: #1e3a5f;
+      color: white;
+      font-size: 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+    }
+    
+    .tooltip:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .tab-content {
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .text-example {
+      line-height: 1.8;
+    }
+    
+    .text-example .thesis {
+      background: rgba(34, 197, 94, 0.15);
+      border-left: 3px solid #22c55e;
+      padding: 12px 16px;
+      margin: 8px 0;
+    }
+    
+    .text-example .argument {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 3px solid #3b82f6;
+      padding: 12px 16px;
+      margin: 8px 0;
+    }
+    
+    .text-example .reiteration {
+      background: rgba(168, 85, 247, 0.1);
+      border-left: 3px solid #a855f7;
+      padding: 12px 16px;
+      margin: 8px 0;
+    }
+
+    .floating-emoji {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .score-display {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px solid #f59e0b;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-slate-50">
+  <div id="app" class="h-full overflow-auto">
+   <!-- Header -->
+   <header class="gradient-bg text-white py-6 px-4 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-6xl mx-auto">
+     <div class="flex items-center justify-between">
+      <div>
+       <h1 id="main-title" class="text-2xl md:text-3xl font-bold flex items-center gap-3"><span class="text-3xl floating-emoji">📝</span> Analytical Exposition</h1>
+       <p id="subtitle" class="text-amber-200 mt-1 text-sm md:text-base">Grade 10 English Material - Merdeka Curriculum</p>
+      </div>
+      <div id="score-container" class="hidden md:block score-display px-4 py-2 rounded-xl">
+       <div class="text-xs text-amber-700 font-medium">
+        Your Score
+       </div>
+       <div id="total-score" class="text-xl font-bold text-amber-900">
+        0/30
+       </div>
+      </div>
+     </div><!-- Navigation Tabs -->
+     <nav class="flex flex-wrap gap-2 mt-4">
+      <button onclick="showSection('materi')" class="nav-btn active px-4 py-2 rounded-full text-sm font-medium bg-white/20" data-section="materi"> 📚 Material </button> <button onclick="showSection('contoh')" class="nav-btn px-4 py-2 rounded-full text-sm font-medium bg-white/20" data-section="contoh"> 📄 Sample Text </button> <button onclick="showSection('latihan')" class="nav-btn px-4 py-2 rounded-full text-sm font-medium bg-white/20" data-section="latihan"> ✍️ Exercises </button> <button onclick="showSection('hasil')" class="nav-btn px-4 py-2 rounded-full text-sm font-medium bg-white/20" data-section="hasil"> 📊 Results </button>
+     </nav>
+    </div>
+   </header>
+   <main class="max-w-6xl mx-auto p-4 md:p-6 pb-20">
+    <!-- SECTION: MATERI -->
+    <section id="section-materi" class="tab-content">
+     <!-- Definition -->
+     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6 card-hover">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-3"><span class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-xl">📖</span> What is Analytical Exposition?</h2>
+      <div class="highlight-box p-4 rounded-lg mb-4">
+       <p class="text-slate-700 leading-relaxed"><strong>Analytical Exposition</strong> is a text type designed to <strong>persuade the reader</strong> that the topic being discussed is important and worth considering. This text contains <strong>the writer's opinion or arguments</strong> about an issue accompanied by logical evidence or reasons.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4 mt-6">
+       <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl">
+        <h3 class="font-semibold text-blue-800 mb-2">🎯 Purpose</h3>
+        <p class="text-blue-700 text-sm">To persuade readers using logical arguments and evidence about a topic or issue</p>
+       </div>
+       <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl">
+        <h3 class="font-semibold text-green-800 mb-2">👥 Target Audience</h3>
+        <p class="text-green-700 text-sm">General readers who need to be convinced about the importance of an issue</p>
+       </div>
+      </div>
+     </div><!-- Generic Structure -->
+     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6 card-hover">
+      <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-xl">🏗️</span> Generic Structure (Text Structure)</h2>
+      <div class="space-y-4">
+       <!-- Thesis -->
+       <div class="structure-card bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-xl">
+        <div class="flex items-start gap-4">
+         <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
+          1
+         </div>
+         <div>
+          <h3 class="text-lg font-bold text-green-800">Thesis (Statement of Opinion)</h3>
+          <p class="text-green-700 mt-1">The opening paragraph that contains <strong>the writer's opinion or position</strong> regarding a topic. Thesis introduces the issue and the writer's perspective.</p>
+          <div class="bg-white/70 p-3 rounded-lg mt-3 text-sm">
+           <strong>Example:</strong> <em>"I believe that social media has more negative effects on teenagers than positive ones."</em>
+          </div>
+         </div>
+        </div>
+       </div><!-- Arguments -->
+       <div class="structure-card bg-gradient-to-r from-blue-50 to-sky-50 p-5 rounded-xl">
+        <div class="flex items-start gap-4">
+         <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
+          2
+         </div>
+         <div>
+          <h3 class="text-lg font-bold text-blue-800">Arguments (Arguments)</h3>
+          <p class="text-blue-700 mt-1">Contains <strong>reasons that support</strong> the thesis. Usually consists of 2-3 paragraphs, each with one main argument + explanation/evidence.</p>
+          <div class="bg-white/70 p-3 rounded-lg mt-3 text-sm">
+           <strong>Pattern:</strong> Point (argument) → Elaboration (explanation/evidence)
+          </div>
+         </div>
+        </div>
+       </div><!-- Reiteration -->
+       <div class="structure-card bg-gradient-to-r from-purple-50 to-violet-50 p-5 rounded-xl">
+        <div class="flex items-start gap-4">
+         <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
+          3
+         </div>
+         <div>
+          <h3 class="text-lg font-bold text-purple-800">Reiteration (Restating the Main Idea)</h3>
+          <p class="text-purple-700 mt-1">The closing paragraph that <strong>restates the thesis</strong> and summarizes the arguments. Often uses words like: <em>In conclusion, Therefore, Thus, In summary</em>.</p>
+          <div class="bg-white/70 p-3 rounded-lg mt-3 text-sm">
+           <strong>Example:</strong> <em>"In conclusion, social media should be used wisely by teenagers to avoid its negative impacts."</em>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Language Features -->
+     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6 card-hover">
+      <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3"><span class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-xl">🔤</span> Language Features (Linguistic Characteristics)</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+       <!-- Simple Present Tense -->
+       <div class="bg-amber-50 border-2 border-amber-200 p-5 rounded-xl">
+        <h3 class="font-bold text-amber-800 text-lg mb-3">1️⃣ Simple Present Tense</h3>
+        <p class="text-amber-700 text-sm mb-3">Used to state general facts and universal truths</p>
+        <div class="space-y-2 text-sm">
+         <div class="bg-white p-2 rounded-lg">
+          <strong>Formula:</strong> S + V1 (s/es) + O/C
+         </div>
+         <div class="bg-white p-2 rounded-lg">
+          <strong>Example:</strong> Social media <u>affects</u> mental health.
+         </div>
+        </div>
+       </div><!-- Mental Verbs -->
+       <div class="bg-blue-50 border-2 border-blue-200 p-5 rounded-xl">
+        <h3 class="font-bold text-blue-800 text-lg mb-3">2️⃣ Mental/Thinking Verbs</h3>
+        <p class="text-blue-700 text-sm mb-3">Verbs that show thinking processes</p>
+        <div class="flex flex-wrap gap-2 text-sm">
+         <span class="bg-white px-3 py-1 rounded-full">believe</span> <span class="bg-white px-3 py-1 rounded-full">think</span> <span class="bg-white px-3 py-1 rounded-full">consider</span> <span class="bg-white px-3 py-1 rounded-full">assume</span> <span class="bg-white px-3 py-1 rounded-full">realize</span>
+        </div>
+       </div><!-- Connectives -->
+       <div class="bg-green-50 border-2 border-green-200 p-5 rounded-xl">
+        <h3 class="font-bold text-green-800 text-lg mb-3">3️⃣ Causal Connectives</h3>
+        <p class="text-green-700 text-sm mb-3">Linking words that show cause-and-effect relationships</p>
+        <div class="flex flex-wrap gap-2 text-sm">
+         <span class="bg-white px-3 py-1 rounded-full">because</span> <span class="bg-white px-3 py-1 rounded-full">therefore</span> <span class="bg-white px-3 py-1 rounded-full">consequently</span> <span class="bg-white px-3 py-1 rounded-full">as a result</span> <span class="bg-white px-3 py-1 rounded-full">thus</span>
+        </div>
+       </div><!-- Modality -->
+       <div class="bg-rose-50 border-2 border-rose-200 p-5 rounded-xl">
+        <h3 class="font-bold text-rose-800 text-lg mb-3">4️⃣ Modality</h3>
+        <p class="text-rose-700 text-sm mb-3">Kata yang menunjukkan tingkat kepastian</p>
+        <div class="flex flex-wrap gap-2 text-sm">
+         <span class="bg-white px-3 py-1 rounded-full">should</span> <span class="bg-white px-3 py-1 rounded-full">must</span> <span class="bg-white px-3 py-1 rounded-full">can</span> <span class="bg-white px-3 py-1 rounded-full">may</span> <span class="bg-white px-3 py-1 rounded-full">will</span>
+        </div>
+       </div><!-- Evaluative Words -->
+       <div class="bg-indigo-50 border-2 border-indigo-200 p-5 rounded-xl md:col-span-2">
+        <h3 class="font-bold text-indigo-800 text-lg mb-3">5️⃣ Evaluative Words</h3>
+        <p class="text-indigo-700 text-sm mb-3">Kata-kata yang menunjukkan penilaian/evaluasi penulis</p>
+        <div class="flex flex-wrap gap-2 text-sm">
+         <span class="bg-white px-3 py-1 rounded-full">important</span> <span class="bg-white px-3 py-1 rounded-full">significant</span> <span class="bg-white px-3 py-1 rounded-full">valuable</span> <span class="bg-white px-3 py-1 rounded-full">harmful</span> <span class="bg-white px-3 py-1 rounded-full">dangerous</span> <span class="bg-white px-3 py-1 rounded-full">beneficial</span>
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="text-center">
+      <button onclick="showSection('contoh')" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"> Lanjut ke Contoh Teks → </button>
+     </div>
+    </section><!-- SECTION: CONTOH TEKS -->
+    <section id="section-contoh" class="tab-content hidden">
+     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
+      <h2 class="text-2xl font-bold text-slate-800 mb-2 flex items-center gap-3"><span class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl">📄</span> Contoh Teks Analytical Exposition</h2>
+      <p class="text-slate-500 mb-6">Klik bagian teks untuk melihat penjelasan struktur</p>
+      <div class="bg-slate-50 rounded-xl p-6 text-example serif">
+       <h3 class="text-xl font-bold text-center text-slate-800 mb-6 not-italic" style="font-family: Poppins, sans-serif;">The Importance of Reading Books</h3><!-- Thesis -->
+       <div class="thesis rounded-lg cursor-pointer hover:shadow-md transition-all" onclick="showExplanation('thesis')">
+        <div class="flex items-center gap-2 mb-2" style="font-family: Poppins, sans-serif;">
+         <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">THESIS</span>
+        </div>
+        <p class="text-slate-700"><strong>I strongly believe</strong> that reading books <strong>is</strong> one of the most important habits that everyone <strong>should develop</strong>. In this digital era, many people <strong>prefer</strong> to spend their time on social media rather than reading books. However, books <strong>offer</strong> many benefits that cannot be replaced by any other media.</p>
+       </div><!-- Argument 1 -->
+       <div class="argument rounded-lg cursor-pointer hover:shadow-md transition-all mt-4" onclick="showExplanation('arg1')">
+        <div class="flex items-center gap-2 mb-2" style="font-family: Poppins, sans-serif;">
+         <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">ARGUMENT 1</span>
+        </div>
+        <p class="text-slate-700"><strong>Firstly</strong>, reading books <strong>improves</strong> our knowledge and vocabulary. When we <strong>read</strong>, we <strong>encounter</strong> new words and information that <strong>expand</strong> our understanding of the world. <strong>Research shows</strong> that people who <strong>read</strong> regularly <strong>have</strong> a broader vocabulary and better comprehension skills <strong>than</strong> those who do not read.</p>
+       </div><!-- Argument 2 -->
+       <div class="argument rounded-lg cursor-pointer hover:shadow-md transition-all mt-4" onclick="showExplanation('arg2')">
+        <div class="flex items-center gap-2 mb-2" style="font-family: Poppins, sans-serif;">
+         <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">ARGUMENT 2</span>
+        </div>
+        <p class="text-slate-700"><strong>Secondly</strong>, reading <strong>reduces</strong> stress and <strong>improves</strong> mental health. According to studies, reading for just six minutes <strong>can</strong> reduce stress levels by up to 68%. Books <strong>provide</strong> an escape from daily problems and <strong>help</strong> readers relax their minds. <strong>Therefore</strong>, reading <strong>is</strong> an effective way to maintain mental well-being.</p>
+       </div><!-- Argument 3 -->
+       <div class="argument rounded-lg cursor-pointer hover:shadow-md transition-all mt-4" onclick="showExplanation('arg3')">
+        <div class="flex items-center gap-2 mb-2" style="font-family: Poppins, sans-serif;">
+         <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">ARGUMENT 3</span>
+        </div>
+        <p class="text-slate-700"><strong>Finally</strong>, reading <strong>enhances</strong> critical thinking and creativity. When we <strong>read</strong> fiction, we <strong>imagine</strong> characters, settings, and events. This process <strong>stimulates</strong> our brain and <strong>develops</strong> our creativity. <strong>Moreover</strong>, reading different perspectives <strong>helps</strong> us <strong>think</strong> critically about various issues.</p>
+       </div><!-- Reiteration -->
+       <div class="reiteration rounded-lg cursor-pointer hover:shadow-md transition-all mt-4" onclick="showExplanation('reiteration')">
+        <div class="flex items-center gap-2 mb-2" style="font-family: Poppins, sans-serif;">
+         <span class="bg-purple-500 text-white text-xs px-2 py-1 rounded-full font-medium">REITERATION</span>
+        </div>
+        <p class="text-slate-700"><strong>In conclusion</strong>, reading books <strong>is</strong> a valuable habit that <strong>brings</strong> numerous benefits. It <strong>improves</strong> knowledge, <strong>reduces</strong> stress, and <strong>develops</strong> critical thinking. <strong>Therefore</strong>, everyone <strong>should</strong> make time to read books every day, even if it <strong>is</strong> only for a few minutes.</p>
+       </div>
+      </div><!-- Explanation Box -->
+      <div id="explanation-box" class="mt-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-5 hidden">
+       <h4 id="explanation-title" class="font-bold text-amber-800 text-lg mb-2"></h4>
+       <p id="explanation-content" class="text-amber-700"></p>
+      </div>
+     </div><!-- Language Features in Text -->
+     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
+      <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-3"><span class="text-2xl">🔍</span> Analisis Language Features dalam Teks</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+       <div class="bg-amber-50 p-4 rounded-xl">
+        <h4 class="font-bold text-amber-800 mb-2">Simple Present Tense</h4>
+        <ul class="text-sm text-amber-700 space-y-1">
+         <li>• Reading books <strong>is</strong> important</li>
+         <li>• Books <strong>offer</strong> many benefits</li>
+         <li>• Reading <strong>improves</strong> knowledge</li>
+         <li>• This process <strong>stimulates</strong> our brain</li>
+        </ul>
+       </div>
+       <div class="bg-blue-50 p-4 rounded-xl">
+        <h4 class="font-bold text-blue-800 mb-2">Mental/Thinking Verbs</h4>
+        <ul class="text-sm text-blue-700 space-y-1">
+         <li>• I strongly <strong>believe</strong></li>
+         <li>• we <strong>imagine</strong> characters</li>
+         <li>• helps us <strong>think</strong> critically</li>
+        </ul>
+       </div>
+       <div class="bg-green-50 p-4 rounded-xl">
+        <h4 class="font-bold text-green-800 mb-2">Causal Connectives</h4>
+        <ul class="text-sm text-green-700 space-y-1">
+         <li>• <strong>Therefore</strong>, reading is effective</li>
+         <li>• <strong>Moreover</strong>, reading helps us</li>
+         <li>• <strong>In conclusion</strong>, reading is valuable</li>
+        </ul>
+       </div>
+       <div class="bg-rose-50 p-4 rounded-xl">
+        <h4 class="font-bold text-rose-800 mb-2">Modality</h4>
+        <ul class="text-sm text-rose-700 space-y-1">
+         <li>• everyone <strong>should</strong> develop</li>
+         <li>• reading <strong>can</strong> reduce stress</li>
+         <li>• everyone <strong>should</strong> make time</li>
+        </ul>
+       </div>
+      </div>
+     </div>
+     <div class="text-center">
+      <button onclick="showSection('latihan')" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"> Lanjut ke Latihan Soal → </button>
+     </div>
+    </section><!-- SECTION: LATIHAN SOAL -->
+    <section id="section-latihan" class="tab-content hidden">
+     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
+      <div class="flex items-center justify-between mb-6">
+       <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-3"><span class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-xl">✍️</span> Latihan Soal Interaktif</h2>
+       <div class="text-right">
+        <div class="text-sm text-slate-500">
+         Progress
+        </div>
+        <div class="text-lg font-bold text-amber-600"><span id="answered-count">0</span>/15 Soal
+        </div>
+       </div>
+      </div><!-- Progress Bar -->
+      <div class="h-3 bg-slate-200 rounded-full mb-8 overflow-hidden">
+       <div id="progress-bar" class="progress-bar h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full" style="width: 0%"></div>
+      </div><!-- Quiz Container -->
+      <div id="quiz-container" class="space-y-6">
+       <!-- Questions will be rendered here -->
+      </div>
+     </div>
+     <div class="text-center space-x-4">
+      <button onclick="resetQuiz()" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-full font-semibold hover:bg-slate-300 transition-all"> 🔄 Reset Semua </button> <button onclick="showSection('hasil')" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"> Lihat Hasil → </button>
+     </div>
+    </section><!-- SECTION: HASIL -->
+    <section id="section-hasil" class="tab-content hidden">
+     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6 text-center">
+      <div class="text-6xl mb-4" id="result-emoji">
+       🎯
+      </div>
+      <h2 class="text-3xl font-bold text-slate-800 mb-2">Hasil Latihan</h2>
+      <p class="text-slate-500 mb-6">Berikut adalah ringkasan hasil latihanmu</p>
+      <div class="grid md:grid-cols-3 gap-4 mb-8">
+       <div class="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-2xl">
+        <div class="text-4xl font-bold text-green-600" id="correct-count">
+         0
+        </div>
+        <div class="text-green-700 font-medium">
+         Benar
+        </div>
+       </div>
+       <div class="bg-gradient-to-br from-red-50 to-rose-100 p-6 rounded-2xl">
+        <div class="text-4xl font-bold text-red-600" id="wrong-count">
+         0
+        </div>
+        <div class="text-red-700 font-medium">
+         Salah
+        </div>
+       </div>
+       <div class="bg-gradient-to-br from-amber-50 to-yellow-100 p-6 rounded-2xl">
+        <div class="text-4xl font-bold text-amber-600" id="percentage">
+         0%
+        </div>
+        <div class="text-amber-700 font-medium">
+         Persentase
+        </div>
+       </div>
+      </div><!-- Category Scores -->
+      <div class="text-left mb-8">
+       <h3 class="font-bold text-slate-800 mb-4">📊 Skor per Kategori</h3>
+       <div class="space-y-3">
+        <div class="flex items-center gap-4">
+         <span class="w-40 text-sm text-slate-600">Present Tense</span>
+         <div class="flex-1 h-4 bg-slate-200 rounded-full overflow-hidden">
+          <div id="cat-present" class="h-full bg-amber-500 rounded-full transition-all" style="width: 0%"></div>
+         </div><span id="cat-present-text" class="w-16 text-sm font-medium text-slate-700">0/3</span>
+        </div>
+        <div class="flex items-center gap-4">
+         <span class="w-40 text-sm text-slate-600">Structure</span>
+         <div class="flex-1 h-4 bg-slate-200 rounded-full overflow-hidden">
+          <div id="cat-structure" class="h-full bg-blue-500 rounded-full transition-all" style="width: 0%"></div>
+         </div><span id="cat-structure-text" class="w-16 text-sm font-medium text-slate-700">0/3</span>
+        </div>
+        <div class="flex items-center gap-4">
+         <span class="w-40 text-sm text-slate-600">Language Features</span>
+         <div class="flex-1 h-4 bg-slate-200 rounded-full overflow-hidden">
+          <div id="cat-language" class="h-full bg-green-500 rounded-full transition-all" style="width: 0%"></div>
+         </div><span id="cat-language-text" class="w-16 text-sm font-medium text-slate-700">0/3</span>
+        </div>
+        <div class="flex items-center gap-4">
+         <span class="w-40 text-sm text-slate-600">Explicit Information</span>
+         <div class="flex-1 h-4 bg-slate-200 rounded-full overflow-hidden">
+          <div id="cat-explicit" class="h-full bg-purple-500 rounded-full transition-all" style="width: 0%"></div>
+         </div><span id="cat-explicit-text" class="w-16 text-sm font-medium text-slate-700">0/3</span>
+        </div>
+        <div class="flex items-center gap-4">
+         <span class="w-40 text-sm text-slate-600">Synonym</span>
+         <div class="flex-1 h-4 bg-slate-200 rounded-full overflow-hidden">
+          <div id="cat-synonym" class="h-full bg-rose-500 rounded-full transition-all" style="width: 0%"></div>
+         </div><span id="cat-synonym-text" class="w-16 text-sm font-medium text-slate-700">0/3</span>
+        </div>
+       </div>
+      </div><!-- Feedback Message -->
+      <div id="feedback-message" class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-6 text-left">
+       <h4 class="font-bold text-amber-800 mb-2">💡 Feedback</h4>
+       <p class="text-amber-700" id="feedback-text">Selesaikan semua soal untuk melihat feedback lengkap!</p>
+      </div>
+     </div>
+     <div class="text-center space-x-4">
+      <button onclick="resetQuiz(); showSection('latihan')" class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"> 🔄 Ulangi Latihan </button> <button onclick="showSection('materi')" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-full font-semibold hover:bg-slate-300 transition-all"> 📚 Pelajari Lagi </button>
+     </div>
+    </section>
+   </main>
+  </div>
+  <script>
+    // Default configuration
+    const defaultConfig = {
+      main_title: 'Analytical Exposition',
+      subtitle: 'Materi Bahasa Inggris Kelas 10 - Kurikulum Merdeka',
+      primary_color: '#1e3a5f',
+      secondary_color: '#f59e0b',
+      background_color: '#f8fafc',
+      text_color: '#1e293b',
+      accent_color: '#ffffff',
+      font_family: 'Poppins',
+      font_size: 16
+    };
+
+    // Quiz data - 15 questions covering all categories
+    const quizData = [
+      // PRESENT TENSE (3 questions)
+      {
+        id: 1,
+        category: 'present',
+        type: 'Present Tense',
+        question: 'Which sentence uses Simple Present Tense correctly?',
+        options: [
+          'Reading books were important for students.',
+          'Reading books is important for students.',
+          'Reading books was important for students.',
+          'Reading books are been important for students.'
+        ],
+        correct: 1,
+        explanation: '"Reading books" adalah gerund (kata kerja yang berfungsi sebagai kata benda) yang dianggap singular, sehingga menggunakan "is" (Simple Present Tense).'
+      },
+      {
+        id: 2,
+        category: 'present',
+        type: 'Present Tense',
+        question: 'Complete the sentence: "Research _____ that reading reduces stress."',
+        options: ['show', 'shows', 'showed', 'showing'],
+        correct: 1,
+        explanation: '"Research" adalah kata benda singular, sehingga kata kerja harus ditambah -s/es menjadi "shows" dalam Simple Present Tense.'
+      },
+      {
+        id: 3,
+        category: 'present',
+        type: 'Present Tense',
+        question: 'Identify the correct Simple Present Tense form: "Books _____ many benefits."',
+        options: ['offers', 'offer', 'offered', 'offering'],
+        correct: 1,
+        explanation: '"Books" adalah kata benda plural, sehingga kata kerja tidak ditambah -s/es. Bentuk yang benar adalah "offer".'
+      },
+
+      // STRUCTURE (3 questions)
+      {
+        id: 4,
+        category: 'structure',
+        type: 'Structure',
+        question: 'What is the function of THESIS in Analytical Exposition?',
+        options: [
+          'To give detailed arguments with evidence',
+          'To introduce the topic and writer\'s position',
+          'To restate the main idea and conclude',
+          'To provide examples and data'
+        ],
+        correct: 1,
+        explanation: 'Thesis berfungsi untuk memperkenalkan topik dan posisi/pendapat penulis terhadap suatu isu. Ini adalah paragraf pembuka.'
+      },
+      {
+        id: 5,
+        category: 'structure',
+        type: 'Structure',
+        question: 'Which part of Analytical Exposition contains "In conclusion, Therefore, Thus"?',
+        options: ['Thesis', 'Arguments', 'Reiteration', 'Introduction'],
+        correct: 2,
+        explanation: 'Reiteration adalah bagian penutup yang menegaskan kembali thesis. Kata-kata seperti "In conclusion", "Therefore", "Thus" sering muncul di bagian ini.'
+      },
+      {
+        id: 6,
+        category: 'structure',
+        type: 'Structure',
+        question: 'The correct order of Analytical Exposition structure is:',
+        options: [
+          'Arguments - Thesis - Reiteration',
+          'Thesis - Reiteration - Arguments',
+          'Thesis - Arguments - Reiteration',
+          'Reiteration - Thesis - Arguments'
+        ],
+        correct: 2,
+        explanation: 'Struktur yang benar adalah: Thesis (pendapat) → Arguments (alasan/bukti) → Reiteration (penegasan ulang).'
+      },
+
+      // LANGUAGE FEATURES (3 questions)
+      {
+        id: 7,
+        category: 'language',
+        type: 'Language Features',
+        question: 'Which word is a MENTAL/THINKING VERB?',
+        options: ['run', 'believe', 'write', 'speak'],
+        correct: 1,
+        explanation: '"Believe" adalah mental verb karena menunjukkan proses berpikir/mental. Contoh lain: think, consider, assume, realize.'
+      },
+      {
+        id: 8,
+        category: 'language',
+        type: 'Language Features',
+        question: '"Therefore" and "Consequently" are examples of:',
+        options: ['Mental verbs', 'Modality', 'Causal connectives', 'Evaluative words'],
+        correct: 2,
+        explanation: '"Therefore" dan "Consequently" adalah causal connectives yang menunjukkan hubungan sebab-akibat antara kalimat.'
+      },
+      {
+        id: 9,
+        category: 'language',
+        type: 'Language Features',
+        question: 'Which word shows MODALITY in "Students should read every day"?',
+        options: ['Students', 'should', 'read', 'every'],
+        correct: 1,
+        explanation: '"Should" adalah kata modal (modality) yang menunjukkan saran atau keharusan. Contoh lain: must, can, may, will.'
+      },
+
+      // EXPLICIT INFORMATION (3 questions)
+      {
+        id: 10,
+        category: 'explicit',
+        type: 'Explicit Information',
+        question: 'Based on the text, reading for how many minutes can reduce stress by 68%?',
+        options: ['10 minutes', '6 minutes', '30 minutes', '15 minutes'],
+        correct: 1,
+        explanation: 'Dalam teks disebutkan secara tersurat: "reading for just six minutes can reduce stress levels by up to 68%".'
+      },
+      {
+        id: 11,
+        category: 'explicit',
+        type: 'Explicit Information',
+        question: 'According to the text, what do people in digital era prefer to do?',
+        options: [
+          'Read books every day',
+          'Spend time on social media',
+          'Go to the library',
+          'Write stories'
+        ],
+        correct: 1,
+        explanation: 'Teks menyebutkan: "many people prefer to spend their time on social media rather than reading books".'
+      },
+      {
+        id: 12,
+        category: 'explicit',
+        type: 'Explicit Information',
+        question: 'What benefits are mentioned in the text? (Select the most complete answer)',
+        options: [
+          'Only improves vocabulary',
+          'Only reduces stress',
+          'Improves knowledge, reduces stress, and develops critical thinking',
+          'Only develops creativity'
+        ],
+        correct: 2,
+        explanation: 'Teks menyebutkan tiga manfaat: 1) improves knowledge and vocabulary, 2) reduces stress, 3) enhances critical thinking and creativity.'
+      },
+
+      // SYNONYM (3 questions)
+      {
+        id: 13,
+        category: 'synonym',
+        type: 'Synonym',
+        question: 'What is the synonym of "improve" as used in the text?',
+        options: ['decrease', 'enhance', 'reduce', 'remove'],
+        correct: 1,
+        explanation: '"Enhance" adalah sinonim dari "improve" yang berarti meningkatkan atau memperbaiki.'
+      },
+      {
+        id: 14,
+        category: 'synonym',
+        type: 'Synonym',
+        question: 'The word "valuable" in the text is closest in meaning to:',
+        options: ['worthless', 'important', 'cheap', 'useless'],
+        correct: 1,
+        explanation: '"Important" adalah sinonim dari "valuable" yang berarti berharga atau penting.'
+      },
+      {
+        id: 15,
+        category: 'synonym',
+        type: 'Synonym',
+        question: '"Numerous" in "numerous benefits" can be replaced with:',
+        options: ['few', 'small', 'many', 'single'],
+        correct: 2,
+        explanation: '"Many" adalah sinonim dari "numerous" yang berarti banyak atau berlimpah.'
+      }
+    ];
+
+    // State management
+    let answers = {};
+    let categoryScores = {
+      present: { correct: 0, total: 3 },
+      structure: { correct: 0, total: 3 },
+      language: { correct: 0, total: 3 },
+      explicit: { correct: 0, total: 3 },
+      synonym: { correct: 0, total: 3 }
+    };
+
+    // Initialize SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          const mainTitle = document.getElementById('main-title');
+          const subtitle = document.getElementById('subtitle');
+          
+          if (mainTitle) {
+            mainTitle.innerHTML = `<span class="text-3xl floating-emoji">📝</span> ${config.main_title || defaultConfig.main_title}`;
+          }
+          if (subtitle) {
+            subtitle.textContent = config.subtitle || defaultConfig.subtitle;
+          }
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => { config.primary_color = value; window.elementSdk.setConfig({ primary_color: value }); }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => { config.secondary_color = value; window.elementSdk.setConfig({ secondary_color: value }); }
+            },
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => { config.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => { config.font_size = value; window.elementSdk.setConfig({ font_size: value }); }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['main_title', config.main_title || defaultConfig.main_title],
+          ['subtitle', config.subtitle || defaultConfig.subtitle]
+        ])
+      });
+    }
+
+    // Navigation functions
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.tab-content').forEach(section => {
+        section.classList.add('hidden');
+      });
+      
+      // Show selected section
+      const section = document.getElementById(`section-${sectionId}`);
+      if (section) {
+        section.classList.remove('hidden');
+      }
+      
+      // Update navigation buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.section === sectionId) {
+          btn.classList.add('active');
+        }
+      });
+
+      // Update results if showing hasil
+      if (sectionId === 'hasil') {
+        updateResults();
+      }
+
+      // Render quiz if showing latihan
+      if (sectionId === 'latihan') {
+        renderQuiz();
+      }
+
+      // Show score container
+      const scoreContainer = document.getElementById('score-container');
+      if (scoreContainer) {
+        scoreContainer.classList.remove('hidden');
+      }
+    }
+
+    // Explanation function for example text
+    function showExplanation(part) {
+      const box = document.getElementById('explanation-box');
+      const title = document.getElementById('explanation-title');
+      const content = document.getElementById('explanation-content');
+      
+      const explanations = {
+        thesis: {
+          title: '📗 THESIS (Pernyataan Pendapat)',
+          content: 'Paragraf ini memperkenalkan topik (reading books) dan menyatakan posisi penulis (I strongly believe). Penulis juga memberikan latar belakang tentang kondisi saat ini (digital era, social media) untuk membangun konteks argumen.'
+        },
+        arg1: {
+          title: '📘 ARGUMENT 1 (Argumen Pertama)',
+          content: 'Argumen pertama menyatakan bahwa membaca meningkatkan pengetahuan dan kosakata. Penulis memberikan elaborasi dengan menjelaskan bagaimana membaca memperluas pemahaman dan didukung oleh bukti (research shows).'
+        },
+        arg2: {
+          title: '📘 ARGUMENT 2 (Argumen Kedua)',
+          content: 'Argumen kedua fokus pada manfaat kesehatan mental. Penulis menyebutkan data spesifik (68% stress reduction in 6 minutes) sebagai bukti pendukung. Kata "Therefore" menunjukkan kesimpulan argumen.'
+        },
+        arg3: {
+          title: '📘 ARGUMENT 3 (Argumen Ketiga)',
+          content: 'Argumen ketiga membahas pengembangan critical thinking dan kreativitas. Kata "Finally" menandakan ini adalah argumen terakhir. "Moreover" menambahkan poin tambahan dalam argumen yang sama.'
+        },
+        reiteration: {
+          title: '📕 REITERATION (Penegasan Ulang)',
+          content: 'Paragraf penutup dimulai dengan "In conclusion" dan merangkum semua argumen: improves knowledge, reduces stress, develops critical thinking. Diakhiri dengan saran menggunakan "should" untuk menekankan pentingnya membaca.'
+        }
+      };
+      
+      const data = explanations[part];
+      if (data) {
+        title.textContent = data.title;
+        content.textContent = data.content;
+        box.classList.remove('hidden');
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // Render quiz questions
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      if (!container) return;
+
+      container.innerHTML = quizData.map((q, index) => `
+        <div class="bg-slate-50 rounded-xl p-5 border-2 border-slate-200" id="question-${q.id}">
+          <div class="flex items-start gap-3 mb-4">
+            <span class="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-lg flex items-center justify-center font-bold text-sm shrink-0">${index + 1}</span>
+            <div class="flex-1">
+              <span class="text-xs font-medium px-2 py-1 rounded-full ${getCategoryColor(q.category)}">${q.type}</span>
+              <p class="text-slate-800 font-medium mt-2">${q.question}</p>
+            </div>
+          </div>
+          <div class="space-y-2 ml-11">
+            ${q.options.map((opt, i) => `
+              <div class="quiz-option border-2 border-slate-200 rounded-lg p-3 flex items-center gap-3 ${answers[q.id] !== undefined ? (i === q.correct ? 'correct' : (answers[q.id] === i ? 'wrong' : '')) : ''} ${answers[q.id] === i ? 'selected' : ''}"
+                   onclick="selectAnswer(${q.id}, ${i}, ${q.correct})"
+                   ${answers[q.id] !== undefined ? 'style="pointer-events: none;"' : ''}>
+                <span class="w-6 h-6 rounded-full border-2 ${answers[q.id] === i ? (i === q.correct ? 'bg-green-500 border-green-500' : 'bg-red-500 border-red-500') : 'border-slate-300'} flex items-center justify-center text-white text-xs font-bold">
+                  ${answers[q.id] !== undefined && i === q.correct ? '✓' : (answers[q.id] === i && i !== q.correct ? '✗' : String.fromCharCode(65 + i))}
+                </span>
+                <span class="text-slate-700">${opt}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div id="feedback-${q.id}" class="${answers[q.id] !== undefined ? '' : 'hidden'} mt-4 ml-11 p-4 rounded-lg ${answers[q.id] === q.correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
+            <p class="${answers[q.id] === q.correct ? 'text-green-800' : 'text-red-800'} font-medium mb-1">
+              ${answers[q.id] === q.correct ? '✅ Benar!' : '❌ Kurang tepat!'}
+            </p>
+            <p class="${answers[q.id] === q.correct ? 'text-green-700' : 'text-red-700'} text-sm">${q.explanation}</p>
+          </div>
+        </div>
+      `).join('');
+
+      updateProgress();
+    }
+
+    function getCategoryColor(category) {
+      const colors = {
+        present: 'bg-amber-100 text-amber-800',
+        structure: 'bg-blue-100 text-blue-800',
+        language: 'bg-green-100 text-green-800',
+        explicit: 'bg-purple-100 text-purple-800',
+        synonym: 'bg-rose-100 text-rose-800'
+      };
+      return colors[category] || 'bg-slate-100 text-slate-800';
+    }
+
+    // Handle answer selection
+    function selectAnswer(questionId, selectedIndex, correctIndex) {
+      if (answers[questionId] !== undefined) return;
+      
+      answers[questionId] = selectedIndex;
+      
+      // Update category scores
+      const question = quizData.find(q => q.id === questionId);
+      if (question && selectedIndex === correctIndex) {
+        categoryScores[question.category].correct++;
+      }
+
+      // Re-render the question
+      renderQuiz();
+      
+      // Add animation
+      const questionEl = document.getElementById(`question-${questionId}`);
+      if (questionEl) {
+        questionEl.classList.add(selectedIndex === correctIndex ? 'correct-answer' : 'wrong-answer');
+        setTimeout(() => {
+          questionEl.classList.remove('correct-answer', 'wrong-answer');
+        }, 500);
+      }
+
+      updateTotalScore();
+    }
+
+    // Update progress bar
+    function updateProgress() {
+      const answered = Object.keys(answers).length;
+      const total = quizData.length;
+      const percentage = (answered / total) * 100;
+      
+      const progressBar = document.getElementById('progress-bar');
+      const answeredCount = document.getElementById('answered-count');
+      
+      if (progressBar) progressBar.style.width = `${percentage}%`;
+      if (answeredCount) answeredCount.textContent = answered;
+    }
+
+    // Update total score display
+    function updateTotalScore() {
+      const correct = Object.entries(answers).filter(([qId, ans]) => {
+        const question = quizData.find(q => q.id === parseInt(qId));
+        return question && ans === question.correct;
+      }).length;
+      
+      const totalScore = document.getElementById('total-score');
+      if (totalScore) {
+        totalScore.textContent = `${correct * 2}/${quizData.length * 2}`;
+      }
+    }
+
+    // Update results page
+    function updateResults() {
+      const totalAnswered = Object.keys(answers).length;
+      const correct = Object.entries(answers).filter(([qId, ans]) => {
+        const question = quizData.find(q => q.id === parseInt(qId));
+        return question && ans === question.correct;
+      }).length;
+      const wrong = totalAnswered - correct;
+      const percentage = totalAnswered > 0 ? Math.round((correct / quizData.length) * 100) : 0;
+
+      // Update main stats
+      document.getElementById('correct-count').textContent = correct;
+      document.getElementById('wrong-count').textContent = wrong;
+      document.getElementById('percentage').textContent = `${percentage}%`;
+
+      // Update emoji based on score
+      const emoji = document.getElementById('result-emoji');
+      if (percentage >= 80) {
+        emoji.textContent = '🎉';
+      } else if (percentage >= 60) {
+        emoji.textContent = '😊';
+      } else if (percentage >= 40) {
+        emoji.textContent = '🤔';
+      } else {
+        emoji.textContent = '💪';
+      }
+
+      // Update category bars
+      Object.entries(categoryScores).forEach(([cat, scores]) => {
+        const bar = document.getElementById(`cat-${cat}`);
+        const text = document.getElementById(`cat-${cat}-text`);
+        if (bar && text) {
+          const pct = (scores.correct / scores.total) * 100;
+          bar.style.width = `${pct}%`;
+          text.textContent = `${scores.correct}/${scores.total}`;
+        }
+      });
+
+      // Update feedback
+      const feedbackText = document.getElementById('feedback-text');
+      if (feedbackText) {
+        if (totalAnswered < quizData.length) {
+          feedbackText.textContent = `Kamu baru menjawab ${totalAnswered} dari ${quizData.length} soal. Selesaikan semua soal untuk mendapat feedback lengkap!`;
+        } else if (percentage >= 80) {
+          feedbackText.textContent = 'Luar biasa! 🌟 Kamu sudah memahami materi Analytical Exposition dengan sangat baik. Pertahankan dan terus latihan menulis teks exposition sendiri!';
+        } else if (percentage >= 60) {
+          feedbackText.textContent = 'Bagus! 👍 Pemahaman kamu cukup baik. Pelajari lagi bagian yang masih salah, terutama pada kategori dengan skor rendah.';
+        } else if (percentage >= 40) {
+          feedbackText.textContent = 'Lumayan! 📚 Kamu perlu belajar lebih banyak lagi. Baca ulang materi dan perhatikan contoh teks dengan seksama.';
+        } else {
+          feedbackText.textContent = 'Semangat! 💪 Jangan menyerah! Pelajari kembali materi dari awal dan pahami setiap bagian struktur dan language features.';
+        }
+      }
+    }
+
+    // Reset quiz
+    function resetQuiz() {
+      answers = {};
+      categoryScores = {
+        present: { correct: 0, total: 3 },
+        structure: { correct: 0, total: 3 },
+        language: { correct: 0, total: 3 },
+        explicit: { correct: 0, total: 3 },
+        synonym: { correct: 0, total: 3 }
+      };
+      renderQuiz();
+      updateTotalScore();
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderQuiz();
+      showSection('materi');
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9db07170a5d9cdd1',t:'MTc3MzI5MzgwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
