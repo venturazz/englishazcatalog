@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aiken → DOCX Converter</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+  header{background:linear-gradient(135deg,#1a73e8,#0d47a1);color:#fff;padding:18px 28px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  header h1{font-size:1.3rem;font-weight:700}
+  header p{font-size:.82rem;opacity:.85;margin-top:2px}
+  .container{max-width:960px;margin:28px auto;padding:0 16px}
+  .card{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+  .card h2{font-size:.95rem;font-weight:700;color:#1a73e8;margin-bottom:12px}
+  .format-box{background:#f8f9ff;border:1px solid #d0d7ff;border-radius:8px;padding:14px 16px;font-family:'Courier New',monospace;font-size:.8rem;color:#444;line-height:1.8}
+  .note{font-size:.78rem;color:#777;margin-top:10px;line-height:1.6}
+  label{font-size:.88rem;font-weight:600;color:#555;display:block;margin-bottom:8px}
+  textarea{width:100%;height:280px;padding:14px;font-family:'Courier New',monospace;font-size:.85rem;border:1.5px solid #d1d5db;border-radius:8px;resize:vertical;outline:none;transition:border-color .2s;line-height:1.7}
+  textarea:focus{border-color:#1a73e8}
+  .btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .btn{padding:10px 22px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s}
+  .btn-primary{background:#1a73e8;color:#fff}.btn-primary:hover{background:#1558b0}
+  .btn-success{background:#188038;color:#fff}.btn-success:hover{background:#0f5a28}
+  .btn-outline{background:#fff;color:#555;border:1.5px solid #d1d5db}.btn-outline:hover{background:#f3f4f6}
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .stat-badge{background:#e8f0fe;color:#1a73e8;padding:6px 14px;border-radius:20px;font-size:.82rem;font-weight:600}
+  .q-block{border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:14px;background:#fafafa}
+  .q-num{font-size:.72rem;font-weight:700;color:#999;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+  .q-soal{font-size:.92rem;margin-bottom:10px;line-height:1.55}
+  .q-opts{list-style:none;margin:0 0 10px 4px}
+  .q-opts li{font-size:.88rem;padding:3px 0;display:flex;gap:8px}
+  .q-opts li .letter{font-weight:700;min-width:22px;color:#555}
+  .q-opts li.correct .letter,.q-opts li.correct span{color:#188038;font-weight:600}
+  .q-meta{font-size:.82rem;color:#666;margin-top:5px}
+  .q-meta b{color:#333}
+  .badge-ans{display:inline-block;background:#e6f4ea;color:#188038;padding:2px 10px;border-radius:12px;font-weight:700;font-size:.82rem;margin-left:4px}
+  .alert{padding:12px 16px;border-radius:8px;font-size:.88rem;margin-bottom:14px}
+  .alert-error{background:#fde8e8;color:#c0392b;border:1px solid #f5c6c6}
+  .alert-warn{background:#fff8e1;color:#e65100;border:1px solid #ffe082}
+  .divider{border:none;border-top:1px solid #e5e7eb;margin:18px 0}
+  #result-section,#dl-section{display:none}
+  .footer{text-align:center;font-size:.78rem;color:#aaa;padding:14px 0 28px}
+  .opt-count{display:inline-block;background:#f3e8ff;color:#7b1fa2;padding:2px 8px;border-radius:10px;font-size:.72rem;font-weight:700;margin-left:6px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>📄 Aiken → DOCX Converter</h1>
+    <p>Konversi soal format Aiken standar → Template MCQ Import (.docx)</p>
+  </div>
+</header>
+<div class="container">
+
+  <div class="card">
+    <h2>📋 Format Input — Aiken Standar</h2>
+    <div class="format-box">
+Teks pertanyaan di sini<br>
+A. Pilihan A<br>
+B. Pilihan B<br>
+C. Pilihan C<br>
+D. Pilihan D &nbsp;<span style="color:#bbb">← bisa berhenti di sini (4 opsi)</span><br>
+E. Pilihan E &nbsp;<span style="color:#bbb">← atau sampai sini (5 opsi)</span><br>
+ANSWER: A<br>
+<br>
+Soal berikutnya (hanya 3 opsi)...<br>
+A. ...<br>
+B. ...<br>
+C. ...<br>
+ANSWER: B
+    </div>
+    <p class="note">
+      ✅ Jumlah opsi <b>fleksibel</b> — 2 sampai 5 pilihan, setiap soal bisa berbeda.<br>
+      ✅ Output DOCX: numbering <b>a. b. c. ...</b> restart otomatis tiap soal, hanya opsi yang ada di Aiken yang ditulis.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>✏️ Input Soal Aiken</h2>
+    <label for="inp">Paste soal format Aiken di bawah ini:</label>
+    <textarea id="inp" placeholder="What is the capital of Indonesia?&#10;A. Surabaya&#10;B. Bandung&#10;C. Jakarta&#10;D. Medan&#10;E. Makassar&#10;ANSWER: C&#10;&#10;True or False: The sun rises in the east.&#10;A. True&#10;B. False&#10;ANSWER: A"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="convert()">⚡ Konversi</button>
+      <button class="btn btn-outline" onclick="loadSample()">📄 Contoh</button>
+      <button class="btn btn-outline" onclick="clearAll()">🗑️ Hapus</button>
+    </div>
+  </div>
+
+  <div id="result-section" class="card">
+    <h2>👁️ Preview Hasil</h2>
+    <div id="stats" class="stats"></div>
+    <div id="err"></div>
+    <div id="preview"></div>
+    <hr class="divider">
+    <div id="dl-section">
+      <button class="btn btn-success" onclick="downloadDocx()">⬇️ Download DOCX</button>
+    </div>
+  </div>
+</div>
+<div class="footer">Aiken Converter · Template MCQ Import v1.02</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const SAMPLE = `What is the capital of Indonesia?
+A. Surabaya
+B. Bandung
+C. Jakarta
+D. Medan
+E. Makassar
+ANSWER: C
+
+Which tense is used to describe habits and routines?
+A. Past Simple
+B. Present Continuous
+C. Present Perfect
+D. Present Simple
+ANSWER: D
+
+True or False: Jakarta is the capital of Indonesia.
+A. True
+B. False
+ANSWER: A
+
+The text that aims to persuade the reader is called...
+A. Narrative text
+B. Descriptive text
+C. Analytical Exposition
+ANSWER: C`;
+
+let parsed = [];
+
+function loadSample(){ document.getElementById('inp').value = SAMPLE; }
+function clearAll(){ document.getElementById('inp').value=''; document.getElementById('result-section').style.display='none'; parsed=[]; }
+
+function parseAiken(text){
+  const qs = [];
+  const lines = text.split('\n');
+  let q = null, opts = [], ans = '', waitNew = false;
+
+  function save(){
+    if(q){
+      qs.push({
+        soal: q.trim(),
+        options: [...opts],   // array of {letter, text} in order
+        jawaban: ans.toLowerCase()
+      });
+    }
+    q = null; opts = []; ans = '';
+  }
+
+  for(const raw of lines){
+    const line = raw.trim();
+    if(!line) continue;
+
+    const aM = line.match(/^ANSWER\s*[:=]\s*([A-Ea-e])/i);
+    // Match any letter A-Z (not just A-E) for flexible options
+    const oM = line.match(/^([A-Za-z])[.)]\s+(.*)/);
+
+    if(aM){
+      ans = aM[1];
+      waitNew = true;
+    } else if(oM){
+      // Only treat as option if it's a single letter option line
+      // and we're currently building a question
+      waitNew = false;
+      opts.push({ letter: oM[1].toLowerCase(), text: oM[2].trim() });
+    } else {
+      if(waitNew){ save(); waitNew = false; q = line; }
+      else if(!q){ q = line; }
+      else if(!opts.length){ q += ' ' + line; }
+    }
+  }
+  save();
+  return qs;
+}
+
+function convert(){
+  const raw = document.getElementById('inp').value.trim();
+  const rs  = document.getElementById('result-section');
+  const err = document.getElementById('err');   err.innerHTML = '';
+  const prev= document.getElementById('preview'); prev.innerHTML = '';
+  const st  = document.getElementById('stats');  st.innerHTML = '';
+  const dl  = document.getElementById('dl-section'); dl.style.display = 'none';
+  rs.style.display = 'block';
+
+  if(!raw){ err.innerHTML='<div class="alert alert-error">⚠️ Input kosong.</div>'; return; }
+  parsed = parseAiken(raw);
+  if(!parsed.length){ err.innerHTML='<div class="alert alert-error">❌ Tidak ada soal terdeteksi. Pastikan ada baris <b>ANSWER: X</b>.</div>'; return; }
+
+  st.innerHTML = `<span class="stat-badge">📝 ${parsed.length} Soal</span><span class="stat-badge">✅ Siap download</span>`;
+
+  let warnings = '';
+  let html = '';
+  parsed.forEach((q, i) => {
+    const optCount = q.options.length;
+    if(optCount < 2) warnings += `<div class="alert alert-warn">⚠️ Soal ${i+1} hanya memiliki ${optCount} opsi.</div>`;
+
+    const optsHtml = q.options.map(o => {
+      const c = q.jawaban === o.letter;
+      return `<li class="${c?'correct':''}"><span class="letter">${o.letter}.</span><span>${o.text}</span></li>`;
+    }).join('');
+
+    html += `<div class="q-block">
+      <div class="q-num">Soal ${i+1} <span class="opt-count">${optCount} opsi</span></div>
+      <div class="q-soal">${q.soal}</div>
+      <ul class="q-opts">${optsHtml}</ul>
+      <div class="q-meta"><b>Kunci Jawaban:</b><span class="badge-ans">${q.jawaban.toUpperCase()}</span></div>
+    </div>`;
+  });
+
+  if(warnings) err.innerHTML = warnings;
+  prev.innerHTML = html;
+  dl.style.display = 'block';
+}
+
+function randHex8(){
+  return Math.floor(Math.random() * 0xFFFFFFFF).toString(16).toUpperCase().padStart(8,'0');
+}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function downloadDocx(){
+  if(!parsed.length) return;
+  const n = parsed.length;
+
+  /* ── numbering.xml: one unique abstractNum + numId per question ── */
+  let numXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">`;
+
+  for(let i = 0; i < n; i++){
+    numXml += `
+  <w:abstractNum w:abstractNumId="${i}">
+    <w:nsid w:val="${randHex8()}"/>
+    <w:multiLevelType w:val="singleLevel"/>
+    <w:tmpl w:val="${randHex8()}"/>
+    <w:lvl w:ilvl="0">
+      <w:start w:val="1"/>
+      <w:numFmt w:val="lowerLetter"/>
+      <w:lvlText w:val="%1."/>
+      <w:lvlJc w:val="left"/>
+      <w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr>
+      <w:rPr><w:sz w:val="24"/></w:rPr>
+    </w:lvl>
+  </w:abstractNum>`;
+  }
+  for(let i = 0; i < n; i++){
+    numXml += `
+  <w:num w:numId="${i+1}">
+    <w:abstractNumId w:val="${i}"/>
+  </w:num>`;
+  }
+  numXml += `\n</w:numbering>`;
+
+  /* ── document.xml ── */
+  const boldRun = t => `<w:r><w:rPr><w:b/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
+  const normRun = t => `<w:r><w:rPr><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
+  const labelPara = (label, val) =>
+    `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>${boldRun(label)}${val !== '' ? normRun(' ' + val) : ''}</w:p>`;
+  const optPara = (text, numId) =>
+    `<w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="${numId}"/></w:numPr></w:pPr>${normRun(text)}</w:p>`;
+  const blankPara = () =>
+    `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr></w:p>`;
+
+  let docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>`;
+
+  parsed.forEach((q, i) => {
+    docXml += labelPara('Soal:', q.soal);
+    // Only write options that actually exist in the Aiken input
+    q.options.forEach(o => {
+      docXml += optPara(o.text, i + 1);
+    });
+    docXml += labelPara('Kunci Jawaban:', q.jawaban.toLowerCase());
+    docXml += labelPara('Pembahasan:', '');
+    if(i < n - 1) docXml += blankPara();
+  });
+
+  docXml += `<w:sectPr/></w:body></w:document>`;
+
+  /* ── styles, rels, content-types ── */
+  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:style w:type="paragraph" w:styleId="Normal" w:default="1">
+    <w:name w:val="Normal"/>
+    <w:rPr><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="ListParagraph">
+    <w:name w:val="List Paragraph"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr><w:contextualSpacing/></w:pPr>
+  </w:style>
+</w:styles>`;
+
+  const ctXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml"  ContentType="application/xml"/>
+  <Override PartName="/word/document.xml"  ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
+  <Override PartName="/word/styles.xml"    ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+</Types>`;
+
+  const rootRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+  const wordRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"    Target="styles.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
+</Relationships>`;
+
+  const zip = new JSZip();
+  zip.file('[Content_Types].xml', ctXml);
+  zip.file('_rels/.rels', rootRels);
+  zip.file('word/document.xml', docXml);
+  zip.file('word/numbering.xml', numXml);
+  zip.file('word/styles.xml', stylesXml);
+  zip.file('word/_rels/document.xml.rels', wordRels);
+
+  const blob = await zip.generateAsync({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'aiken_converted.docx';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>
