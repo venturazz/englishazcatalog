@@ -214,7 +214,104 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
     <div class="w-full min-h-100 p-4 sm:p-6" style="background:linear-gradient(180deg,#0F172A,#1E293B)">
      <h2 class="cinzel text-2xl sm:text-3xl text-center mb-6" style="color:var(--gold)">🎨 Customize Groups</h2>
      <div id="customizeCards" class="max-w-3xl mx-auto grid gap-4 sm:grid-cols-2"></div>
-     <div class="text-center mt-6"><button class="btn-fantasy text-lg" onclick="startGame()">⚔️ Begin Quest!</button>
+     <div class="text-center mt-8 pt-6 border-t border-yellow-600/30"><button class="btn-fantasy text-lg" onclick="showBoardGuide()">🎮 Board Guide</button> <button class="btn-fantasy text-lg ml-2" onclick="showPowerUpGuide()">🎒 Power-Ups Guide</button> <button class="btn-fantasy text-lg ml-2" onclick="startGame()">⚔️ Begin Quest!</button>
+     </div>
+    </div>
+   </div><!-- POWER-UP GUIDE MODAL -->
+   <div id="powerUpGuideModal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4" style="background:rgba(0,0,0,0.85)">
+    <div class="rounded-2xl p-8" style="background:linear-gradient(135deg,#1E293B,#0F172A);border:3px solid var(--gold);width:95%;max-width:900px;max-height:90vh;overflow-y:auto">
+     <h2 class="cinzel text-3xl text-center mb-6" style="color:var(--gold)">🎒 Power-Ups Guide</h2>
+     <div id="puGuideGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"></div>
+     <div class="text-center"><button class="btn-fantasy" onclick="closePowerUpGuide()">✓ Got It!</button>
+     </div>
+    </div>
+   </div><!-- BOARD GUIDE MODAL -->
+   <div id="boardGuideModal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4" style="background:rgba(0,0,0,0.85)">
+    <div class="rounded-2xl p-8" style="background:linear-gradient(135deg,#1E293B,#0F172A);border:3px solid var(--gold);width:95%;max-width:900px;max-height:90vh;overflow-y:auto">
+     <h2 class="cinzel text-3xl text-center mb-6" style="color:var(--gold)">🎮 Board Guide</h2>
+     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#10B981,#059669);border:2px solid #10B981">
+       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🪜</span>
+        <div class="font-bold text-lg" style="color:white">
+         Ladder
+        </div>
+       </div>
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
+        <strong>Climb Forward!</strong> When you land on a ladder square, you automatically climb up to a higher square. Gain +5 bonus points for climbing!
+       </div>
+      </div>
+      <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#DC2626,#991B1B);border:2px solid #DC2626">
+       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🐍</span>
+        <div class="font-bold text-lg" style="color:white">
+         Snake
+        </div>
+       </div>
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
+        <strong>Slide Back!</strong> When you land on a snake head, you slide down to its tail. Use your Shield power-up to block the slide, or hope your character has snake immunity!
+       </div>
+      </div>
+      <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#F59E0B,#D97706);border:2px solid #F59E0B">
+       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">⭐</span>
+        <div class="font-bold text-lg" style="color:#0F172A">
+         Bonus Star
+        </div>
+       </div>
+       <div class="text-sm" style="color:#0F172A">
+        <strong>Double Luck!</strong> Land here to roll the dice twice next turn — roll one extra time! You also earn a Shield power-up to help block snakes.
+       </div>
+      </div>
+      <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);border:2px solid #8B5CF6">
+       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🔄</span>
+        <div class="font-bold text-lg" style="color:white">
+         Challenge Square
+        </div>
+       </div>
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
+        <strong>Extra Reward!</strong> Landing here earns you a Sabotage power-up to send a rival back 3 squares. Challenge squares test your skill!
+       </div>
+      </div>
+      <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#EF4444,#DC2626);border:2px solid #EF4444">
+       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🎯</span>
+        <div class="font-bold text-lg" style="color:white">
+         HOTS Square
+        </div>
+       </div>
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
+        <strong>Double Points!</strong> Land on a HOTS square and all question points are doubled! Answer correctly and earn 2x the normal bonus. HOTS = Higher Order Thinking Skills.
+       </div>
+      </div>
+      <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#06B6D4,#0891B2);border:2px solid #06B6D4">
+       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🤝</span>
+        <div class="font-bold text-lg" style="color:white">
+         Kolaborasi
+        </div>
+       </div>
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
+        <strong>Team Bonus!</strong> A collaboration square where teamwork is rewarded. All groups benefit with +3 bonus points when anyone lands here!
+       </div>
+      </div>
+      <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#22D3EE,#06B6D4);border:2px solid #22D3EE">
+       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">⏭️</span>
+        <div class="font-bold text-lg" style="color:#0F172A">
+         Free Pass
+        </div>
+       </div>
+       <div class="text-sm" style="color:#0F172A">
+        <strong>Skip Questions!</strong> Land here to earn a free pass. Use it to skip your next question and move forward without answering!
+       </div>
+      </div>
+      <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#3B82F6,#2563EB);border:2px solid #3B82F6">
+       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">□</span>
+        <div class="font-bold text-lg" style="color:white">
+         Normal Square
+        </div>
+       </div>
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
+        <strong>Safe Zone!</strong> Regular squares are safe. Land here and get ready to answer your next question. No special effects — just a moment to prepare!
+       </div>
+      </div>
+     </div>
+     <div class="text-center"><button class="btn-fantasy" onclick="closeBoardGuide()">✓ Ready to Play!</button>
      </div>
     </div>
    </div><!-- SCREEN 6: GAME BOARD -->
@@ -719,6 +816,9 @@ function buildCustomizeUI(){
           <div class="font-bold text-lg" style="color:var(--gold)">${g.char.name}</div>
           <div class="text-xs" style="color:var(--emerald)">${g.char.ability}</div>
         </div>
+      </div>
+      <div class="mb-3 p-2 rounded text-xs" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);color:var(--text-light)">
+        <strong>Ability:</strong> ${g.char.desc}
       </div>
       <div class="mb-2">
         <label class="text-sm font-bold" style="color:var(--text-light)" for="gname_${i}">Group Name</label>
@@ -1459,6 +1559,40 @@ function playAgain(){
   createParticles();
 }
 
+function showPowerUpGuide(){
+  const modal = document.getElementById('powerUpGuideModal');
+  modal.classList.remove('hidden');
+  const grid = document.getElementById('puGuideGrid');
+  grid.innerHTML='';
+  POWER_UPS.forEach(pu=>{
+    const card = document.createElement('div');
+    card.className='rounded-xl p-4';
+    card.style.cssText='background:rgba(139,92,246,0.1);border:2px solid rgba(139,92,246,0.3)';
+    card.innerHTML=`
+      <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">${pu.emoji}</span>
+        <div class="font-bold" style="color:var(--gold)">${pu.name}</div>
+      </div>
+      <div class="text-sm mb-2" style="color:var(--text-light)">${pu.desc}</div>
+      <div class="text-xs" style="color:var(--emerald)">📌 ${pu.earn}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function closePowerUpGuide(){
+  document.getElementById('powerUpGuideModal').classList.add('hidden');
+}
+
+function showBoardGuide(){
+  const modal = document.getElementById('boardGuideModal');
+  modal.classList.remove('hidden');
+}
+
+function closeBoardGuide(){
+  document.getElementById('boardGuideModal').classList.add('hidden');
+}
+
 // ===================== ELEMENT SDK =====================
 const defaultConfig = {
   game_title: 'WILD QUEST',
@@ -1521,5 +1655,5 @@ if(window.elementSdk){
 createParticles();
 updatePresetSelect();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e8eabf6a5ed409b',t:'MTc3NTYyNDA0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e8ee40c11171d47',t:'MTc3NTYyNjMzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
