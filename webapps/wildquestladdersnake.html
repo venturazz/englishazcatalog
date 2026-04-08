@@ -148,6 +148,14 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
      <div class="max-w-2xl mx-auto mb-4">
       <div id="qStats" class="flex flex-wrap gap-3 mb-3"></div>
       <div id="qErrors" class="text-sm max-h-40 overflow-y-auto" style="color:var(--crimson)"></div>
+     </div><!-- Reattempt Option -->
+     <div class="max-w-2xl mx-auto mb-4 flex items-center gap-3 px-4 py-3 rounded-xl" style="background:rgba(139,92,246,0.1);border:2px solid rgba(139,92,246,0.3)"><input type="checkbox" id="reattemptToggle" checked class="w-5 h-5 accent-purple-500" style="cursor:pointer"> <label for="reattemptToggle" class="flex-1 cursor-pointer" style="color:var(--text-light)">
+       <div class="font-bold">
+        🔄 Allow Reattempting Unsolved Questions
+       </div>
+       <div class="text-xs opacity-75">
+        Questions answered incorrectly can appear again later in the game
+       </div></label>
      </div>
      <div class="max-w-2xl mx-auto flex justify-between items-center"><span id="validCount" class="font-bold" style="color:var(--emerald)">0 valid questions</span> <button id="proceedBtn" class="btn-fantasy" disabled onclick="showScreen('setupScreen')">PROCEED ➜</button>
      </div>
@@ -358,7 +366,8 @@ let G = {
   diffFilter:'ALL', paused:false, currentQ:null, timerInterval:null,
   timeLeft:0, phase:'splash', usedChars:[], turnBonusDice:false,
   audioCtx:null, bgmGain:null, sfxGain:null, muted:false,
-  questionPool:[], askedIndices:new Set(), kolabActive:false, randomizeQuestions:true
+  questionPool:[], askedIndices:new Set(), kolabActive:false, randomizeQuestions:true,
+  allowReattempt:true, unsolvedQuestions:[]
 };
 
 // ===================== AUDIO (Web Audio API) =====================
@@ -750,6 +759,8 @@ function startGame(){
   G.askedIndices = new Set();
   G.currentGroup = 0;
   G.paused = false;
+  G.allowReattempt = document.getElementById('reattemptToggle').checked;
+  G.unsolvedQuestions = [];
   
   // Generate dynamic snakes and ladders for this game
   generateSnakesAndLadders();
@@ -934,10 +945,21 @@ function showDiceModal(roll, callback){
 // ===================== QUESTIONS =====================
 function getNextQuestion(){
   if(!G.randomizeQuestions){
-    // Sequential mode: just return the next unasked question
+    // Sequential mode with reattempt support
+    if(G.allowReattempt && G.unsolvedQuestions.length > 0 && Math.random() > 0.5){
+      // 50% chance to pick from unsolved if available
+      const unsolvedIdx = Math.floor(Math.random() * G.unsolvedQuestions.length);
+      const q = G.unsolvedQuestions[unsolvedIdx];
+      return q;
+    }
+    
     const nextIdx = Array.from({length:G.questionPool.length}).findIndex((_,i)=>!G.askedIndices.has(i));
     if(nextIdx === -1){
-      // All asked, reset and return first
+      // All asked, reset and return first (or use unsolved pool)
+      if(G.allowReattempt && G.unsolvedQuestions.length > 0){
+        G.askedIndices.clear();
+        return G.unsolvedQuestions[Math.floor(Math.random() * G.unsolvedQuestions.length)];
+      }
       G.askedIndices.clear();
       return G.questionPool[0];
     }
@@ -945,10 +967,19 @@ function getNextQuestion(){
     return G.questionPool[nextIdx];
   }
   
-  // Randomize mode: pick random unasked question
+  // Randomize mode with reattempt support
+  if(G.allowReattempt && G.unsolvedQuestions.length > 0 && Math.random() > 0.5){
+    // 50% chance to pick from unsolved if available
+    const unsolvedIdx = Math.floor(Math.random() * G.unsolvedQuestions.length);
+    return G.unsolvedQuestions[unsolvedIdx];
+  }
+  
   const pool = G.questionPool.filter((_,i)=>!G.askedIndices.has(i));
   if(pool.length===0){
     G.askedIndices.clear();
+    if(G.allowReattempt && G.unsolvedQuestions.length > 0){
+      return G.unsolvedQuestions[Math.floor(Math.random() * G.unsolvedQuestions.length)];
+    }
     const available = G.questionPool;
     if(available.length===0) return null;
     const q = available[Math.floor(Math.random()*available.length)];
@@ -987,7 +1018,7 @@ function askQuestion(diceRoll){
   // Choices
   const choicesDiv = document.getElementById('qChoices');
   choicesDiv.innerHTML='';
-  let choiceKeys = ['A','B','C','D'];
+  let choiceKeys = ['A','B','C','D','E'];
 
   // Hint power-up: show only 2 choices
   const hasHint = g.powerups.find(p=>p.id==='hint');
@@ -1086,6 +1117,9 @@ function answerQuestion(chosen, btn){
 
     resultDiv.innerHTML = `<span style="color:var(--emerald)">✅ Correct! +${pts}pts${speedPts?' ⚡+'+speedPts+'speed':''}</span>`;
 
+    // Remove from unsolved if it was there
+    G.unsolvedQuestions = G.unsolvedQuestions.filter(uq => uq.index !== q.index);
+
     // Streak
     g.streak++;
     // Wolf: 2 streak = bonus dice
@@ -1114,6 +1148,12 @@ function answerQuestion(chosen, btn){
     const penalty = g.char.ability==='ToughHide'?0:0; // Wrong = 0 per spec
     g.score += penalty;
     g.streak = 0;
+    
+    // Add to unsolved if reattempt enabled
+    if(G.allowReattempt && !G.unsolvedQuestions.find(uq => uq.index === q.index)){
+      G.unsolvedQuestions.push(q);
+    }
+    
     resultDiv.innerHTML = `<span style="color:var(--crimson)">❌ Wrong! Answer: ${q.answer}. Turn skipped.</span>`;
     setTimeout(()=>{
       document.getElementById('questionModal').classList.add('hidden');
@@ -1481,5 +1521,5 @@ if(window.elementSdk){
 createParticles();
 updatePresetSelect();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e8e5ca243fb6be8',t:'MTc3NTYyMDc5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e8eabf6a5ed409b',t:'MTc3NTYyNDA0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
