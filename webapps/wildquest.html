@@ -43,12 +43,16 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
 .board-grid.size-50{width:100%;height:100%;aspect-ratio:1/1;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(5,1fr)}
 .board-cell{position:relative;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;border-radius:2px;transition:all 0.2s;border:1px solid rgba(255,255,255,0.15);min-width:0;min-height:0}
 .board-cell .cell-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1rem;opacity:0.95;font-weight:900;color:#ffffff}
-.board-cell .pawn-container{display:flex;flex-wrap:wrap;gap:2px;font-size:2.5rem;position:absolute;inset:0;width:100%;height:100%;align-items:center;justify-content:center}
+.board-cell .pawn-container{display:flex;flex-wrap:wrap;gap:2px;position:absolute;inset:0;width:100%;height:100%;align-items:center;justify-content:center}
+.board-cell .pawn-container span{font-size:inherit}
 @media(min-width:1024px){
-  .board-cell .pawn-container{font-size:4.5rem}
+  .board-cell .pawn-container{font-size:4.5rem !important}
 }
 @media(max-width:767px){
   .board-cell .pawn-container{font-size:2.8rem}
+}
+@media(min-width:768px) and (max-width:1023px){
+  .board-cell .pawn-container{font-size:3.5rem}
 }
 /* Scrollbar */
 ::-webkit-scrollbar{width:6px}
@@ -107,7 +111,8 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
-  <div class="app-root" id="appRoot"><!-- SCREEN 1: SPLASH -->
+  <div class="app-root" id="appRoot">
+   <!-- SCREEN 1: SPLASH -->
    <div class="screen active" id="splashScreen">
     <div class="relative flex flex-col items-center justify-center w-full h-full overflow-hidden" style="height:100%;background:radial-gradient(ellipse at center,#1a1a3e 0%,#0F172A 70%);overflow-y:auto">
      <div id="particleContainer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
@@ -120,34 +125,34 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
       <div class="rounded-2xl p-6 mt-8 text-left" style="background:rgba(30,41,59,0.7);border:2px solid rgba(245,158,11,0.3);max-width:600px;margin:0 auto">
        <h2 class="cinzel text-2xl font-bold mb-4" style="color:var(--gold);text-align:center">🎮 How to Play</h2>
        <div class="space-y-3 text-sm" style="color:var(--text-light);line-height:1.7">
-        <div class="flex gap-3"><span class="text-lg flex-shrink-0">📝</span>
-         <div>
-          <strong>Upload Questions:</strong> Import Aiken-formatted MCQ files to create your question bank
+        <div class="flex gap-3">
+         <span class="text-lg flex-shrink-0">📝</span>
+         <div><strong>Upload Questions:</strong> Import Aiken-formatted MCQ files to create your question bank
          </div>
         </div>
-        <div class="flex gap-3"><span class="text-lg flex-shrink-0">🎭</span>
-         <div>
-          <strong>Spin Characters:</strong> Each group gets a unique character with special abilities
+        <div class="flex gap-3">
+         <span class="text-lg flex-shrink-0">🎭</span>
+         <div><strong>Spin Characters:</strong> Each group gets a unique character with special abilities
          </div>
         </div>
-        <div class="flex gap-3"><span class="text-lg flex-shrink-0">🎲</span>
-         <div>
-          <strong>Roll &amp; Answer:</strong> Roll dice, move forward, and answer questions to progress
+        <div class="flex gap-3">
+         <span class="text-lg flex-shrink-0">🎲</span>
+         <div><strong>Roll &amp; Answer:</strong> Roll dice, move forward, and answer questions to progress
          </div>
         </div>
-        <div class="flex gap-3"><span class="text-lg flex-shrink-0">🐍🪜</span>
-         <div>
-          <strong>Snakes &amp; Ladders:</strong> Snakes slide you back, ladders boost you forward — positions randomize each game
+        <div class="flex gap-3">
+         <span class="text-lg flex-shrink-0">🐍🪜</span>
+         <div><strong>Snakes &amp; Ladders:</strong> Snakes slide you back, ladders boost you forward — positions randomize each game
          </div>
         </div>
-        <div class="flex gap-3"><span class="text-lg flex-shrink-0">⭐</span>
-         <div>
-          <strong>Earn Power-ups:</strong> Correct answers unlock shields, hints, and special moves
+        <div class="flex gap-3">
+         <span class="text-lg flex-shrink-0">⭐</span>
+         <div><strong>Earn Power-ups:</strong> Correct answers unlock shields, hints, and special moves
          </div>
         </div>
-        <div class="flex gap-3"><span class="text-lg flex-shrink-0">🏆</span>
-         <div>
-          <strong>Reach Finish:</strong> First to square 100 wins! Highest score determines final rankings
+        <div class="flex gap-3">
+         <span class="text-lg flex-shrink-0">🏆</span>
+         <div><strong>Reach Finish:</strong> First to square 100 wins! Highest score determines final rankings
          </div>
         </div>
        </div>
@@ -158,16 +163,19 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
    <div class="screen" id="importScreen">
     <div class="w-full min-h-100 p-4 sm:p-6" style="background:linear-gradient(180deg,#0F172A,#1E293B)">
      <h2 class="cinzel text-2xl sm:text-3xl text-center mb-6" style="color:var(--gold)">📜 Import Questions</h2><!-- Preset Management -->
-     <div class="max-w-2xl mx-auto mb-4 flex flex-wrap gap-2 items-center"><input id="presetName" class="input-fantasy flex-1" placeholder="Preset name..." style="min-width:120px;max-width:200px"> <button class="btn-fantasy text-sm py-2 px-4" onclick="savePreset()">💾 Save</button> <select id="presetSelect" class="input-fantasy flex-1" style="min-width:120px;max-width:200px" onchange="loadPreset()"> <option value="">Load preset...</option> </select> <button class="btn-fantasy text-sm py-2 px-4" onclick="deletePreset()">🗑️</button>
+     <div class="max-w-2xl mx-auto mb-4 flex flex-wrap gap-2 items-center">
+      <input id="presetName" class="input-fantasy flex-1" placeholder="Preset name..." style="min-width:120px;max-width:200px"> <button class="btn-fantasy text-sm py-2 px-4" onclick="savePreset()">💾 Save</button> <select id="presetSelect" class="input-fantasy flex-1" style="min-width:120px;max-width:200px" onchange="loadPreset()"> <option value="">Load preset...</option> </select> <button class="btn-fantasy text-sm py-2 px-4" onclick="deletePreset()">🗑️</button>
      </div><!-- Drop Zone -->
-     <div id="dropZone" class="max-w-2xl mx-auto border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all mb-4" style="border-color:rgba(245,158,11,0.4);background:rgba(30,41,59,0.5);color:var(--text-light)" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" ondragleave="this.style.borderColor='rgba(245,158,11,0.4)'" ondrop="handleFileDrop(event)"><input type="file" id="fileInput" accept=".txt" class="hidden" onchange="handleFileSelect(event)">
+     <div id="dropZone" class="max-w-2xl mx-auto border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all mb-4" style="border-color:rgba(245,158,11,0.4);background:rgba(30,41,59,0.5);color:var(--text-light)" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" ondragleave="this.style.borderColor='rgba(245,158,11,0.4)'" ondrop="handleFileDrop(event)">
+      <input type="file" id="fileInput" accept=".txt" class="hidden" onchange="handleFileSelect(event)">
       <div class="text-4xl mb-2">
        📁
       </div>
       <p class="font-bold text-lg">Drag &amp; Drop .txt file here</p>
       <p class="text-sm opacity-70 mt-1">or click to browse — Aiken format</p>
      </div><!-- Paste Area -->
-     <div class="max-w-2xl mx-auto mb-4"><label for="pasteArea" class="block mb-1 font-bold" style="color:var(--gold)">Or paste Aiken text:</label> <textarea id="pasteArea" class="input-fantasy w-full" rows="8" placeholder="Paste your Aiken formatted questions here...
+     <div class="max-w-2xl mx-auto mb-4">
+      <label for="pasteArea" class="block mb-1 font-bold" style="color:var(--gold)">Or paste Aiken text:</label> <textarea id="pasteArea" class="input-fantasy w-full" rows="8" placeholder="Paste your Aiken formatted questions here...
 Example:
 What is 2+2?
 A. 3
@@ -180,7 +188,8 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
       <div id="qStats" class="flex flex-wrap gap-3 mb-3"></div>
       <div id="qErrors" class="text-sm max-h-40 overflow-y-auto" style="color:var(--crimson)"></div>
      </div><!-- Reattempt Option -->
-     <div class="max-w-2xl mx-auto mb-4 flex items-center gap-3 px-4 py-3 rounded-xl" style="background:rgba(139,92,246,0.1);border:2px solid rgba(139,92,246,0.3)"><input type="checkbox" id="reattemptToggle" checked class="w-5 h-5 accent-purple-500" style="cursor:pointer"> <label for="reattemptToggle" class="flex-1 cursor-pointer" style="color:var(--text-light)">
+     <div class="max-w-2xl mx-auto mb-4 flex items-center gap-3 px-4 py-3 rounded-xl" style="background:rgba(139,92,246,0.1);border:2px solid rgba(139,92,246,0.3)">
+      <input type="checkbox" id="reattemptToggle" checked class="w-5 h-5 accent-purple-500" style="cursor:pointer"> <label for="reattemptToggle" class="flex-1 cursor-pointer" style="color:var(--text-light)">
        <div class="font-bold">
         🔄 Allow Reattempting Unsolved Questions
        </div>
@@ -188,7 +197,8 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
         Questions answered incorrectly can appear again later in the game
        </div></label>
      </div>
-     <div class="max-w-2xl mx-auto flex justify-between items-center"><span id="validCount" class="font-bold" style="color:var(--emerald)">0 valid questions</span> <button id="proceedBtn" class="btn-fantasy" disabled onclick="showScreen('setupScreen')">PROCEED ➜</button>
+     <div class="max-w-2xl mx-auto flex justify-between items-center">
+      <span id="validCount" class="font-bold" style="color:var(--emerald)">0 valid questions</span> <button id="proceedBtn" class="btn-fantasy" disabled onclick="showScreen('setupScreen')">PROCEED ➜</button>
      </div>
     </div>
    </div><!-- SCREEN 3: SETUP -->
@@ -196,24 +206,27 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
     <div class="w-full min-h-100 p-4 sm:p-6" style="background:linear-gradient(180deg,#0F172A,#1E293B)">
      <h2 class="cinzel text-2xl sm:text-3xl text-center mb-6" style="color:var(--gold)">⚙️ Quest Setup</h2>
      <div class="max-w-lg mx-auto space-y-5">
-      <div><label for="groupCount" class="block font-bold mb-2" style="color:var(--gold)">Number of Groups</label> <input type="range" id="groupCount" min="2" max="10" value="4" class="w-full accent-yellow-500" oninput="document.getElementById('gcVal').textContent=this.value">
-       <div class="flex justify-between text-sm mt-1" style="color:var(--text-light)">
-        <span>2</span><span id="gcVal" class="font-bold" style="color:var(--gold)">4</span><span>10</span>
+      <div>
+       <label for="groupCount" class="block font-bold mb-2" style="color:var(--gold)">Number of Groups</label> <input type="range" id="groupCount" min="2" max="10" value="4" class="w-full accent-yellow-500" oninput="document.getElementById('gcVal').textContent=this.value">
+       <div class="flex justify-between text-sm mt-1" style="color:var(--text-light)"><span>2</span><span id="gcVal" class="font-bold" style="color:var(--gold)">4</span><span>10</span>
        </div>
       </div>
-      <div><label class="block font-bold mb-2" style="color:var(--gold)">🎲 Board Speed Mode</label>
+      <div>
+       <label class="block font-bold mb-2" style="color:var(--gold)">🎲 Board Speed Mode</label>
        <div id="speedBtns" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
-       <div class="text-xs mt-2 p-2 rounded" style="background:rgba(255,255,255,0.05);color:var(--text-light)">
-        <span id="speedDesc"></span>
+       <div class="text-xs mt-2 p-2 rounded" style="background:rgba(255,255,255,0.05);color:var(--text-light)"><span id="speedDesc"></span>
        </div>
       </div>
-      <div><label class="font-bold" style="color:var(--gold)">⚡ Speed Bonus</label> <button id="speedToggle" class="w-14 h-7 rounded-full relative transition-all cursor-pointer" style="background:var(--emerald)" onclick="toggleSpeed()">
+      <div>
+       <label class="font-bold" style="color:var(--gold)">⚡ Speed Bonus</label> <button id="speedToggle" class="w-14 h-7 rounded-full relative transition-all cursor-pointer" style="background:var(--emerald)" onclick="toggleSpeed()">
         <div id="speedDot" class="absolute top-0.5 w-6 h-6 bg-white rounded-full transition-all" style="left:calc(100% - 26px)"></div></button>
       </div>
-      <div class="flex items-center justify-between"><label class="font-bold" style="color:var(--gold)">🔀 Randomize Questions</label> <button id="randomToggle" class="w-14 h-7 rounded-full relative transition-all cursor-pointer" style="background:var(--emerald)" onclick="toggleRandomize()">
+      <div class="flex items-center justify-between">
+       <label class="font-bold" style="color:var(--gold)">🔀 Randomize Questions</label> <button id="randomToggle" class="w-14 h-7 rounded-full relative transition-all cursor-pointer" style="background:var(--emerald)" onclick="toggleRandomize()">
         <div id="randomDot" class="absolute top-0.5 w-6 h-6 bg-white rounded-full transition-all" style="left:calc(100% - 26px)"></div></button>
       </div>
-      <div class="pt-4 text-center"><button class="btn-fantasy text-lg" onclick="startCharSpin()">🎰 Spin Characters!</button>
+      <div class="pt-4 text-center">
+       <button class="btn-fantasy text-lg" onclick="startCharSpin()">🎰 Spin Characters!</button>
       </div>
      </div>
     </div>
@@ -223,7 +236,8 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
      <h2 class="cinzel text-2xl sm:text-3xl text-center mb-4" style="color:var(--gold)">🎰 Character Spin</h2>
      <div id="spinInfo" class="text-lg font-bold mb-4" style="color:var(--text-light)"></div>
      <div id="wheelContainer" class="relative w-64 h-64 sm:w-80 sm:h-80 mb-6">
-      <div id="wheel" class="w-full h-full rounded-full border-4 flex items-center justify-center text-6xl transition-transform" style="border-color:var(--gold);background:conic-gradient(#EF4444,#F59E0B,#10B981,#3B82F6,#8B5CF6,#EC4899,#14B8A6,#F97316,#6366F1,#84CC16)"><span id="wheelEmoji" class="text-7xl">❓</span>
+      <div id="wheel" class="w-full h-full rounded-full border-4 flex items-center justify-center text-6xl transition-transform" style="border-color:var(--gold);background:conic-gradient(#EF4444,#F59E0B,#10B981,#3B82F6,#8B5CF6,#EC4899,#14B8A6,#F97316,#6366F1,#84CC16)">
+       <span id="wheelEmoji" class="text-7xl">❓</span>
       </div>
       <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 text-3xl">
        ▼
@@ -243,7 +257,8 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
     <div class="w-full min-h-100 p-4 sm:p-6" style="background:linear-gradient(180deg,#0F172A,#1E293B)">
      <h2 class="cinzel text-2xl sm:text-3xl text-center mb-6" style="color:var(--gold)">🎨 Customize Groups</h2>
      <div id="customizeCards" class="max-w-3xl mx-auto grid gap-4 sm:grid-cols-2"></div>
-     <div class="text-center mt-8 pt-6 border-t border-yellow-600/30"><button class="btn-fantasy text-lg" onclick="showBoardGuide()">🎮 Board Guide</button> <button class="btn-fantasy text-lg ml-2" onclick="showPowerUpGuide()">🎒 Power-Ups Guide</button> <button class="btn-fantasy text-lg ml-2" onclick="startGame()">⚔️ Begin Quest!</button>
+     <div class="text-center mt-8 pt-6 border-t border-yellow-600/30">
+      <button class="btn-fantasy text-lg" onclick="showBoardGuide()">🎮 Board Guide</button> <button class="btn-fantasy text-lg ml-2" onclick="showPowerUpGuide()">🎒 Power-Ups Guide</button> <button class="btn-fantasy text-lg ml-2" onclick="startGame()">⚔️ Begin Quest!</button>
      </div>
     </div>
    </div><!-- POWER-UP GUIDE MODAL -->
@@ -251,7 +266,8 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
     <div class="rounded-2xl p-8" style="background:linear-gradient(135deg,#1E293B,#0F172A);border:3px solid var(--gold);width:95%;max-width:900px;max-height:90vh;overflow-y:auto">
      <h2 class="cinzel text-3xl text-center mb-6" style="color:var(--gold)">🎒 Power-Ups Guide</h2>
      <div id="puGuideGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"></div>
-     <div class="text-center"><button class="btn-fantasy" onclick="closePowerUpGuide()">✓ Got It!</button>
+     <div class="text-center">
+      <button class="btn-fantasy" onclick="closePowerUpGuide()">✓ Got It!</button>
      </div>
     </div>
    </div><!-- BOARD GUIDE MODAL -->
@@ -260,94 +276,97 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
      <h2 class="cinzel text-3xl text-center mb-6" style="color:var(--gold)">🎮 Board Guide</h2>
      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
       <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#10B981,#059669);border:2px solid #10B981">
-       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🪜</span>
+       <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">🪜</span>
         <div class="font-bold text-lg" style="color:white">
          Ladder
         </div>
        </div>
-       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
-        <strong>Climb Forward!</strong> When you land on a ladder square, you automatically climb up to a higher square. Gain +5 bonus points for climbing!
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)"><strong>Climb Forward!</strong> When you land on a ladder square, you automatically climb up to a higher square. Gain +5 bonus points for climbing!
        </div>
       </div>
       <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#DC2626,#991B1B);border:2px solid #DC2626">
-       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🐍</span>
+       <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">🐍</span>
         <div class="font-bold text-lg" style="color:white">
          Snake
         </div>
        </div>
-       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
-        <strong>Slide Back!</strong> When you land on a snake head, you slide down to its tail. Use your Shield power-up to block the slide, or hope your character has snake immunity!
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)"><strong>Slide Back!</strong> When you land on a snake head, you slide down to its tail. Use your Shield power-up to block the slide, or hope your character has snake immunity!
        </div>
       </div>
       <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#F59E0B,#D97706);border:2px solid #F59E0B">
-       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">⭐</span>
+       <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">⭐</span>
         <div class="font-bold text-lg" style="color:#0F172A">
          Bonus Star
         </div>
        </div>
-       <div class="text-sm" style="color:#0F172A">
-        <strong>Double Luck!</strong> Land here to roll the dice twice next turn — roll one extra time! You also earn a Shield power-up to help block snakes.
+       <div class="text-sm" style="color:#0F172A"><strong>Double Luck!</strong> Land here to roll the dice twice next turn — roll one extra time! You also earn a Shield power-up to help block snakes.
        </div>
       </div>
       <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);border:2px solid #8B5CF6">
-       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🔄</span>
+       <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">🔄</span>
         <div class="font-bold text-lg" style="color:white">
          Challenge Square
         </div>
        </div>
-       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
-        <strong>Extra Reward!</strong> Landing here earns you a Sabotage power-up to send a rival back 3 squares. Challenge squares test your skill!
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)"><strong>Extra Reward!</strong> Landing here earns you a Sabotage power-up to send a rival back 3 squares. Challenge squares test your skill!
        </div>
       </div>
       <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#EF4444,#DC2626);border:2px solid #EF4444">
-       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🎯</span>
+       <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">🎯</span>
         <div class="font-bold text-lg" style="color:white">
          HOTS Square
         </div>
        </div>
-       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
-        <strong>Double Points!</strong> Land on a HOTS square and all question points are doubled! Answer correctly and earn 2x the normal bonus. HOTS = Higher Order Thinking Skills.
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)"><strong>Double Points!</strong> Land on a HOTS square and all question points are doubled! Answer correctly and earn 2x the normal bonus. HOTS = Higher Order Thinking Skills.
        </div>
       </div>
       <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#06B6D4,#0891B2);border:2px solid #06B6D4">
-       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">🤝</span>
+       <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">🤝</span>
         <div class="font-bold text-lg" style="color:white">
          Kolaborasi
         </div>
        </div>
-       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
-        <strong>Team Bonus!</strong> A collaboration square where teamwork is rewarded. All groups benefit with +3 bonus points when anyone lands here!
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)"><strong>Team Bonus!</strong> A collaboration square where teamwork is rewarded. All groups benefit with +3 bonus points when anyone lands here!
        </div>
       </div>
       <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#22D3EE,#06B6D4);border:2px solid #22D3EE">
-       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">⏭️</span>
+       <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">⏭️</span>
         <div class="font-bold text-lg" style="color:#0F172A">
          Free Pass
         </div>
        </div>
-       <div class="text-sm" style="color:#0F172A">
-        <strong>Skip Questions!</strong> Land here to earn a free pass. Use it to skip your next question and move forward without answering!
+       <div class="text-sm" style="color:#0F172A"><strong>Skip Questions!</strong> Land here to earn a free pass. Use it to skip your next question and move forward without answering!
        </div>
       </div>
       <div class="rounded-xl p-4" style="background:linear-gradient(135deg,#3B82F6,#2563EB);border:2px solid #3B82F6">
-       <div class="flex items-center gap-3 mb-2"><span class="text-4xl">□</span>
+       <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">□</span>
         <div class="font-bold text-lg" style="color:white">
          Normal Square
         </div>
        </div>
-       <div class="text-sm" style="color:rgba(255,255,255,0.95)">
-        <strong>Safe Zone!</strong> Regular squares are safe. Land here and get ready to answer your next question. No special effects — just a moment to prepare!
+       <div class="text-sm" style="color:rgba(255,255,255,0.95)"><strong>Safe Zone!</strong> Regular squares are safe. Land here and get ready to answer your next question. No special effects — just a moment to prepare!
        </div>
       </div>
      </div>
-     <div class="text-center"><button class="btn-fantasy" onclick="closeBoardGuide()">✓ Ready to Play!</button>
+     <div class="text-center">
+      <button class="btn-fantasy" onclick="closeBoardGuide()">✓ Ready to Play!</button>
      </div>
     </div>
    </div><!-- SCREEN 6: GAME BOARD -->
    <div class="screen" id="gameScreen">
-    <div class="w-full h-full flex flex-col" style="background:linear-gradient(180deg,#0F172A,#1E293B)"><!-- Top Bar: Live Scores -->
+    <div class="w-full h-full flex flex-col" style="background:linear-gradient(180deg,#0F172A,#1E293B)">
+     <!-- Top Bar: Live Scores -->
      <div id="liveScoreBar" class="w-full overflow-x-auto p-2 sm:p-3 flex gap-2 sm:gap-3 flex-shrink-0" style="background:rgba(0,0,0,0.5);border-bottom:2px solid rgba(245,158,11,0.2);min-height:70px;scroll-behavior:smooth"></div><!-- Main Content: Board Center + Side Controls -->
-     <div class="game-container flex-1 p-2 sm:p-3 md:p-4 overflow-hidden"><!-- Left Panel: Turn Info & Power-ups -->
+     <div class="game-container flex-1 p-2 sm:p-3 md:p-4 overflow-hidden">
+      <!-- Left Panel: Turn Info & Power-ups -->
       <div class="left-panel">
        <div id="turnInfo" class="p-3 rounded-xl text-center flex-shrink-0 w-full md:w-auto" style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.05));border:2px solid rgba(245,158,11,0.4);min-width:180px">
         <div id="turnText" class="font-bold text-sm md:text-base" style="color:var(--gold)">
@@ -412,7 +431,8 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
    <div id="confirmOverlay" class="confirm-overlay hidden">
     <div class="confirm-box">
      <p id="confirmText" class="text-lg font-bold mb-4" style="color:var(--text-light)"></p>
-     <div class="flex gap-3 justify-center"><button id="confirmYes" class="btn-fantasy py-2 px-6">Yes</button> <button id="confirmNo" class="py-2 px-6 rounded-xl font-bold cursor-pointer" style="background:rgba(255,255,255,0.1);color:var(--text-light);border:2px solid rgba(255,255,255,0.2)" onclick="hideConfirm()">Cancel</button>
+     <div class="flex gap-3 justify-center">
+      <button id="confirmYes" class="btn-fantasy py-2 px-6">Yes</button> <button id="confirmNo" class="py-2 px-6 rounded-xl font-bold cursor-pointer" style="background:rgba(255,255,255,0.1);color:var(--text-light);border:2px solid rgba(255,255,255,0.2)" onclick="hideConfirm()">Cancel</button>
      </div>
     </div>
    </div><!-- TOAST -->
@@ -421,7 +441,8 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
     <div class="rounded-2xl p-8" style="background:linear-gradient(135deg,#1E293B,#0F172A);border:3px solid var(--gold);width:95%;max-width:600px">
      <h2 class="cinzel text-2xl text-center mb-6" style="color:var(--gold)">🔄 Choose Target to Swap</h2>
      <div id="swapTargetGrid" class="grid gap-3 mb-6"></div>
-     <div class="text-center"><button class="btn-fantasy" onclick="closeSwapSelector()">Cancel</button>
+     <div class="text-center">
+      <button class="btn-fantasy" onclick="closeSwapSelector()">Cancel</button>
      </div>
     </div>
    </div>
@@ -2035,5 +2056,5 @@ if(restoreGameState()){
 }
 updatePresetSelect();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea22a9952ec86a1',t:'MTc3NTgyODQ1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea23327542f9509',t:'MTc3NTgyODgwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
