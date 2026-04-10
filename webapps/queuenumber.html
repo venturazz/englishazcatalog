@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Queue Number</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Space+Mono:wght@700&amp;display=swap" rel="stylesheet">
   <style>
   @keyframes pulse-number {
@@ -25,7 +24,10 @@
 </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
   <div id="app" class="w-full h-full flex flex-col items-center justify-center overflow-auto" style="background: linear-gradient(135deg, #e0f2fe 0%, #f0fdfa 40%, #ffffff 100%); font-family: 'DM Sans', sans-serif;">
@@ -50,7 +52,8 @@
     <div id="adminPanel" class="mt-6 hidden">
      <div class="bg-white rounded-lg p-4 inline-block" style="box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
       <p class="text-xs font-medium mb-3" style="color: #0c4a6e;">Masukkan Kode Admin / Enter Admin Code:</p>
-      <div class="flex gap-2"><input id="adminCode" type="password" placeholder="••••" class="text-sm px-3 py-2 rounded border" style="border-color: #cbd5e1; width: 120px;"> <button id="submitAdminCode" class="text-xs px-4 py-2 rounded font-medium transition" style="background: #0284c7; color: white;">Konfirmasi / Confirm</button> <button id="cancelAdminCode" class="text-xs px-4 py-2 rounded font-medium transition" style="background: #e2e8f0; color: #64748b;">Batal / Cancel</button>
+      <div class="flex gap-2">
+       <input id="adminCode" type="password" placeholder="••••" class="text-sm px-3 py-2 rounded border" style="border-color: #cbd5e1; width: 120px;"> <button id="submitAdminCode" class="text-xs px-4 py-2 rounded font-medium transition" style="background: #0284c7; color: white;">Konfirmasi / Confirm</button> <button id="cancelAdminCode" class="text-xs px-4 py-2 rounded font-medium transition" style="background: #e2e8f0; color: #64748b;">Batal / Cancel</button>
       </div>
       <p id="adminMsg" class="text-xs mt-2" style="color: #dc2626; display: none;"></p>
      </div>
@@ -58,25 +61,24 @@
    </footer>
   </div>
   <script>
-// Shared queue system using Data SDK
+// Firebase Configuration
+// ⚠️ GANTI DENGAN KONFIGURASI FIREBASE ANDA SENDIRI
+ const firebaseConfig = {
+    apiKey: "AIzaSyBUG9x02y-xS4aemmvOVUIgQ-t6HsGgG6o",
+    authDomain: "queuenumber-62b79.firebaseapp.com",
+    projectId: "queuenumber-62b79",
+    storageBucket: "queuenumber-62b79.firebasestorage.app",
+    messagingSenderId: "573068020787",
+    appId: "1:573068020787:web:06decd79a0dfdd0859e746",
+    measurementId: "G-M8L7PVXTC2"
+  };
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
 let myQueueRecord = null;
 let allQueueData = [];
-
-const dataHandler = {
-  onDataChanged(data) {
-    allQueueData = data;
-    // Find this visitor's queue record
-    const visitorId = localStorage.getItem('visitor_id');
-    myQueueRecord = data.find(record => record.visitor_id === visitorId);
-    
-    if (myQueueRecord) {
-      const queueNum = String(myQueueRecord.queue_number).padStart(3, '0');
-      document.getElementById('queueNumber').textContent = queueNum;
-      const d = new Date(myQueueRecord.registration_time);
-      document.getElementById('regTime').textContent = d.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) + ', ' + d.toLocaleTimeString('id-ID');
-    }
-  }
-};
 
 // Generate device fingerprint that works across browsers
 function getDeviceFingerprint() {
@@ -85,10 +87,8 @@ function getDeviceFingerprint() {
   const screen_res = screen.width + 'x' + screen.height;
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   
-  // Create fingerprint from device characteristics
   const fingerprint = navigator_ua + '|' + navigator_lang + '|' + screen_res + '|' + timezone;
   
-  // Simple hash function
   let hash = 0;
   for (let i = 0; i < fingerprint.length; i++) {
     const char = fingerprint.charCodeAt(i);
@@ -98,25 +98,38 @@ function getDeviceFingerprint() {
   return 'device_' + Math.abs(hash).toString(36);
 }
 
+// Listen to queue data changes
+function listenToQueueData() {
+  database.ref('queues').on('value', (snapshot) => {
+    const data = snapshot.val();
+    allQueueData = data ? Object.values(data) : [];
+    
+    // Find this visitor's queue record
+    const visitorId = localStorage.getItem('visitor_id');
+    myQueueRecord = allQueueData.find(record => record.visitor_id === visitorId);
+    
+    if (myQueueRecord) {
+      const queueNum = String(myQueueRecord.queue_number).padStart(3, '0');
+      document.getElementById('queueNumber').textContent = queueNum;
+      const d = new Date(myQueueRecord.registration_time);
+      document.getElementById('regTime').textContent = d.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) + ', ' + d.toLocaleTimeString('id-ID');
+    }
+  });
+}
+
 async function initializeQueue() {
-  const initResult = await window.dataSdk.init(dataHandler);
-  if (!initResult.isOk) {
-    console.error('Failed to initialize Data SDK');
-    return;
-  }
+  // Listen to data changes
+  listenToQueueData();
   
-  // Wait longer for data to load from backend after potential reset
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Wait for initial data load
+  await new Promise(resolve => setTimeout(resolve, 1500));
   
-  // Get consistent device ID (works across browsers on same device)
   const deviceId = getDeviceFingerprint();
   const storedVisitorId = localStorage.getItem('visitor_id');
   
-  // Check if this device already has a queue number
   let visitorRecord = null;
   
   if (storedVisitorId) {
-    // Try to find existing record for this device
     visitorRecord = allQueueData.find(r => r.visitor_id === storedVisitorId);
   }
   
@@ -132,7 +145,7 @@ async function initializeQueue() {
     const visitorId = deviceId;
     localStorage.setItem('visitor_id', visitorId);
     
-    // Calculate next queue number (max existing + 1)
+    // Calculate next queue number
     let nextNumber = 1;
     if (allQueueData && allQueueData.length > 0) {
       const queueNumbers = allQueueData.map(r => r.queue_number).filter(n => typeof n === 'number');
@@ -141,17 +154,18 @@ async function initializeQueue() {
       }
     }
     
-    // Show loading state
     document.getElementById('queueNumber').textContent = '...';
     
-    const createResult = await window.dataSdk.create({
-      visitor_id: visitorId,
-      queue_number: nextNumber,
-      registration_time: new Date().toISOString()
-    });
+    const queueKey = database.ref('queues').push().key;
     
-    if (!createResult.isOk) {
-      console.error('Failed to create queue record:', createResult.error);
+    try {
+      await database.ref('queues/' + queueKey).set({
+        visitor_id: visitorId,
+        queue_number: nextNumber,
+        registration_time: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Failed to create queue record:', error);
       document.getElementById('queueNumber').textContent = 'Erro';
     }
   }
@@ -160,7 +174,7 @@ async function initializeQueue() {
 // Initialize queue system
 initializeQueue();
 
-// Admin code for reset (set your own admin code here)
+// Admin code for reset
 const ADMIN_CODE = '1234';
 
 // Reset button - show admin panel
@@ -184,37 +198,39 @@ document.getElementById('submitAdminCode').addEventListener('click', async (e) =
     document.getElementById('submitAdminCode').textContent = 'Menghapus... / Deleting...';
     msgEl.style.display = 'none';
     
-    // Delete all queue records from Canva Sheet
-    const recordsToDelete = [...allQueueData];
-    for (const record of recordsToDelete) {
-      const deleteResult = await window.dataSdk.delete(record);
-      if (!deleteResult.isOk) {
-        console.error('Failed to delete record:', deleteResult.error);
-      }
-    }
-    
-    // Wait for all deletes to complete and sync
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Clear local storage for current device
-    localStorage.removeItem('visitor_id');
-    
-    // Force data refresh and reload
-    allQueueData = [];
-    myQueueRecord = null;
-    msgEl.textContent = 'Reset berhasil! / Reset successful!';
-    msgEl.style.color = '#16a34a';
-    msgEl.style.display = 'block';
-    
-    // Close panel and reload after confirmation
-    setTimeout(() => {
-      document.getElementById('adminPanel').classList.add('hidden');
-      document.getElementById('adminCode').value = '';
+    try {
+      // Delete all queue records from Firebase
+      await database.ref('queues').remove();
+      
+      // Wait for deletion to complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Clear local storage
+      localStorage.removeItem('visitor_id');
+      
+      // Force data refresh
+      allQueueData = [];
+      myQueueRecord = null;
+      msgEl.textContent = 'Reset berhasil! / Reset successful!';
+      msgEl.style.color = '#16a34a';
+      msgEl.style.display = 'block';
+      
+      // Close panel and reload after confirmation
+      setTimeout(() => {
+        document.getElementById('adminPanel').classList.add('hidden');
+        document.getElementById('adminCode').value = '';
+        document.getElementById('submitAdminCode').disabled = false;
+        document.getElementById('submitAdminCode').textContent = 'Konfirmasi / Confirm';
+        msgEl.style.color = '#dc2626';
+        location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error('Reset failed:', error);
+      msgEl.textContent = 'Gagal / Failed. Coba lagi / Try again.';
+      msgEl.style.display = 'block';
       document.getElementById('submitAdminCode').disabled = false;
       document.getElementById('submitAdminCode').textContent = 'Konfirmasi / Confirm';
-      msgEl.style.color = '#dc2626';
-      location.reload();
-    }, 2000);
+    }
   } else {
     // Wrong code
     msgEl.textContent = 'Kode salah / Wrong code. Coba lagi / Try again.';
@@ -239,7 +255,7 @@ document.getElementById('adminCode').addEventListener('keypress', (e) => {
   }
 });
 
-// Element SDK
+// Simple config without Element SDK
 const defaultConfig = {
   welcome_text: 'Selamat Datang / Welcome',
   card_title: 'Nomor Antrian Anda / Your Queue Number:',
@@ -271,29 +287,8 @@ function applyConfig(config) {
   document.getElementById('footerNote').style.fontSize = (bs * 0.75) + 'px';
 }
 
-if (window.elementSdk) {
-  window.elementSdk.init({
-    defaultConfig,
-    onConfigChange: async (config) => applyConfig(config),
-    mapToCapabilities: (config) => ({
-      recolorables: [
-        { get: () => config.bg_color || defaultConfig.bg_color, set: v => { config.bg_color = v; window.elementSdk.setConfig({ bg_color: v }); }},
-        { get: () => config.muted_color || defaultConfig.muted_color, set: v => { config.muted_color = v; window.elementSdk.setConfig({ muted_color: v }); }},
-        { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
-        { get: () => config.primary_color || defaultConfig.primary_color, set: v => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }},
-        { get: () => config.accent_color || defaultConfig.accent_color, set: v => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }},
-      ],
-      borderables: [],
-      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
-      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: v => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }}
-    }),
-    mapToEditPanelValues: (config) => new Map([
-      ['welcome_text', config.welcome_text || defaultConfig.welcome_text],
-      ['card_title', config.card_title || defaultConfig.card_title],
-      ['footer_note', config.footer_note || defaultConfig.footer_note]
-    ])
-  });
-}
+// Apply default config on load
+applyConfig(defaultConfig);
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea0237d6009880d',t:'MTc3NTgwNzE5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea05b37c2fb3dea',t:'MTc3NTgwOTQ3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
