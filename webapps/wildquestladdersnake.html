@@ -38,8 +38,10 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;font-family:
 .card-flip{animation:cardFlip 0.6s ease}
 .timer-flash{animation:timerPulse 0.3s infinite}
 /* Board */
-.board-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;aspect-ratio:1;width:100%;background:#0a0e27;border:4px solid #F59E0B;border-radius:12px;padding:8px;box-shadow:0 0 40px rgba(245,158,11,0.4), inset 0 0 20px rgba(245,158,11,0.1)}
-.board-cell{position:relative;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;border-radius:4px;aspect-ratio:1;transition:all 0.2s;border:2px solid rgba(255,255,255,0.2)}
+.board-grid{display:grid;gap:1px;background:#0a0e27;border:4px solid #F59E0B;border-radius:12px;padding:6px;box-shadow:0 0 40px rgba(245,158,11,0.4), inset 0 0 20px rgba(245,158,11,0.1);overflow:hidden}
+.board-grid.size-100{width:100%;height:100%;aspect-ratio:1/1;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr)}
+.board-grid.size-50{width:100%;height:100%;max-width:600px;max-height:600px;margin:auto;aspect-ratio:1/1;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(5,1fr)}
+.board-cell{position:relative;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;border-radius:3px;transition:all 0.2s;border:1px solid rgba(255,255,255,0.15);min-width:0;min-height:0}
 .board-cell .cell-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.1rem;opacity:0.95;font-weight:900;color:#ffffff}
 .board-cell .pawn-container{display:flex;flex-wrap:wrap;gap:4px;font-size:8rem;position:absolute;inset:0;width:100%;height:100%;align-items:center;justify-content:center}
 /* Scrollbar */
@@ -177,19 +179,14 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
        </div>
       </div>
       <div>
-       <label class="block font-bold mb-2" style="color:var(--gold)">Timer Mode</label>
-       <div id="timerBtns" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
-       <div id="customTimerWrap" class="mt-2 hidden">
-        <label for="customTimer" class="text-sm" style="color:var(--text-light)">Custom (1-10 min):</label> <input type="number" id="customTimer" class="input-fantasy w-24 ml-2" min="1" max="10" value="3">
+       <label class="block font-bold mb-2" style="color:var(--gold)">🎲 Board Speed Mode</label>
+       <div id="speedBtns" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+       <div class="text-xs mt-2 p-2 rounded" style="background:rgba(255,255,255,0.05);color:var(--text-light)"><span id="speedDesc"></span>
        </div>
       </div>
-      <div class="flex items-center justify-between">
+      <div>
        <label class="font-bold" style="color:var(--gold)">⚡ Speed Bonus</label> <button id="speedToggle" class="w-14 h-7 rounded-full relative transition-all cursor-pointer" style="background:var(--emerald)" onclick="toggleSpeed()">
         <div id="speedDot" class="absolute top-0.5 w-6 h-6 bg-white rounded-full transition-all" style="left:calc(100% - 26px)"></div></button>
-      </div>
-      <div>
-       <label class="block font-bold mb-2" style="color:var(--gold)">Difficulty Filter</label>
-       <div class="flex gap-2 flex-wrap" id="diffBtns"></div>
       </div>
       <div class="flex items-center justify-between">
        <label class="font-bold" style="color:var(--gold)">🔀 Randomize Questions</label> <button id="randomToggle" class="w-14 h-7 rounded-full relative transition-all cursor-pointer" style="background:var(--emerald)" onclick="toggleRandomize()">
@@ -355,8 +352,8 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
         </div><label class="flex items-center gap-2 mb-2"><span style="font-size:0.65rem">BGM</span><input type="range" id="bgmVol" min="0" max="100" value="50" class="flex-1 accent-yellow-500" oninput="updateAudioVol()" style="height:4px"></label> <label class="flex items-center gap-2 mb-2"><span style="font-size:0.65rem">SFX</span><input type="range" id="sfxVol" min="0" max="100" value="70" class="flex-1 accent-yellow-500" oninput="updateAudioVol()" style="height:4px"></label> <button class="w-full px-2 py-1 rounded text-xs" style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.4);color:var(--gold);cursor:pointer" onclick="muteAll()">🔇 Mute</button>
        </div>
       </div><!-- Center: Game Board (Large) -->
-      <div class="flex-1 flex flex-col items-center justify-center overflow-auto" style="min-width:0">
-       <div class="board-grid" id="gameBoard" style="width:90%;max-width:700px;aspect-ratio:1;margin:0 auto"></div>
+      <div class="flex-1 flex flex-col items-center justify-center overflow-hidden" style="min-width:0;padding:8px">
+       <div class="board-grid" id="gameBoard" style="width:100%;height:100%;margin:0 auto"></div>
       </div><!-- Right Panel: Stats (Compact) -->
       <div class="w-48 flex flex-col gap-2 flex-shrink-0 overflow-y-auto text-xs">
        <div class="p-3 rounded-xl" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3)">
@@ -406,7 +403,16 @@ ANSWER: B" oninput="parseQuestions()"></textarea>
      </div>
     </div>
    </div><!-- TOAST -->
-   <div id="toastContainer"></div>
+   <div id="toastContainer"></div><!-- SWAP TARGET SELECTOR -->
+   <div id="swapSelectorModal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-4" style="background:rgba(0,0,0,0.85)">
+    <div class="rounded-2xl p-8" style="background:linear-gradient(135deg,#1E293B,#0F172A);border:3px solid var(--gold);width:95%;max-width:600px">
+     <h2 class="cinzel text-2xl text-center mb-6" style="color:var(--gold)">🔄 Choose Target to Swap</h2>
+     <div id="swapTargetGrid" class="grid gap-3 mb-6"></div>
+     <div class="text-center">
+      <button class="btn-fantasy" onclick="closeSwapSelector()">Cancel</button>
+     </div>
+    </div>
+   </div>
   </div>
   <script>
 // ===================== STATE =====================
@@ -428,7 +434,8 @@ function saveGameState(){
     randomizeQuestions: G.randomizeQuestions,
     snakes: SNAKES,
     ladders: LADDERS,
-    kolabActive: G.kolabActive
+    kolabActive: G.kolabActive,
+    boardSpeed: G.boardSpeed
   };
   sessionStorage.setItem('wq_save', JSON.stringify(saveData));
 }
@@ -453,6 +460,7 @@ function restoreGameState(){
     SNAKES = data.snakes || [];
     LADDERS = data.ladders || [];
     G.kolabActive = data.kolabActive || false;
+    G.boardSpeed = data.boardSpeed || {name:'Normal', diceCount:1, boardSize:100};
     return true;
   }catch(e){
     console.error('Failed to restore save:', e);
@@ -535,9 +543,9 @@ let G = {
   questions:[], groups:[], currentGroup:0, timerSec:120, speedBonus:true,
   diffFilter:'ALL', paused:false, currentQ:null, timerInterval:null,
   timeLeft:0, phase:'splash', usedChars:[], turnBonusDice:false,
-  audioCtx:null, bgmGain:null, sfxGain:null, muted:false,
+  audioCtx:null, bgmGain:null, sfxGain:null, muted:false, bgmTimeout:null, bgmActive:false,
   questionPool:[], askedIndices:new Set(), kolabActive:false, randomizeQuestions:true,
-  allowReattempt:true, unsolvedQuestions:[]
+  allowReattempt:true, unsolvedQuestions:[], boardSpeed:{name:'Normal', diceCount:1, boardSize:100}
 };
 
 // ===================== AUDIO (Web Audio API) =====================
@@ -545,48 +553,132 @@ function initAudio(){
   if(G.audioCtx) return;
   G.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   G.bgmGain = G.audioCtx.createGain();
-  G.bgmGain.gain.value = 0.3;
+  G.bgmGain.gain.value = 0.25;
   G.bgmGain.connect(G.audioCtx.destination);
   G.sfxGain = G.audioCtx.createGain();
-  G.sfxGain.gain.value = 0.5;
+  G.sfxGain.gain.value = 0.6;
   G.sfxGain.connect(G.audioCtx.destination);
+  G.bgmActive = false;
 }
 
 function playSFX(type){
   if(G.muted || !G.audioCtx) return;
   try{
-    const osc = G.audioCtx.createOscillator();
-    const gain = G.audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(G.sfxGain);
     const t = G.audioCtx.currentTime;
-    gain.gain.setValueAtTime(0.3, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
-    const freqs = {correct:[523,659,784],wrong:[200,150],timeout:[440,220],tick:[800],dice:[300,400,500,600],ladder:[400,500,600,700,800],snake:[500,400,300,200],powerup:[600,700,800,900],sabotage:[200,300,150],fanfare:[523,659,784,1047],horn:[349,440,523],cheer:[600,800,1000]};
-    const f = freqs[type] || [440];
-    osc.frequency.setValueAtTime(f[0], t);
-    f.forEach((freq,i) => {if(i>0) osc.frequency.setValueAtTime(freq, t + i*0.1)});
-    osc.type = type==='wrong'?'sawtooth':type==='snake'?'triangle':'sine';
-    osc.start(t);
-    osc.stop(t + 0.5);
+    const soundConfigs = {
+      correct: {freqs:[523,659,784], type:'sine', duration:0.4, gain:0.4},
+      wrong: {freqs:[200,150], type:'sawtooth', duration:0.4, gain:0.3},
+      timeout: {freqs:[440,220], type:'sine', duration:0.6, gain:0.3},
+      tick: {freqs:[800], type:'sine', duration:0.1, gain:0.2},
+      dice: {freqs:[400,500,600], type:'sine', duration:0.5, gain:0.35},
+      ladder: {freqs:[400,500,600,700], type:'sine', duration:0.6, gain:0.4},
+      snake: {freqs:[500,400,300], type:'triangle', duration:0.5, gain:0.35},
+      powerup: {freqs:[600,700,800], type:'sine', duration:0.5, gain:0.4},
+      sabotage: {freqs:[200,300,200], type:'square', duration:0.4, gain:0.35},
+      fanfare: {freqs:[523,659,784,1047], type:'sine', duration:1.2, gain:0.4},
+      horn: {freqs:[349,440,523], type:'sine', duration:0.8, gain:0.38},
+      cheer: {freqs:[600,800,1000], type:'sine', duration:0.7, gain:0.35},
+      shield: {freqs:[800,900,1000], type:'sine', duration:0.5, gain:0.35},
+      bonus: {freqs:[700,800,900], type:'sine', duration:0.6, gain:0.4},
+      swap: {freqs:[550,660,550], type:'sine', duration:0.5, gain:0.35},
+      win: {freqs:[523,659,784,1047,784,659,523], type:'sine', duration:2, gain:0.4}
+    };
+    const config = soundConfigs[type] || soundConfigs.correct;
+    const freqs = config.freqs;
+    
+    freqs.forEach((freq,i) => {
+      const osc = G.audioCtx.createOscillator();
+      const gain = G.audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(G.sfxGain);
+      
+      osc.frequency.value = freq;
+      osc.type = config.type;
+      
+      const startTime = t + (i * 0.08);
+      gain.gain.setValueAtTime(config.gain, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + config.duration);
+      
+      osc.start(startTime);
+      osc.stop(startTime + config.duration);
+    });
   }catch(e){}
 }
 
-function playBGM(mood){
-  // Simple ambient tone
-  if(G.muted || !G.audioCtx) return;
-  // We skip persistent BGM to keep code simpler; SFX covers engagement
+function playBGM(){
+  if(G.muted || !G.audioCtx || G.bgmActive) return;
+  try{
+    G.bgmActive = true;
+    
+    // Adventure mode BGM: energetic pulsing chord progression
+    const chordSequence = [
+      {freqs: [196, 247, 294], duration: 0.5},    // G minor
+      {freqs: [220, 277, 330], duration: 0.5},    // A minor
+      {freqs: [246, 310, 392], duration: 0.5},    // B minor
+      {freqs: [196, 247, 294], duration: 0.5}     // Back to G minor
+    ];
+    
+    let chordIdx = 0;
+    
+    const playNextChord = () => {
+      if(G.muted || !G.bgmActive || !G.audioCtx) return;
+      
+      const chord = chordSequence[chordIdx % chordSequence.length];
+      const now = G.audioCtx.currentTime;
+      
+      // Play chord notes
+      chord.freqs.forEach((freq, idx) => {
+        const osc = G.audioCtx.createOscillator();
+        const gain = G.audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(G.bgmGain);
+        
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.02, now + chord.duration);
+        
+        osc.start(now);
+        osc.stop(now + chord.duration);
+      });
+      
+      chordIdx++;
+      G.bgmTimeout = setTimeout(playNextChord, chord.duration * 1000);
+    };
+    
+    playNextChord();
+  }catch(e){}
+}
+
+function stopBGM(){
+  G.bgmActive = false;
+  if(G.bgmTimeout){
+    clearTimeout(G.bgmTimeout);
+    G.bgmTimeout = null;
+  }
 }
 
 function updateAudioVol(){
   if(!G.audioCtx) return;
   const b = document.getElementById('bgmVol').value/100;
   const s = document.getElementById('sfxVol').value/100;
-  if(G.bgmGain) G.bgmGain.gain.value = b * 0.5;
-  if(G.sfxGain) G.sfxGain.gain.value = s * 0.7;
+  if(G.bgmGain) G.bgmGain.gain.value = b * 0.25;
+  if(G.sfxGain) G.sfxGain.gain.value = s * 0.6;
 }
 
-function muteAll(){G.muted = !G.muted; showToast(G.muted?'🔇 Audio Muted':'🔊 Audio On','info')}
+function muteAll(){
+  G.muted = !G.muted;
+  if(G.muted){
+    stopBGM();
+    showToast('🔇 Audio Muted','info');
+  } else {
+    showToast('🔊 Audio On','info');
+    if(G.phase==='game'){
+      playBGM();
+    }
+  }
+}
 
 // ===================== UTILS =====================
 function showScreen(id){
@@ -759,9 +851,31 @@ function updatePresetSelect(){
 // ===================== SETUP =====================
 let selectedTimer = 2; // Standard
 let selectedDiff = 'ALL';
+let selectedBoardSpeed = 'Normal'; // Default board speed mode
+
+const BOARD_SPEED_MODES = [
+  {name:'Normal', diceCount:1, boardSize:100, desc:'1 die (1-6), 100 squares'},
+  {name:'Quick', diceCount:1, boardSize:50, desc:'1 die (1-6), 50 squares'},
+  {name:'Fast', diceCount:2, boardSize:100, desc:'2 dice (2-12), 100 squares'},
+  {name:'Turbo', diceCount:2, boardSize:50, desc:'2 dice (2-12), 50 squares'}
+];
 
 function buildSetupUI(){
   updatePresetSelect();
+  const sb = document.getElementById('speedBtns');
+  sb.innerHTML='';
+  BOARD_SPEED_MODES.forEach((m,i)=>{
+    const b = document.createElement('button');
+    b.className = 'py-2 px-3 rounded-xl font-bold text-sm cursor-pointer transition-all';
+    b.style.background = m.name===selectedBoardSpeed?'var(--gold)':'rgba(255,255,255,0.1)';
+    b.style.color = m.name===selectedBoardSpeed?'#0F172A':'var(--text-light)';
+    b.style.border = '2px solid '+(m.name===selectedBoardSpeed?'var(--gold)':'rgba(255,255,255,0.15)');
+    b.textContent = m.name;
+    b.onclick = ()=>{selectedBoardSpeed=m.name;buildSetupUI();document.getElementById('speedDesc').textContent=m.desc};
+    sb.appendChild(b);
+  });
+  document.getElementById('speedDesc').textContent = BOARD_SPEED_MODES.find(m=>m.name===selectedBoardSpeed).desc;
+
   const tb = document.getElementById('timerBtns');
   tb.innerHTML='';
   TIMER_MODES.forEach((m,i)=>{
@@ -776,18 +890,26 @@ function buildSetupUI(){
   });
   const db = document.getElementById('diffBtns');
   db.innerHTML='';
-  ['ALL','EASY','MEDIUM','HOTS'].forEach(d=>{
+  const diffOptions = ['ALL','EASY','MEDIUM','HOTS'];
+  for(let idx = 0; idx < diffOptions.length; idx++){
+    const d = diffOptions[idx];
     const b = document.createElement('button');
-    b.className='py-2 px-4 rounded-xl font-bold text-sm cursor-pointer transition-all';
     const active = selectedDiff===d;
-    const colors = {ALL:'var(--royal)',EASY:'var(--emerald)',MEDIUM:'var(--gold)',HOTS:'var(--crimson)'};
-    b.style.background = active?colors[d]:'rgba(255,255,255,0.1)';
-    b.style.color = active?(d==='MEDIUM'?'#0F172A':'white'):'var(--text-light)';
-    b.style.border = '2px solid '+(active?colors[d]:'rgba(255,255,255,0.15)');
+    const colors = {ALL:'#3B82F6',EASY:'#10B981',MEDIUM:'#F59E0B',HOTS:'#EF4444'};
+    b.type = 'button';
     b.textContent = d;
-    b.onclick = ()=>{selectedDiff=d;buildSetupUI()};
+    const bgColor = active?colors[d]:'rgba(255,255,255,0.1)';
+    const textColor = active?(d==='MEDIUM'?'#0F172A':'white'):'#f1f5f9';
+    const borderColor = active?colors[d]:'rgba(255,255,255,0.15)';
+    b.style.cssText = `padding:8px 16px;border-radius:12px;font-weight:700;font-size:0.875rem;transition:all 0.3s;border:2px solid ${borderColor};cursor:pointer;background:${bgColor};color:${textColor};font-family:Quicksand,sans-serif;`;
+    b.onclick = (function(difficulty){
+      return function(){
+        selectedDiff = difficulty;
+        buildSetupUI();
+      };
+    })(d);
     db.appendChild(b);
-  });
+  }
 }
 
 function toggleSpeed(){
@@ -813,6 +935,7 @@ function startCharSpin(){
   const tm = TIMER_MODES[selectedTimer];
   G.timerSec = tm.name==='Custom'?parseInt(document.getElementById('customTimer').value||3)*60:tm.sec;
   G.diffFilter = selectedDiff;
+  G.boardSpeed = BOARD_SPEED_MODES.find(m=>m.name===selectedBoardSpeed);
   G.groups = [];
   G.usedChars = [];
   for(let i=0;i<gc;i++){
@@ -935,9 +1058,13 @@ function startGame(){
   G.allowReattempt = document.getElementById('reattemptToggle').checked;
   G.unsolvedQuestions = [];
   
+  // Set board speed from selection
+  G.boardSpeed = BOARD_SPEED_MODES.find(m=>m.name===selectedBoardSpeed) || BOARD_SPEED_MODES[0];
+  
   // Generate dynamic snakes and ladders for this game
   generateSnakesAndLadders();
   
+  G.phase = 'game';
   showScreen('gameScreen');
   buildBoard();
   renderScoreBar();
@@ -945,6 +1072,7 @@ function startGame(){
   renderPowerUps();
   saveGameState();
   playSFX('horn');
+  if(!G.muted) playBGM();
 }
 
 function getCellColor(n){
@@ -972,31 +1100,29 @@ function getCellIcon(n){
 function buildBoard(){
   const board = document.getElementById('gameBoard');
   board.innerHTML='';
-  for(let row=9;row>=0;row--){
-    const cells=[];
-    for(let col=0;col<10;col++){
-      const num = row%2===1 ? row*10+(10-col) : row*10+col+1;
-      cells.push(num);
-    }
-    // Reverse for snake-style board (even rows left-to-right from bottom)
-    // Actually: row 0 = bottom. row 0 even = left to right. row 1 odd = right to left.
-    // We iterate row=9 down to 0
-    const actualRow = 9-row;
-    const rowNums=[];
-    for(let col=0;col<10;col++){
-      const n = actualRow%2===0 ? actualRow*10+col+1 : actualRow*10+(10-col);
-      rowNums.push(n);
-    }
-    rowNums.forEach(n=>{
+  const boardSize = G.boardSpeed.boardSize || 100;
+  const cols = boardSize <= 50 ? 10 : 10; // 10 columns for both
+  const rows = boardSize / cols;
+  
+  // Apply size class to board
+  board.classList.remove('size-50', 'size-100');
+  board.classList.add(boardSize <= 50 ? 'size-50' : 'size-100');
+  
+  // Build board from bottom-right to top-left (snake-and-ladder style)
+  for(let row = rows - 1; row >= 0; row--){
+    for(let col = 0; col < cols; col++){
+      // Alternate direction: even rows go left-to-right, odd rows go right-to-left
+      const n = row % 2 === 0 ? row * cols + col + 1 : row * cols + (cols - col);
+      
       const cell = document.createElement('div');
       const special = getCellColor(n);
       cell.className = `board-cell ${special}`;
       cell.id = `cell-${n}`;
-      if(!special) cell.style.background = n%2===0?'rgba(59,130,246,0.2)':'rgba(139,92,246,0.2)';
+      if(!special) cell.style.background = n % 2 === 0 ? 'rgba(59,130,246,0.2)' : 'rgba(139,92,246,0.2)';
       const icon = getCellIcon(n);
-      cell.innerHTML = `<span class="cell-num">${n}</span>${icon?`<span style="font-size:0.8rem;position:absolute;top:2px;right:2px">${icon}</span>`:''}`;
+      cell.innerHTML = `<span class="cell-num">${n}</span>${icon ? `<span style="font-size:0.8rem;position:absolute;top:2px;right:2px">${icon}</span>` : ''}`;
       board.appendChild(cell);
-    });
+    }
   }
   renderPawns();
   updateBoardStats();
@@ -1068,52 +1194,102 @@ function rollDice(){
   const g = G.groups[G.currentGroup];
   document.getElementById('rollDiceBtn').disabled = true;
 
-  // Check DoubleDice
-  const hasDDice = g.powerups.find(p=>p.id==='doubledice');
-  let roll1 = Math.floor(Math.random()*6)+1;
-  let roll2 = hasDDice ? Math.floor(Math.random()*6)+1 : 0;
-  let roll = hasDDice ? Math.max(roll1,roll2) : roll1;
+  // Board speed determines dice count
+  const diceCount = G.boardSpeed.diceCount || 1;
+  
+  // Roll dice based on count
+  const rolls = [];
+  for(let i = 0; i < diceCount; i++){
+    rolls.push(Math.floor(Math.random() * 6) + 1);
+  }
+  let roll = rolls.reduce((a,b)=>a+b, 0);
 
-  // LuckyRoll
+  // Check DoubleDice power-up (take higher value, not reroll better)
+  const hasDDice = g.powerups.find(p=>p.id==='doubledice');
+  if(hasDDice && diceCount === 1){
+    const extraRoll = Math.floor(Math.random() * 6) + 1;
+    roll = Math.max(roll, extraRoll);
+    removePowerUp(g, 'doubledice');
+    showToast('⚡ DoubleDice: took higher roll!','success');
+  }
+
+  // LuckyRoll: reroll if result is less than 3
   const hasLucky = g.powerups.find(p=>p.id==='luckyroll');
   if(hasLucky && roll < 3){
-    roll = Math.floor(Math.random()*6)+1;
-    removePowerUp(g,'luckyroll');
+    rolls.length = 0;
+    for(let i = 0; i < diceCount; i++){
+      rolls.push(Math.floor(Math.random() * 6) + 1);
+    }
+    roll = rolls.reduce((a,b)=>a+b, 0);
+    removePowerUp(g, 'luckyroll');
+    showToast('🎲 LuckyRoll: rerolled!','success');
   }
-  if(hasDDice) removePowerUp(g,'doubledice');
 
   // Bonus dice from Wolf streak or BonusStar
   if(g.bonusDiceNext){
-    const bonus = Math.floor(Math.random()*6)+1;
+    const bonus = Math.floor(Math.random() * 6) + 1;
     roll += bonus;
     g.bonusDiceNext = false;
-    showToast(`🎲 Bonus dice! +${bonus}`,'success');
+    showToast(`🎲 Bonus dice! +${bonus}`, 'success');
   }
 
   // Show dice animation
-  showDiceModal(roll, ()=>{
+  showDiceModal(rolls, roll, ()=>{
     askQuestion(roll);
   });
 }
 
-function showDiceModal(roll, callback){
+function showDiceModal(rolls, totalRoll, callback){
   const modal = document.getElementById('diceModal');
   modal.classList.remove('hidden');
   const display = document.getElementById('diceDisplay');
   const diceEmojis = ['⚀','⚁','⚂','⚃','⚄','⚅'];
-  let count=0;
+  
+  // Show individual dice
+  display.innerHTML = '';
+  let count = 0;
+  const spinDuration = 0.6;
+  const spinFrames = Math.floor(spinDuration * 1000 / 80);
+  
   playSFX('dice');
-  const interval = setInterval(()=>{
-    display.textContent = diceEmojis[Math.floor(Math.random()*6)];
+  
+  // Spin animation for each die
+  const spinInterval = setInterval(()=>{
+    display.innerHTML = '';
+    rolls.forEach((_, diceIdx)=>{
+      const diceEl = document.createElement('span');
+      diceEl.style.cssText = 'display:inline-block;margin:0 8px;font-size:3.5rem;animation:diceRoll 0.3s ease;';
+      diceEl.textContent = diceEmojis[Math.floor(Math.random()*6)];
+      display.appendChild(diceEl);
+    });
     count++;
-    if(count>15){
-      clearInterval(interval);
-      display.textContent = roll<=6?diceEmojis[roll-1]:'🎲';
-      document.getElementById('diceResult').textContent = `Rolled: ${roll}`;
-      document.getElementById('diceInfo').textContent = `Moving ${roll} squares!`;
-      setTimeout(()=>{modal.classList.add('hidden');callback()},1200);
+    if(count >= spinFrames){
+      clearInterval(spinInterval);
+      // Show final values
+      display.innerHTML = '';
+      rolls.forEach((rollValue, idx)=>{
+        const diceEl = document.createElement('span');
+        diceEl.style.cssText = 'display:inline-block;margin:0 8px;font-size:3.5rem;';
+        diceEl.textContent = diceEmojis[rollValue - 1];
+        display.appendChild(diceEl);
+      });
+      
+      // Show total
+      setTimeout(()=>{
+        document.getElementById('diceResult').innerHTML = `<span style="color:var(--gold)">Total: ${totalRoll}</span>`;
+        if(rolls.length > 1){
+          document.getElementById('diceInfo').innerHTML = `${rolls.join(' + ')} = <span style="font-size:1.3em;color:var(--emerald)">${totalRoll}</span>`;
+        } else {
+          document.getElementById('diceInfo').textContent = `Moving ${totalRoll} squares!`;
+        }
+        
+        setTimeout(()=>{
+          modal.classList.add('hidden');
+          callback();
+        }, 1200);
+      }, 400);
     }
-  },80);
+  }, 80);
 }
 
 // ===================== QUESTIONS =====================
@@ -1189,20 +1365,34 @@ function askQuestion(diceRoll){
 
   document.getElementById('qText').textContent = q.text;
 
-  // Choices
+  // Fox: Peek question category before answering
+  if(g.char.ability==='Cunning'){
+    const categories = {EASY:'📚 Easy Knowledge',MEDIUM:'🎓 Medium Thinking',HOTS:'🧠 Higher-Order Thinking'};
+    showToast(`🦊 Fox Peek: ${categories[q.difficulty]}`,'info');
+  }
+
+  // Choices - only use keys that exist in the question
   const choicesDiv = document.getElementById('qChoices');
   choicesDiv.innerHTML='';
-  let choiceKeys = ['A','B','C','D','E'];
+  let choiceKeys = ['A','B','C','D','E'].filter(key => q.choices[key]);
 
   // Hint power-up: show only 2 choices
   const hasHint = g.powerups.find(p=>p.id==='hint');
   let hiddenChoices = [];
-  if(hasHint){
-    // Remove 2 wrong answers
+  if(hasHint && choiceKeys.length > 2){
+    // Remove 2 wrong answers (but keep the correct one)
     const wrongKeys = choiceKeys.filter(k=>k!==q.answer);
     hiddenChoices = wrongKeys.sort(()=>Math.random()-0.5).slice(0,2);
     removePowerUp(g,'hint');
     showToast('🔍 Hint: 2 wrong answers removed!','info');
+  }
+
+  // WildCard: choose any difficulty question
+  const hasWildcard = g.powerups.find(p=>p.id==='wildcard');
+  if(hasWildcard){
+    // Already picked a question, just note the WildCard was used
+    removePowerUp(g,'wildcard');
+    showToast('🌟 WildCard: Any difficulty answered!','success');
   }
 
   choiceKeys.forEach(key=>{
@@ -1234,6 +1424,17 @@ function askQuestion(diceRoll){
   G.timeLeft = timerSec;
   const totalTime = timerSec;
   updateTimerBar(timerSec, totalTime);
+
+  // Shark: force Blitz timer on opponent once
+  const sharkPlayer = G.groups.find(g=>g.char.ability==='Blitz' && !g.sharkUsed);
+  if(sharkPlayer && G.currentGroup !== G.groups.indexOf(sharkPlayer)){
+    G.timerLeft = 30;
+    timerSec = 30;
+    G.timeLeft = 30;
+    updateTimerBar(30, 30);
+    sharkPlayer.sharkUsed = true;
+    showToast('🦈 Shark Blitz activated! Only 30s!','error');
+  }
 
   clearInterval(G.timerInterval);
   G.timerInterval = setInterval(()=>{
@@ -1314,12 +1515,8 @@ function answerQuestion(chosen, btn){
     btn.style.background='var(--crimson)';btn.style.borderColor='var(--crimson)';
     btn.classList.add('shake-anim');
     playSFX('wrong');
-    // Show correct
-    document.querySelectorAll('#qChoices button').forEach(b=>{
-      if(b.textContent.startsWith(q.answer+'.')) {b.style.background='var(--emerald)';b.style.borderColor='var(--emerald)'}
-    });
-    // Bear: 0 instead of -5
-    const penalty = g.char.ability==='ToughHide'?0:0; // Wrong = 0 per spec
+    // Bear: wrong answer = 0pts instead of -5
+    const penalty = g.char.ability==='ToughHide'?0:-5;
     g.score += penalty;
     g.streak = 0;
     
@@ -1328,7 +1525,8 @@ function answerQuestion(chosen, btn){
       G.unsolvedQuestions.push(q);
     }
     
-    resultDiv.innerHTML = `<span style="color:var(--crimson)">❌ Wrong! Answer: ${q.answer}. Turn skipped.</span>`;
+    const bearMsg = g.char.ability==='ToughHide'?'<br>🐻 ToughHide protected you!':'';
+    resultDiv.innerHTML = `<span style="color:var(--crimson)">❌ Wrong! Turn skipped.${bearMsg}</span>`;
     setTimeout(()=>{
       document.getElementById('questionModal').classList.add('hidden');
       nextTurn();
@@ -1379,12 +1577,13 @@ function forceTimeout(){
 // ===================== MOVEMENT =====================
 function moveGroupPawn(g, steps, forward){
   let newPos = g.pos + steps;
-  if(newPos > 100) newPos = 100 - (newPos - 100); // Bounce back
+  const boardSize = G.boardSpeed.boardSize;
+  if(newPos > boardSize) newPos = boardSize - (newPos - boardSize); // Bounce back
   if(newPos < 1) newPos = 1;
 
-  // Eagle exact 100
-  if(g.char.ability==='SkyFinish' && newPos===100) g.score += 50;
-  if(newPos===100) g.score += 30;
+  // Eagle exact finish
+  if(g.char.ability==='SkyFinish' && newPos===boardSize) g.score += 50;
+  if(newPos===boardSize) g.score += 30;
 
   // Animate movement
   animatePawnMove(g, g.pos, newPos, ()=>{
@@ -1449,8 +1648,8 @@ function finishMove(g){
   renderScoreBar();
   saveGameState();
 
-  // Check win condition (highest score check happens at end, but reaching 100 could trigger end)
-  if(g.pos >= 100){
+  // Check win condition (highest score check happens at end, but reaching finish could trigger end)
+  if(g.pos >= G.boardSpeed.boardSize){
     showToast(`${g.char.emoji} ${g.name} reached the finish!`,'success');
     // Check if all groups have had equal turns or end game
     setTimeout(()=>endGame(),1500);
@@ -1508,9 +1707,11 @@ function earnPowerUp(g, puId){
   g.totalPU++;
   playSFX('powerup');
   showToast(`${pu.emoji} ${g.name} earned ${pu.name}!`,'success');
-  // Swap milestone
+  // Swap milestone: grant at 3 total PU collected
   if(g.totalPU>=3 && !g.powerups.find(p=>p.id==='swap') && g.powerups.length<2){
-    g.powerups.push({...POWER_UPS.find(p=>p.id==='swap')});
+    const swapPU = {...POWER_UPS.find(p=>p.id==='swap')};
+    g.powerups.push(swapPU);
+    showToast(`⭐ Milestone! Earned ${swapPU.name}!`,'success');
   }
   renderPowerUps();
 }
@@ -1526,33 +1727,33 @@ function usePowerUp(idx){
   if(!pu) return;
 
   if(pu.id==='sabotage'){
-    // Pick a target (next group)
-    const target = G.groups[(G.currentGroup+1)%G.groups.length];
+    // Pick a target (next group in turn order)
+    let targetIdx = (G.currentGroup+1)%G.groups.length;
+    const target = G.groups[targetIdx];
+    
+    // Dragon FireShield blocks sabotage (once per game)
     if(target.char.ability==='FireShield' && !target.dragonShieldUsed){
       target.dragonShieldUsed=true;
-      showToast(`🐉 ${target.name} is immune to sabotage!`,'warning');
+      playSFX('shield');
+      showToast(`🐉 ${target.name}'s FireShield blocked sabotage!`,'warning');
+      removePowerUp(g,'sabotage');
     } else {
       target.pos = Math.max(1, target.pos-3);
       playSFX('sabotage');
       showToast(`💣 ${target.name} sent back 3 squares!`,'error');
+      removePowerUp(g,'sabotage');
     }
-    removePowerUp(g,'sabotage');
     renderPawns();renderScoreBar();
     return;
   }
 
   if(pu.id==='swap'){
-    const target = G.groups[(G.currentGroup+1)%G.groups.length];
-    const tmp = g.pos;
-    g.pos = target.pos;
-    target.pos = tmp;
-    showToast(`🔄 Swapped positions with ${target.name}!`,'info');
-    removePowerUp(g,'swap');
-    renderPawns();renderScoreBar();
+    // Show target selection overlay
+    showSwapTargetSelector(g);
     return;
   }
 
-  // Others are used automatically during questions/dice
+  // Manual activation message for auto-trigger power-ups
   showToast(`${pu.emoji} ${pu.name} will activate automatically!`,'info');
 }
 
@@ -1565,6 +1766,7 @@ function togglePause(){
 // ===================== END GAME / LEADERBOARD =====================
 function endGame(){
   clearGameState();
+  stopBGM(); // Stop background music
   showScreen('leaderboardScreen');
   const sorted = [...G.groups].sort((a,b)=>b.score-a.score);
   const podium = document.getElementById('podium');
@@ -1671,6 +1873,48 @@ function closeBoardGuide(){
   document.getElementById('boardGuideModal').classList.add('hidden');
 }
 
+function showSwapTargetSelector(currentGroup){
+  const modal = document.getElementById('swapSelectorModal');
+  const grid = document.getElementById('swapTargetGrid');
+  grid.innerHTML='';
+  
+  // Show all other groups as swap targets
+  G.groups.forEach((target, idx)=>{
+    if(idx === G.currentGroup) return; // Skip current group
+    
+    const card = document.createElement('button');
+    card.className='p-4 rounded-xl text-center cursor-pointer transition-all';
+    card.style.cssText=`background:${target.color}22;border:2px solid ${target.color};font-family:Quicksand,sans-serif;color:var(--text-light)`;
+    card.innerHTML=`
+      <div class="text-4xl mb-2">${target.char.emoji}</div>
+      <div class="font-bold" style="color:${target.color}">${target.name}</div>
+      <div class="text-xs mt-1">📍Sq ${target.pos}</div>
+    `;
+    card.onmouseenter = ()=>card.style.borderColor='var(--gold)';
+    card.onmouseleave = ()=>card.style.borderColor=target.color;
+    card.onclick = ()=>performSwap(currentGroup, target, modal);
+    grid.appendChild(card);
+  });
+  
+  modal.classList.remove('hidden');
+}
+
+function performSwap(currentGroup, targetGroup, modal){
+  const tmp = currentGroup.pos;
+  currentGroup.pos = targetGroup.pos;
+  targetGroup.pos = tmp;
+  playSFX('swap');
+  showToast(`🔄 Swapped positions with ${targetGroup.name}!`,'info');
+  removePowerUp(currentGroup, 'swap');
+  renderPawns();
+  renderScoreBar();
+  closeSwapSelector();
+}
+
+function closeSwapSelector(){
+  document.getElementById('swapSelectorModal').classList.add('hidden');
+}
+
 // ===================== ELEMENT SDK =====================
 const defaultConfig = {
   game_title: 'WILD QUEST',
@@ -1745,5 +1989,5 @@ if(restoreGameState()){
 }
 updatePresetSelect();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e8eeaacd02e1d47',t:'MTc3NTYyNjYxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea0ae8d11f5b2df',t:'MTc3NTgxMjg5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
