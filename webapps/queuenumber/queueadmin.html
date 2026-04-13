@@ -19,7 +19,7 @@
     .secondary { background:#334155; color:var(--text); }
     .danger    { background:var(--danger); color:white; }
     .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:14px; }
-    .stat-box { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
+    .stat-box { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; }
     .stat-label { font-size:12px; color:var(--muted); margin-bottom:4px; }
     .stat-value { font-size:22px; font-weight:800; }
     .section-title { font-size:15px; font-weight:700; margin:18px 0 8px; padding-bottom:6px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
@@ -41,28 +41,32 @@
     .btn-row button.served  { background:#60a5fa; color:white; font-weight:600; }
     .btn-row button.waiting { background:#475569; }
     .empty-note { color:var(--muted); font-size:13px; padding:14px; text-align:center; background:var(--card); border-radius:12px; border:1px solid var(--border); }
+    /* QR section */
     .qr-section { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:16px; }
-    .qr-section h2 { margin:0 0 12px; font-size:18px; }
+    .qr-section h2 { margin:0 0 4px; font-size:18px; }
+    .qr-section .qr-hint { font-size:12px; color:var(--muted); margin:0 0 14px; }
     .qr-inner { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
     .qr-box { background:white; padding:12px; border-radius:10px; display:inline-block; min-width:60px; min-height:60px; }
     .qr-info { flex:1; min-width:200px; }
     .qr-info label { font-size:13px; color:var(--muted); display:block; margin-bottom:4px; }
-    .qr-info input { width:100%; background:#0b1220; border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-size:13px; margin-bottom:10px; }
+    .qr-url-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+    .qr-url-row input { flex:1; background:#0b1220; border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-size:12px; }
+    .qr-url-row button { background:#1e293b; border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--muted); font-size:12px; cursor:pointer; white-space:nowrap; }
+    .qr-info input.label-input { width:100%; background:#0b1220; border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-size:13px; margin-bottom:10px; }
     .msg { margin-top:10px; min-height:22px; padding:7px 12px; border-radius:8px; background:rgba(249,115,22,.1); border:1px solid rgba(249,115,22,.2); color:#fbbf24; font-size:13px; }
     .footer { margin-top:20px; text-align:center; color:var(--muted); font-size:12px; }
     @media print {
       body { background:white; color:black; }
       .no-print { display:none !important; }
-      .qr-print { display:block !important; text-align:center; padding:40px 20px; }
-      .qr-print-label { font-size:28px; font-weight:800; color:black; margin-top:16px; }
-      .qr-print-url   { font-size:13px; color:#555; margin-top:6px; }
+      .qr-print { display:block !important; text-align:center; padding:60px 20px; }
+      .qr-print-label { font-size:30px; font-weight:800; color:black; margin-top:20px; }
+      .qr-print-url   { font-size:13px; color:#555; margin-top:8px; word-break:break-all; }
     }
   </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- Header -->
   <header>
     <div>
       <h1>Queue Monitor (Admin)</h1>
@@ -73,16 +77,20 @@
     </div>
   </header>
 
-  <!-- QR Code Generator -->
+  <!-- QR Code -->
   <div class="qr-section no-print">
     <h2>📲 Guest QR Code</h2>
+    <p class="qr-hint">URL is auto-detected from this page. Edit only if your guest page has a different name.</p>
     <div class="qr-inner">
       <div class="qr-box" id="qrcode"></div>
       <div class="qr-info">
-        <label>Guest page URL</label>
-        <input id="guestUrl" type="text" placeholder="https://venturazz.github.io/englishazcatalog/webapps/queuenumber/queueguest.html" />
-        <label>Label under QR (optional)</label>
-        <input id="qrLabel" type="text" value="Scan to get your queue number" />
+        <label>Guest page URL (auto-detected)</label>
+        <div class="qr-url-row">
+          <input id="guestUrl" type="text" readonly />
+          <button onclick="resetGuestUrl()">↺ Reset</button>
+        </div>
+        <label>Label under QR</label>
+        <input class="label-input" id="qrLabel" type="text" value="Scan to get your queue number" />
         <div class="btn-row">
           <button class="primary"   id="generateQr">Generate QR</button>
           <button class="secondary" id="printQr">🖨 Print QR</button>
@@ -91,7 +99,7 @@
     </div>
   </div>
 
-  <!-- Printable QR (only visible on print) -->
+  <!-- Printable QR -->
   <div class="qr-print" id="qrPrintArea" style="display:none;">
     <div id="qrPrintCode"></div>
     <div class="qr-print-label" id="qrPrintLabel">Scan to get your queue number</div>
@@ -125,7 +133,7 @@
     </table>
   </div>
 
-  <!-- Served Section -->
+  <!-- Served -->
   <div class="section-title no-print" style="margin-top:24px;">
     ✅ Served <span class="badge badge-served" id="servedCount">0</span>
   </div>
@@ -139,53 +147,75 @@
 
   <div class="msg no-print" id="msg"></div>
 </div>
-<div class="footer no-print"><small>Queue Monitor v2.2 · Built with Google Sheets & Apps Script</small></div>
+<div class="footer no-print"><small>Queue Monitor v2.3 · Built with Google Sheets & Apps Script</small></div>
 
 <script>
-  // ← Replace with your deployed Apps Script web app URL
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwZSQ7ZNfGcyquy9PmgqX4epCdv6chayfmQfqiKsvry9256RjDXFakaeWeAZE05vCZHBQ/exec';
   const msg = document.getElementById('msg');
 
-  // ── QR Generator ──────────────────────────────────────────────────────
-  document.getElementById('generateQr').addEventListener('click', () => {
+  // ── Auto-detect guest URL ─────────────────────────────────────────────
+  function getGuestUrl() {
+    return window.location.href
+      .replace('queue-admin.html', 'queue-guest.html')
+      .replace('admin.html', 'guest.html')
+      .split('?')[0];
+  }
+
+  function resetGuestUrl() {
+    const input = document.getElementById('guestUrl');
+    input.value = getGuestUrl();
+    input.readOnly = false;
+  }
+
+  // Set on load
+  window.addEventListener('load', () => {
+    const input = document.getElementById('guestUrl');
+    input.value = getGuestUrl();
+    // Allow manual edit on click
+    input.addEventListener('click', () => { input.readOnly = false; });
+    // Auto-generate QR on load
+    generateQR();
+  });
+
+  function generateQR() {
     const url = document.getElementById('guestUrl').value.trim();
-    if (!url) { alert('Please enter the guest page URL first.'); return; }
+    if (!url || url.includes('localhost') || url.includes('file://')) return;
     const qrBox = document.getElementById('qrcode');
     qrBox.innerHTML = '';
     new QRCode(qrBox, { text: url, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.H });
-    msg.textContent = 'QR code generated.';
+  }
+
+  document.getElementById('generateQr').addEventListener('click', () => {
+    generateQR();
+    msg.textContent = 'QR code generated for: ' + document.getElementById('guestUrl').value;
   });
 
   document.getElementById('printQr').addEventListener('click', () => {
     const url   = document.getElementById('guestUrl').value.trim();
     const label = document.getElementById('qrLabel').value.trim();
-    if (!url) { alert('Please generate the QR code first.'); return; }
+    if (!url) { alert('No URL detected. Please enter the guest page URL manually.'); return; }
     document.getElementById('qrPrintLabel').textContent = label;
     document.getElementById('qrPrintUrl').textContent   = url;
     const printCode = document.getElementById('qrPrintCode');
     printCode.innerHTML = '';
-    new QRCode(printCode, { text: url, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.H });
+    new QRCode(printCode, { text: url, width: 280, height: 280, correctLevel: QRCode.CorrectLevel.H });
     const printArea = document.getElementById('qrPrintArea');
     printArea.style.display = 'block';
     setTimeout(() => { window.print(); printArea.style.display = 'none'; }, 400);
   });
 
-  // ── Load & render queue ───────────────────────────────────────────────
+  // ── Queue loader ──────────────────────────────────────────────────────
   async function showQueue() {
     msg.textContent = 'Loading queue...';
     try {
       const resp = await fetch(SHEET_URL + '?action=get_queue&timestamp=' + Date.now());
       const data = await resp.json();
-      if (!data || !Array.isArray(data.data)) {
-        msg.textContent = data?.error || 'Invalid response.';
-        return;
-      }
+      if (!data || !Array.isArray(data.data)) { msg.textContent = data?.error || 'Invalid response.'; return; }
 
       const items  = data.data;
       const active = items.filter(i => ['waiting','called'].includes((i.status||'').toLowerCase()));
       const served = items.filter(i => (i.status||'').toLowerCase() === 'served');
 
-      // Stats
       document.getElementById('totalToday').textContent  = items.length;
       document.getElementById('statWaiting').textContent = active.filter(i => i.status === 'waiting').length;
       document.getElementById('statCalled').textContent  = active.filter(i => i.status === 'called').length;
@@ -193,7 +223,7 @@
       document.getElementById('activeCount').textContent = active.length;
       document.getElementById('servedCount').textContent = served.length;
 
-      // ── Active table ──
+      // Active table
       const activeTB = document.getElementById('activeTable').querySelector('tbody');
       activeTB.innerHTML = '';
       if (active.length === 0) {
@@ -219,7 +249,7 @@
         });
       }
 
-      // ── Served table ──
+      // Served table
       const servedTB = document.getElementById('servedTable').querySelector('tbody');
       servedTB.innerHTML = '';
       if (served.length === 0) {
@@ -241,71 +271,48 @@
           servedTB.appendChild(row);
         });
       }
-
       msg.textContent = '';
-    } catch (err) {
-      msg.textContent = 'Network error: ' + err.toString();
-    }
+    } catch (err) { msg.textContent = 'Network error: ' + err.toString(); }
   }
 
-  // ── Action handler ────────────────────────────────────────────────────
   async function doAction(action, deviceId) {
     msg.textContent = 'Processing...';
     try {
       await fetch(`${SHEET_URL}?action=${action}&device_id=${encodeURIComponent(deviceId)}&timestamp=${Date.now()}`);
       await showQueue();
-    } catch (err) {
-      msg.textContent = 'Error: ' + err.toString();
-    }
+    } catch (err) { msg.textContent = 'Error: ' + err.toString(); }
   }
 
-  // ── Reset queue ───────────────────────────────────────────────────────
   async function resetQueue() {
     const pass = prompt('Admin password:');
     if (!pass) return;
     msg.textContent = 'Resetting queue...';
     try {
-      const resp = await fetch(
-        `${SHEET_URL}?action=reset_queue&password=${encodeURIComponent(pass)}&timestamp=${Date.now()}`,
-        { method: 'POST' }
-      );
+      const resp = await fetch(`${SHEET_URL}?action=reset_queue&password=${encodeURIComponent(pass)}&timestamp=${Date.now()}`, { method:'POST' });
       const data = await resp.json();
-      msg.textContent = data?.success ? '✅ ' + data.message : ('❌ ' + (data?.error || 'Failed.'));
+      msg.textContent = data?.success ? '✅ ' + data.message : '❌ ' + (data?.error || 'Failed.');
       if (data?.success) await showQueue();
-    } catch (err) {
-      msg.textContent = 'Error: ' + err.toString();
-    }
+    } catch (err) { msg.textContent = 'Error: ' + err.toString(); }
   }
 
-  // ── Reset all ─────────────────────────────────────────────────────────
   async function resetAll() {
     if (prompt('Type "RESET ALL" to confirm:') !== 'RESET ALL') return;
     const pass = prompt('Admin password:');
     if (!pass) return;
     msg.textContent = 'Resetting all data...';
     try {
-      const resp = await fetch(
-        `${SHEET_URL}?action=reset_all&password=${encodeURIComponent(pass)}&timestamp=${Date.now()}`,
-        { method: 'POST' }
-      );
+      const resp = await fetch(`${SHEET_URL}?action=reset_all&password=${encodeURIComponent(pass)}&timestamp=${Date.now()}`, { method:'POST' });
       const data = await resp.json();
-      msg.textContent = data?.success ? '✅ ' + data.message : ('❌ ' + (data?.error || 'Failed.'));
+      msg.textContent = data?.success ? '✅ ' + data.message : '❌ ' + (data?.error || 'Failed.');
       if (data?.success) await showQueue();
-    } catch (err) {
-      msg.textContent = 'Error: ' + err.toString();
-    }
+    } catch (err) { msg.textContent = 'Error: ' + err.toString(); }
   }
 
-  // ── Auto-refresh every 30s ────────────────────────────────────────────
   setInterval(showQueue, 30000);
-
-  // ── Event listeners ───────────────────────────────────────────────────
   document.getElementById('refreshBtn').addEventListener('click',  showQueue);
   document.getElementById('loadBtn').addEventListener('click',     showQueue);
   document.getElementById('resetBtn').addEventListener('click',    resetQueue);
   document.getElementById('resetAllBtn').addEventListener('click', resetAll);
-
-  // Load on open
   showQueue();
 </script>
 </body>
