@@ -19,27 +19,13 @@
     .num.calling { color:var(--warn); border-color:var(--warn); }
     .num.served  { color:var(--blue); border-color:var(--blue); text-decoration:line-through; opacity:.6; }
     .status { font-size:14px; font-weight:600; padding:8px 18px; border-radius:20px; display:inline-block; margin-bottom:10px; }
-    .status.waiting { background:rgba(34,197,94,.15);  color:var(--accent); }
+    .status.waiting { background:rgba(34,197,94,.15); color:var(--accent); }
     .status.called  { background:rgba(245,158,11,.2);  color:var(--warn); animation:pulse 1s infinite; }
     .status.served  { background:rgba(96,165,250,.15); color:var(--blue); }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
-    /* Notification button */
-    #notifBtn {
-      background:rgba(34,197,94,.1);
-      border:1px solid #22c55e;
-      color:#22c55e;
-      border-radius:10px;
-      padding:8px 16px;
-      font-size:13px;
-      cursor:pointer;
-      margin-bottom:12px;
-      font-weight:600;
-      display:inline-block;
-      transition:all .3s;
-    }
+    #notifBtn { background:rgba(34,197,94,.1); border:1px solid #22c55e; color:#22c55e; border-radius:10px; padding:8px 16px; font-size:13px; cursor:pointer; margin-bottom:12px; font-weight:600; display:inline-block; transition:all .3s; }
     #notifBtn:disabled { opacity:.6; cursor:default; }
-    #notifBtn.denied  { border-color:#ef4444; color:#ef4444; background:rgba(239,68,68,.1); }
-    /* Alert boxes */
+    #notifBtn.denied { border-color:#ef4444; color:#ef4444; background:rgba(239,68,68,.1); }
     .alert-box { display:none; border-radius:14px; padding:18px 16px; margin-top:12px; font-size:17px; font-weight:700; }
     .alert-box.calling { display:block; background:rgba(245,158,11,.15); border:2px solid var(--warn); color:var(--warn); animation:pulse 1.5s infinite; }
     .alert-box.served  { display:block; background:rgba(96,165,250,.1);  border:2px solid var(--blue); color:var(--blue); }
@@ -55,18 +41,14 @@
     <h1>Queue Number</h1>
     <p class="subtitle">Your number is assigned automatically when you open this page.</p>
 
-    <!-- Enable notifications button -->
     <button id="notifBtn" onclick="requestNotif()">🔔 Enable Notifications</button>
 
     <div id="queueNumber" class="num">----</div>
     <div id="statusBadge" class="status waiting">Waiting</div>
 
-    <!-- Called alert -->
     <div id="calledAlert" class="alert-box">
       📢 Your number is being called!<br>Please proceed to the counter.
     </div>
-
-    <!-- Served thank you -->
     <div id="servedAlert" class="alert-box">
       <div class="thank-icon">🎉</div>
       <div class="thank-title">Thank You!</div>
@@ -91,8 +73,9 @@
     const notifBtn      = document.getElementById('notifBtn');
 
     let myDeviceId = null, myNumber = null, lastStatus = null, pollTimer = null;
+    let swRegistration = null;
 
-    // ── Device ID ──────────────────────────────────────────────────────────
+    // ── Device ID ─────────────────────────────────────────────────────────
     function getDeviceId() {
       let id = localStorage.getItem('queue_device_id');
       if (!id) {
@@ -102,26 +85,18 @@
       return id;
     }
 
-    // ── Notification permission ────────────────────────────────────────────
-    function requestNotif() {
-      if (!('Notification' in window)) {
-        notifBtn.textContent = '❌ Not supported on this browser';
-        notifBtn.classList.add('denied');
-        notifBtn.disabled = true;
-        return;
+    // ── Register Service Worker ───────────────────────────────────────────
+    async function registerSW() {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        swRegistration = await navigator.serviceWorker.register('/sw.js');
+        console.log('SW registered:', swRegistration.scope);
+      } catch (err) {
+        console.warn('SW registration failed:', err);
       }
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          notifBtn.textContent = '✅ Notifications enabled';
-          notifBtn.disabled = true;
-        } else {
-          notifBtn.textContent = '❌ Blocked — allow in browser settings';
-          notifBtn.classList.add('denied');
-          notifBtn.disabled = true;
-        }
-      });
     }
 
+    // ── Notification permission ───────────────────────────────────────────
     function updateNotifBtn() {
       if (!('Notification' in window)) {
         notifBtn.textContent = '❌ Not supported on this device';
@@ -137,10 +112,51 @@
         notifBtn.classList.add('denied');
         notifBtn.disabled = true;
       }
-      // else 'default' — keep button visible so user can click
     }
 
-    // ── Beep sound ────────────────────────────────────────────────────────
+    async function requestNotif() {
+      if (!('Notification' in window)) {
+        notifBtn.textContent = '❌ Not supported on this browser';
+        notifBtn.classList.add('denied');
+        notifBtn.disabled = true;
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        notifBtn.textContent = '✅ Notifications enabled';
+        notifBtn.disabled = true;
+        // Register SW now that permission is granted
+        await registerSW();
+      } else {
+        notifBtn.textContent = '❌ Blocked — allow in browser settings';
+        notifBtn.classList.add('denied');
+        notifBtn.disabled = true;
+      }
+    }
+
+    // ── Show notification via Service Worker ─────────────────────────────
+    async function showNotif(title, body) {
+      if (Notification.permission !== 'granted') return;
+      try {
+        // Use SW if available (works in background)
+        if (swRegistration) {
+          await swRegistration.showNotification(title, {
+            body,
+            vibrate: [300, 100, 300, 100, 300],
+            tag: 'queue-alert',
+            renotify: true,
+            requireInteraction: true
+          });
+        } else {
+          // Fallback to basic Notification
+          new Notification(title, { body });
+        }
+      } catch (e) {
+        console.warn('Notification error:', e);
+      }
+    }
+
+    // ── Beep sound (3 beeps) ──────────────────────────────────────────────
     function playBeep() {
       try {
         const ctx  = new (window.AudioContext || window.webkitAudioContext)();
@@ -149,7 +165,6 @@
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.type = 'sine';
-        // Play 3 short beeps
         [0, 0.35, 0.70].forEach(offset => {
           osc.frequency.setValueAtTime(880, ctx.currentTime + offset);
           gain.gain.setValueAtTime(0.5, ctx.currentTime + offset);
@@ -161,17 +176,16 @@
     }
 
     // ── UI state machine ──────────────────────────────────────────────────
-    function updateUI(status) {
+    async function updateUI(status) {
       if (lastStatus === status) return;
       lastStatus = status;
 
-      // Reset
-      document.body.className   = '';
-      mainWrap.className        = 'wrap';
-      queueNumberEl.className   = 'num';
-      calledAlert.className     = 'alert-box';
-      servedAlert.className     = 'alert-box';
-      statusBadge.className     = 'status ' + status;
+      document.body.className = '';
+      mainWrap.className      = 'wrap';
+      queueNumberEl.className = 'num';
+      calledAlert.className   = 'alert-box';
+      servedAlert.className   = 'alert-box';
+      statusBadge.className   = 'status ' + status;
 
       const labels = { waiting:'Waiting', called:'Being Called!', served:'Served' };
       statusBadge.textContent = labels[status] || status;
@@ -183,19 +197,18 @@
         calledAlert.classList.add('calling');
         hintText.textContent = 'Please proceed to the counter now.';
         playBeep();
-        if (Notification.permission === 'granted') {
-          new Notification('Queue Alert 📢', {
-            body: 'Number ' + String(myNumber).padStart(4,'0') + ' is being called! Please proceed to the counter.',
-            icon: ''
-          });
-        }
+        await showNotif(
+          'Queue Alert 📢',
+          'Number ' + String(myNumber).padStart(4,'0') + ' is being called! Please proceed to the counter.'
+        );
       } else if (status === 'served') {
         document.body.classList.add('served');
         mainWrap.classList.add('served');
         queueNumberEl.classList.add('served');
         servedAlert.classList.add('served');
         hintText.textContent = 'This queue session is complete. Thank you!';
-        if (pollTimer) clearInterval(pollTimer); // stop polling
+        if (pollTimer) clearInterval(pollTimer);
+        await showNotif('Queue ✅', 'You have been served. Thank you!');
       } else {
         hintText.textContent = 'Keep this page open. You will be notified when your number is called.';
       }
@@ -213,7 +226,7 @@
           myNumber = data.number;
           queueNumberEl.textContent = String(data.number).padStart(4,'0');
           msgEl.textContent = data.is_new ? 'New number issued.' : 'Existing number reused.';
-          updateUI(data.status || 'waiting');
+          await updateUI(data.status || 'waiting');
           if (data.status !== 'served') startPolling();
         } else {
           queueNumberEl.textContent = 'ERR';
@@ -225,14 +238,14 @@
       }
     }
 
-    // ── Poll every 5s for status change ───────────────────────────────────
+    // ── Poll every 5s ─────────────────────────────────────────────────────
     async function pollStatus() {
       if (!myDeviceId) return;
       try {
         const url = `${SHEET_URL}?action=get_status&device_id=${encodeURIComponent(myDeviceId)}&timestamp=${Date.now()}`;
         const resp = await fetch(url);
         const data = await resp.json();
-        if (data && data.status) updateUI(data.status);
+        if (data && data.status) await updateUI(data.status);
       } catch (e) {}
     }
 
@@ -243,6 +256,7 @@
 
     // ── Init ──────────────────────────────────────────────────────────────
     updateNotifBtn();
+    if (Notification.permission === 'granted') registerSW();
     fetchNumber();
   </script>
 </body>
