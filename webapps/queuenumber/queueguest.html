@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Queue Number</title>
   <style>
-    :root { --bg:#0f172a; --text:#e5e7eb; --muted:#94a3b8; --accent:#22c55e; --warn:#f59e0b; --blue:#60a5fa; }
+    :root { --text:#e5e7eb; --muted:#94a3b8; --accent:#22c55e; --warn:#f59e0b; --blue:#60a5fa; }
     * { box-sizing:border-box; }
     body { margin:0; min-height:100vh; display:grid; place-items:center; font-family:system-ui,Segoe UI,Arial,sans-serif; background:linear-gradient(135deg,#0f172a,#1e293b); color:var(--text); transition:background .4s; }
     body.calling { background:linear-gradient(135deg,#1c1a00,#3d2b00) !important; }
@@ -23,7 +23,7 @@
     .status.called  { background:rgba(245,158,11,.2);  color:var(--warn); animation:pulse 1s infinite; }
     .status.served  { background:rgba(96,165,250,.15); color:var(--blue); }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
-    #notifBtn { background:rgba(34,197,94,.1); border:1px solid #22c55e; color:#22c55e; border-radius:10px; padding:8px 16px; font-size:13px; cursor:pointer; margin-bottom:12px; font-weight:600; display:inline-block; transition:all .3s; }
+    #notifBtn { background:rgba(34,197,94,.1); border:1px solid #22c55e; color:#22c55e; border-radius:10px; padding:9px 18px; font-size:13px; cursor:pointer; margin-bottom:14px; font-weight:600; transition:all .3s; width:100%; }
     #notifBtn:disabled { opacity:.6; cursor:default; }
     #notifBtn.denied { border-color:#ef4444; color:#ef4444; background:rgba(239,68,68,.1); }
     .alert-box { display:none; border-radius:14px; padding:18px 16px; margin-top:12px; font-size:17px; font-weight:700; }
@@ -40,12 +40,9 @@
   <div class="wrap" id="mainWrap">
     <h1>Queue Number</h1>
     <p class="subtitle">Your number is assigned automatically when you open this page.</p>
-
-    <button id="notifBtn" onclick="requestNotif()">🔔 Enable Notifications</button>
-
+    <button id="notifBtn">🔔 Tap here to enable notifications & sound</button>
     <div id="queueNumber" class="num">----</div>
     <div id="statusBadge" class="status waiting">Waiting</div>
-
     <div id="calledAlert" class="alert-box">
       📢 Your number is being called!<br>Please proceed to the counter.
     </div>
@@ -54,13 +51,11 @@
       <div class="thank-title">Thank You!</div>
       <div class="thank-sub">You have been served. We hope to see you again!</div>
     </div>
-
     <p class="small" id="hintText">Keep this page open. You will be notified when your number is called.</p>
     <div id="msg" class="msg"></div>
   </div>
 
   <script>
-    // ← Replace with your deployed Apps Script web app URL
     const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwZSQ7ZNfGcyquy9PmgqX4epCdv6chayfmQfqiKsvry9256RjDXFakaeWeAZE05vCZHBQ/exec';
 
     const queueNumberEl = document.getElementById('queueNumber');
@@ -72,8 +67,11 @@
     const msgEl         = document.getElementById('msg');
     const notifBtn      = document.getElementById('notifBtn');
 
-    let myDeviceId = null, myNumber = null, lastStatus = null, pollTimer = null;
-    let swRegistration = null;
+    let myDeviceId  = null;
+    let myNumber    = null;
+    let lastStatus  = null; // always null on fresh page load
+    let pollTimer   = null;
+    let audioCtx    = null; // shared audio context
 
     // ── Device ID ─────────────────────────────────────────────────────────
     function getDeviceId() {
@@ -85,19 +83,65 @@
       return id;
     }
 
-    // ── Register Service Worker ───────────────────────────────────────────
+    // ── Audio context unlock on button tap ───────────────────────────────
+    function unlockAudio() {
+      if (audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume();
+      } catch (e) {}
+    }
+
+    function playBeep() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume().then(() => {
+          const osc  = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sine';
+          const t = audioCtx.currentTime;
+          [0, 0.35, 0.70].forEach(offset => {
+            osc.frequency.setValueAtTime(880, t + offset);
+            gain.gain.setValueAtTime(0.6, t + offset);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + offset + 0.28);
+          });
+          osc.start(t);
+          osc.stop(t + 1.1);
+        });
+      } catch (e) {}
+    }
+
+    // ── Service Worker registration ───────────────────────────────────────
     async function registerSW() {
       if (!('serviceWorker' in navigator)) return;
       try {
-        swRegistration = await navigator.serviceWorker.register('/sw.js');
-        console.log('SW registered:', swRegistration.scope);
-      } catch (err) {
-        console.warn('SW registration failed:', err);
+        await navigator.serviceWorker.register('/sw.js');
+      } catch (e) {
+        console.warn('SW failed:', e);
       }
     }
 
-    // ── Notification permission ───────────────────────────────────────────
-    function updateNotifBtn() {
+    // ── Show notification via SW (waits until SW is ready) ────────────────
+    async function showNotif(title, body) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification(title, {
+          body,
+          vibrate: [300, 100, 300, 100, 300],
+          tag: 'queue-alert',
+          renotify: true
+        });
+      } catch (e) {
+        try { new Notification(title, { body }); } catch (e2) {}
+      }
+    }
+
+    // ── Notification button ───────────────────────────────────────────────
+    notifBtn.addEventListener('click', async function () {
+      unlockAudio(); // unlock audio on this tap
       if (!('Notification' in window)) {
         notifBtn.textContent = '❌ Not supported on this device';
         notifBtn.classList.add('denied');
@@ -105,77 +149,30 @@
         return;
       }
       if (Notification.permission === 'granted') {
-        notifBtn.textContent = '✅ Notifications enabled';
+        notifBtn.textContent = '✅ Notifications & sound enabled';
         notifBtn.disabled = true;
-      } else if (Notification.permission === 'denied') {
-        notifBtn.textContent = '❌ Blocked — allow in browser settings';
-        notifBtn.classList.add('denied');
-        notifBtn.disabled = true;
+        await registerSW();
+        return;
       }
-    }
-
-    async function requestNotif() {
-      if (!('Notification' in window)) {
-        notifBtn.textContent = '❌ Not supported on this browser';
+      if (Notification.permission === 'denied') {
+        notifBtn.textContent = '❌ Blocked — go to browser settings → allow';
         notifBtn.classList.add('denied');
         notifBtn.disabled = true;
         return;
       }
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        notifBtn.textContent = '✅ Notifications enabled';
+      const perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        notifBtn.textContent = '✅ Notifications & sound enabled';
         notifBtn.disabled = true;
-        // Register SW now that permission is granted
         await registerSW();
       } else {
-        notifBtn.textContent = '❌ Blocked — allow in browser settings';
+        notifBtn.textContent = '❌ Blocked — go to browser settings → allow';
         notifBtn.classList.add('denied');
         notifBtn.disabled = true;
       }
-    }
+    });
 
-    // ── Show notification via Service Worker ─────────────────────────────
-    async function showNotif(title, body) {
-      if (Notification.permission !== 'granted') return;
-      try {
-        // Use SW if available (works in background)
-        if (swRegistration) {
-          await swRegistration.showNotification(title, {
-            body,
-            vibrate: [300, 100, 300, 100, 300],
-            tag: 'queue-alert',
-            renotify: true,
-            requireInteraction: true
-          });
-        } else {
-          // Fallback to basic Notification
-          new Notification(title, { body });
-        }
-      } catch (e) {
-        console.warn('Notification error:', e);
-      }
-    }
-
-    // ── Beep sound (3 beeps) ──────────────────────────────────────────────
-    function playBeep() {
-      try {
-        const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-        const osc  = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        [0, 0.35, 0.70].forEach(offset => {
-          osc.frequency.setValueAtTime(880, ctx.currentTime + offset);
-          gain.gain.setValueAtTime(0.5, ctx.currentTime + offset);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.28);
-        });
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 1.1);
-      } catch (e) {}
-    }
-
-    // ── UI state machine ──────────────────────────────────────────────────
+    // ── Update UI on status change ────────────────────────────────────────
     async function updateUI(status) {
       if (lastStatus === status) return;
       lastStatus = status;
@@ -186,7 +183,6 @@
       calledAlert.className   = 'alert-box';
       servedAlert.className   = 'alert-box';
       statusBadge.className   = 'status ' + status;
-
       const labels = { waiting:'Waiting', called:'Being Called!', served:'Served' };
       statusBadge.textContent = labels[status] || status;
 
@@ -197,10 +193,8 @@
         calledAlert.classList.add('calling');
         hintText.textContent = 'Please proceed to the counter now.';
         playBeep();
-        await showNotif(
-          'Queue Alert 📢',
-          'Number ' + String(myNumber).padStart(4,'0') + ' is being called! Please proceed to the counter.'
-        );
+        await showNotif('Queue Alert 📢',
+          'Number ' + String(myNumber).padStart(4,'0') + ' is being called! Please proceed.');
       } else if (status === 'served') {
         document.body.classList.add('served');
         mainWrap.classList.add('served');
@@ -214,7 +208,7 @@
       }
     }
 
-    // ── Fetch queue number on open ────────────────────────────────────────
+    // ── Fetch number on open ──────────────────────────────────────────────
     async function fetchNumber() {
       myDeviceId = getDeviceId();
       const url = `${SHEET_URL}?action=get_number&device_id=${encodeURIComponent(myDeviceId)}&timestamp=${Date.now()}`;
@@ -255,8 +249,23 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────────
-    updateNotifBtn();
-    if (Notification.permission === 'granted') registerSW();
+    // Check existing permission on load
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
+        notifBtn.textContent = '✅ Notifications & sound enabled';
+        notifBtn.disabled = true;
+        registerSW();
+      } else if (Notification.permission === 'denied') {
+        notifBtn.textContent = '❌ Blocked — go to browser settings → allow';
+        notifBtn.classList.add('denied');
+        notifBtn.disabled = true;
+      }
+    } else {
+      notifBtn.textContent = '❌ Not supported on this device';
+      notifBtn.classList.add('denied');
+      notifBtn.disabled = true;
+    }
+
     fetchNumber();
   </script>
 </body>
