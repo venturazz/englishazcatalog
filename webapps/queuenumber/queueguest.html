@@ -43,12 +43,9 @@
   <div class="wrap" id="mainWrap">
     <h1>Queue Number</h1>
     <p class="subtitle">Your number is assigned automatically when you open this page.</p>
-
     <button id="notifBtn">🔔 Tap to enable notifications &amp; sound</button>
-
     <div id="queueNumber" class="num">----</div>
     <div id="statusBadge" class="status waiting">Waiting</div>
-
     <div id="calledAlert" class="alert-box">
       📢 Your number is being called!<br>Please proceed to the counter.
     </div>
@@ -57,10 +54,7 @@
       <div class="thank-title">Thank You!</div>
       <div class="thank-sub">You have been served. We hope to see you again!</div>
     </div>
-
-    <!-- Stop alarm button — appears only when called -->
     <button id="stopBtn" onclick="stopBeep()">🔕 Tap to stop alarm</button>
-
     <p class="small" id="hintText">Keep this page open. You will be notified when your number is called.</p>
     <div id="msg" class="msg"></div>
   </div>
@@ -78,14 +72,10 @@
     const notifBtn      = document.getElementById('notifBtn');
     const stopBtn       = document.getElementById('stopBtn');
 
-    let myDeviceId  = null;
-    let myNumber    = null;
-    let lastStatus  = null;
-    let pollTimer   = null;
-    let audioCtx    = null;
-    let audioReady  = false;
-    let alarmInterval = null;
-    let swReg       = null;
+    let myDeviceId = null, myNumber = null, lastStatus = null, pollTimer = null;
+    let audioCtx   = null, audioReady = false;
+    let alarmOsc   = null, alarmGain = null, alarmTimer = null;
+    let swReg      = null;
 
     // ── Device ID ─────────────────────────────────────────────────────────
     function getDeviceId() {
@@ -97,62 +87,68 @@
       return id;
     }
 
-    // ── Audio unlock — MUST be first line inside a click handler ──────────
+    // ── Unlock audio — MUST be first inside click handler ─────────────────
     function unlockAudio() {
       try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         audioCtx.resume().then(() => {
           audioReady = true;
-          // Silent test beep to fully unlock iOS audio pipeline
-          const osc  = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(audioCtx.currentTime);
-          osc.stop(audioCtx.currentTime + 0.1);
+          // Silent test beep to fully unlock iOS
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(audioCtx.currentTime);
+          o.stop(audioCtx.currentTime + 0.1);
         });
-      } catch (e) {}
+      } catch(e) {}
     }
 
-    // ── Single beep ───────────────────────────────────────────────────────
-    function beepOnce() {
-      if (!audioCtx || !audioReady) return;
-      try {
-        const t    = audioCtx.currentTime;
-        const osc  = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, t);
-        gain.gain.setValueAtTime(0.8, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-        osc.start(t);
-        osc.stop(t + 0.35);
-      } catch (e) {}
-    }
-
-    // ── Continuous alarm ──────────────────────────────────────────────────
+    // ── Continuous alarm using single oscillator + gain pulsing ───────────
     function playBeep() {
       if (!audioCtx || !audioReady) return;
       stopBeep();
-      beepOnce();
-      alarmInterval = setInterval(beepOnce, 800);
-      stopBtn.classList.add('show');
+      try {
+        audioCtx.resume();
+        alarmGain = audioCtx.createGain();
+        alarmGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        alarmGain.connect(audioCtx.destination);
+
+        alarmOsc = audioCtx.createOscillator();
+        alarmOsc.type = 'sine';
+        alarmOsc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        alarmOsc.connect(alarmGain);
+        alarmOsc.start();
+
+        let on = true;
+        alarmTimer = setInterval(() => {
+          if (!alarmGain || !audioCtx) return;
+          try {
+            const t = audioCtx.currentTime;
+            if (on) {
+              alarmGain.gain.setValueAtTime(0.8, t);
+              alarmGain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+            }
+            on = !on;
+          } catch(e) {}
+        }, 500);
+
+        stopBtn.classList.add('show');
+      } catch(e) { console.warn('playBeep error:', e); }
     }
 
+    // ── Stop alarm ────────────────────────────────────────────────────────
     function stopBeep() {
-      if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
+      if (alarmTimer) { clearInterval(alarmTimer); alarmTimer = null; }
+      if (alarmOsc)   { try { alarmOsc.stop(); } catch(e) {} alarmOsc = null; }
+      if (alarmGain)  { try { alarmGain.disconnect(); } catch(e) {} alarmGain = null; }
       stopBtn.classList.remove('show');
     }
 
     // ── Service Worker ────────────────────────────────────────────────────
     async function registerSW() {
       if (!('serviceWorker' in navigator)) return;
-      try { swReg = await navigator.serviceWorker.register('/sw.js'); } catch (e) {}
+      try { swReg = await navigator.serviceWorker.register('/sw.js'); } catch(e) {}
     }
 
     // ── Show notification via SW ──────────────────────────────────────────
@@ -163,13 +159,13 @@
         await reg.showNotification(title, {
           body, vibrate:[300,100,300,100,300], tag:'queue-alert', renotify:true
         });
-      } catch (e) {
-        try { new Notification(title, { body }); } catch (e2) {}
+      } catch(e) {
+        try { new Notification(title, { body }); } catch(e2) {}
       }
     }
 
-    // ── Notification button ───────────────────────────────────────────────
-    notifBtn.addEventListener('click', async function () {
+    // ── Notification + audio button ───────────────────────────────────────
+    notifBtn.addEventListener('click', async function() {
       unlockAudio(); // MUST be first
 
       if (!('Notification' in window)) {
@@ -200,8 +196,7 @@
     async function updateUI(status) {
       if (lastStatus === status) return;
       lastStatus = status;
-
-      stopBeep(); // always stop alarm on any status change
+      stopBeep();
 
       document.body.className = '';
       mainWrap.className      = 'wrap';
@@ -218,7 +213,7 @@
         queueNumberEl.classList.add('calling');
         calledAlert.classList.add('calling');
         hintText.textContent = 'Please proceed to the counter now.';
-        playBeep(); // continuous alarm
+        playBeep();
         await showNotif('Queue Alert 📢',
           'Number ' + String(myNumber).padStart(4,'0') + ' is being called! Please proceed.');
       } else if (status === 'served') {
@@ -252,7 +247,7 @@
           queueNumberEl.textContent = 'ERR';
           msgEl.textContent = data?.error || 'Error loading number.';
         }
-      } catch (err) {
+      } catch(err) {
         queueNumberEl.textContent = 'ERR';
         msgEl.textContent = 'Network error. Please refresh.';
       }
@@ -266,7 +261,7 @@
         const resp = await fetch(url);
         const data = await resp.json();
         if (data && data.status) await updateUI(data.status);
-      } catch (e) {}
+      } catch(e) {}
     }
 
     function startPolling() {
