@@ -35,7 +35,7 @@
     .status-waiting { color:var(--accent); font-weight:600; }
     .status-called  { color:var(--warn); font-weight:700; animation:pulse 1.2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.5;} }
-    .btn-row { display:flex; gap:6px; }
+    .btn-row { display:flex; gap:6px; flex-wrap:wrap; }
     .btn-row button { background:#334155; border:0; border-radius:8px; padding:5px 10px; font-size:12px; cursor:pointer; color:var(--text); }
     .btn-row button.call    { background:var(--warn); color:#1c1000; font-weight:700; }
     .btn-row button.served  { background:#60a5fa; color:white; font-weight:600; }
@@ -44,7 +44,7 @@
     .qr-section { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:16px; }
     .qr-section h2 { margin:0 0 12px; font-size:18px; }
     .qr-inner { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
-    .qr-box { background:white; padding:12px; border-radius:10px; display:inline-block; }
+    .qr-box { background:white; padding:12px; border-radius:10px; display:inline-block; min-width:60px; min-height:60px; }
     .qr-info { flex:1; min-width:200px; }
     .qr-info label { font-size:13px; color:var(--muted); display:block; margin-bottom:4px; }
     .qr-info input { width:100%; background:#0b1220; border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-size:13px; margin-bottom:10px; }
@@ -53,19 +53,27 @@
     @media print {
       body { background:white; color:black; }
       .no-print { display:none !important; }
-      .qr-print { display:block; text-align:center; margin-top:40px; }
-      .qr-print h2 { font-size:28px; color:black; }
-      .qr-print p  { font-size:18px; color:#333; }
+      .qr-print { display:block !important; text-align:center; padding:40px 20px; }
+      .qr-print-label { font-size:28px; font-weight:800; color:black; margin-top:16px; }
+      .qr-print-url   { font-size:13px; color:#555; margin-top:6px; }
     }
   </style>
 </head>
 <body>
 <div class="wrap">
+
+  <!-- Header -->
   <header>
-    <div><h1>Queue Monitor (Admin)</h1><p class="caption">Small-office queue dashboard · Google Sheets backend</p></div>
-    <div class="no-print"><button class="secondary" id="refreshBtn">🔄 Refresh</button></div>
+    <div>
+      <h1>Queue Monitor (Admin)</h1>
+      <p class="caption">Small-office queue dashboard · Google Sheets backend</p>
+    </div>
+    <div class="no-print">
+      <button class="secondary" id="refreshBtn">🔄 Refresh</button>
+    </div>
   </header>
 
+  <!-- QR Code Generator -->
   <div class="qr-section no-print">
     <h2>📲 Guest QR Code</h2>
     <div class="qr-inner">
@@ -76,34 +84,40 @@
         <label>Label under QR (optional)</label>
         <input id="qrLabel" type="text" value="Scan to get your queue number" />
         <div class="btn-row">
-          <button class="primary" id="generateQr">Generate QR</button>
+          <button class="primary"   id="generateQr">Generate QR</button>
           <button class="secondary" id="printQr">🖨 Print QR</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Printable QR (only visible on print) -->
   <div class="qr-print" id="qrPrintArea" style="display:none;">
     <div id="qrPrintCode"></div>
-    <h2 id="qrPrintLabel">Scan to get your queue number</h2>
-    <p id="qrPrintUrl" style="font-size:13px;color:#555;"></p>
+    <div class="qr-print-label" id="qrPrintLabel">Scan to get your queue number</div>
+    <div class="qr-print-url"   id="qrPrintUrl"></div>
   </div>
 
+  <!-- Controls -->
   <div class="controls no-print">
-    <button class="primary" id="loadBtn">Load Queue</button>
+    <button class="primary"   id="loadBtn">Load Queue</button>
     <button class="secondary" id="resetBtn">Reset Queue</button>
-    <button class="danger" id="resetAllBtn">Reset All</button>
+    <button class="danger"    id="resetAllBtn">Reset All</button>
   </div>
 
+  <!-- Stats -->
   <div class="stats no-print">
     <div class="stat-box"><div class="stat-label">Total Today</div><div class="stat-value" id="totalToday">0</div></div>
-    <div class="stat-box"><div class="stat-label">Waiting</div><div class="stat-value" id="statWaiting">0</div></div>
-    <div class="stat-box"><div class="stat-label">Called</div><div class="stat-value" id="statCalled">0</div></div>
-    <div class="stat-box"><div class="stat-label">Served</div><div class="stat-value" id="statServed">0</div></div>
+    <div class="stat-box"><div class="stat-label">Waiting</div>   <div class="stat-value" id="statWaiting">0</div></div>
+    <div class="stat-box"><div class="stat-label">Called</div>    <div class="stat-value" id="statCalled">0</div></div>
+    <div class="stat-box"><div class="stat-label">Served</div>    <div class="stat-value" id="statServed">0</div></div>
   </div>
 
-  <div class="section-title no-print">🟢 Active Queue <span class="badge badge-active" id="activeCount">0</span></div>
-  <div id="activeSection" class="no-print">
+  <!-- Active Queue -->
+  <div class="section-title no-print">
+    🟢 Active Queue <span class="badge badge-active" id="activeCount">0</span>
+  </div>
+  <div class="no-print">
     <div class="empty-note" id="activeEmpty">No active queue entries.</div>
     <table class="table" id="activeTable" style="display:none;">
       <thead><tr><th>Number</th><th>Device</th><th>Created</th><th>Status</th><th>Actions</th></tr></thead>
@@ -111,8 +125,11 @@
     </table>
   </div>
 
-  <div class="section-title no-print" style="margin-top:24px;">✅ Served <span class="badge badge-served" id="servedCount">0</span></div>
-  <div id="servedSection" class="no-print">
+  <!-- Served Section -->
+  <div class="section-title no-print" style="margin-top:24px;">
+    ✅ Served <span class="badge badge-served" id="servedCount">0</span>
+  </div>
+  <div class="no-print">
     <div class="empty-note" id="servedEmpty">No served entries yet.</div>
     <table class="table served-table" id="servedTable" style="display:none;">
       <thead><tr><th>Number</th><th>Device</th><th>Created</th><th>Status</th><th>Action</th></tr></thead>
@@ -122,18 +139,20 @@
 
   <div class="msg no-print" id="msg"></div>
 </div>
-<div class="footer no-print"><small>Queue Monitor v2.1 · Built with Google Sheets & Apps Script</small></div>
+<div class="footer no-print"><small>Queue Monitor v2.2 · Built with Google Sheets & Apps Script</small></div>
 
 <script>
+  // ← Replace with your deployed Apps Script web app URL
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwZSQ7ZNfGcyquy9PmgqX4epCdv6chayfmQfqiKsvry9256RjDXFakaeWeAZE05vCZHBQ/exec';
   const msg = document.getElementById('msg');
 
+  // ── QR Generator ──────────────────────────────────────────────────────
   document.getElementById('generateQr').addEventListener('click', () => {
     const url = document.getElementById('guestUrl').value.trim();
     if (!url) { alert('Please enter the guest page URL first.'); return; }
     const qrBox = document.getElementById('qrcode');
     qrBox.innerHTML = '';
-    new QRCode(qrBox, { text:url, width:180, height:180, correctLevel:QRCode.CorrectLevel.H });
+    new QRCode(qrBox, { text: url, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.H });
     msg.textContent = 'QR code generated.';
   });
 
@@ -141,31 +160,40 @@
     const url   = document.getElementById('guestUrl').value.trim();
     const label = document.getElementById('qrLabel').value.trim();
     if (!url) { alert('Please generate the QR code first.'); return; }
-    const printArea = document.getElementById('qrPrintArea');
     document.getElementById('qrPrintLabel').textContent = label;
-    document.getElementById('qrPrintUrl').textContent = url;
-    document.getElementById('qrPrintCode').innerHTML = '';
-    new QRCode(document.getElementById('qrPrintCode'), { text:url, width:250, height:250, correctLevel:QRCode.CorrectLevel.H });
+    document.getElementById('qrPrintUrl').textContent   = url;
+    const printCode = document.getElementById('qrPrintCode');
+    printCode.innerHTML = '';
+    new QRCode(printCode, { text: url, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.H });
+    const printArea = document.getElementById('qrPrintArea');
     printArea.style.display = 'block';
-    setTimeout(() => { window.print(); printArea.style.display = 'none'; }, 300);
+    setTimeout(() => { window.print(); printArea.style.display = 'none'; }, 400);
   });
 
+  // ── Load & render queue ───────────────────────────────────────────────
   async function showQueue() {
     msg.textContent = 'Loading queue...';
     try {
       const resp = await fetch(SHEET_URL + '?action=get_queue&timestamp=' + Date.now());
       const data = await resp.json();
-      if (!data || !Array.isArray(data.data)) { msg.textContent = data?.error || 'Invalid response.'; return; }
+      if (!data || !Array.isArray(data.data)) {
+        msg.textContent = data?.error || 'Invalid response.';
+        return;
+      }
+
       const items  = data.data;
       const active = items.filter(i => ['waiting','called'].includes((i.status||'').toLowerCase()));
       const served = items.filter(i => (i.status||'').toLowerCase() === 'served');
+
+      // Stats
       document.getElementById('totalToday').textContent  = items.length;
-      document.getElementById('statWaiting').textContent = active.filter(i=>i.status==='waiting').length;
-      document.getElementById('statCalled').textContent  = active.filter(i=>i.status==='called').length;
+      document.getElementById('statWaiting').textContent = active.filter(i => i.status === 'waiting').length;
+      document.getElementById('statCalled').textContent  = active.filter(i => i.status === 'called').length;
       document.getElementById('statServed').textContent  = served.length;
       document.getElementById('activeCount').textContent = active.length;
       document.getElementById('servedCount').textContent = served.length;
 
+      // ── Active table ──
       const activeTB = document.getElementById('activeTable').querySelector('tbody');
       activeTB.innerHTML = '';
       if (active.length === 0) {
@@ -176,20 +204,22 @@
         document.getElementById('activeTable').style.display = 'table';
         active.forEach(item => {
           const row = document.createElement('tr');
+          const isCalled = (item.status||'').toLowerCase() === 'called';
           row.innerHTML = `
             <td><strong>${String(item.queue_number).padStart(4,'0')}</strong></td>
-            <td><code style="font-size:11px;">${String(item.device_id).slice(0,18)}…</code></td>
-            <td>${item.timestamp}</td>
-            <td class="${item.status==='called'?'status-called':'status-waiting'}">${item.status}</td>
+            <td><code style="font-size:11px;">${String(item.device_id).slice(0,20)}…</code></td>
+            <td style="font-size:12px;">${item.timestamp}</td>
+            <td class="${isCalled ? 'status-called' : 'status-waiting'}">${item.status}</td>
             <td><div class="btn-row">
-              <button class="call"    onclick="doAction('call_next','${item.device_id}')">📢 Call</button>
-              <button class="served"  onclick="doAction('mark_served','${item.device_id}')">✅ Served</button>
+              <button class="call"    onclick="doAction('call_next',   '${item.device_id}')">📢 Call</button>
+              <button class="served"  onclick="doAction('mark_served', '${item.device_id}')">✅ Served</button>
               <button class="waiting" onclick="doAction('mark_waiting','${item.device_id}')">↩ Reset</button>
             </div></td>`;
           activeTB.appendChild(row);
         });
       }
 
+      // ── Served table ──
       const servedTB = document.getElementById('servedTable').querySelector('tbody');
       servedTB.innerHTML = '';
       if (served.length === 0) {
@@ -201,9 +231,9 @@
         served.forEach(item => {
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td><strong>${String(item.queue_number).padStart(4,'0')}</strong></td>
-            <td><code style="font-size:11px;">${String(item.device_id).slice(0,18)}…</code></td>
-            <td>${item.timestamp}</td>
+            <td><strong style="text-decoration:line-through;opacity:.6;">${String(item.queue_number).padStart(4,'0')}</strong></td>
+            <td><code style="font-size:11px;">${String(item.device_id).slice(0,20)}…</code></td>
+            <td style="font-size:12px;">${item.timestamp}</td>
             <td style="color:#60a5fa;">served</td>
             <td><div class="btn-row">
               <button class="waiting" onclick="doAction('mark_waiting','${item.device_id}')">↩ Requeue</button>
@@ -211,39 +241,71 @@
           servedTB.appendChild(row);
         });
       }
+
       msg.textContent = '';
-    } catch (err) { msg.textContent = 'Network error: ' + err.toString(); }
+    } catch (err) {
+      msg.textContent = 'Network error: ' + err.toString();
+    }
   }
 
+  // ── Action handler ────────────────────────────────────────────────────
   async function doAction(action, deviceId) {
-    msg.textContent = action + ' ...';
-    await fetch(`${SHEET_URL}?action=${action}&device_id=${encodeURIComponent(deviceId)}&timestamp=${Date.now()}`);
-    await showQueue();
+    msg.textContent = 'Processing...';
+    try {
+      await fetch(`${SHEET_URL}?action=${action}&device_id=${encodeURIComponent(deviceId)}&timestamp=${Date.now()}`);
+      await showQueue();
+    } catch (err) {
+      msg.textContent = 'Error: ' + err.toString();
+    }
   }
 
+  // ── Reset queue ───────────────────────────────────────────────────────
   async function resetQueue() {
     const pass = prompt('Admin password:');
     if (!pass) return;
-    const resp = await fetch(`${SHEET_URL}?action=reset_queue&password=${encodeURIComponent(pass)}&timestamp=${Date.now()}`, {method:'POST'});
-    const data = await resp.json();
-    msg.textContent = data?.success ? 'Queue reset.' : (data?.error || 'Failed.');
-    if (data?.success) await showQueue();
+    msg.textContent = 'Resetting queue...';
+    try {
+      const resp = await fetch(
+        `${SHEET_URL}?action=reset_queue&password=${encodeURIComponent(pass)}&timestamp=${Date.now()}`,
+        { method: 'POST' }
+      );
+      const data = await resp.json();
+      msg.textContent = data?.success ? '✅ ' + data.message : ('❌ ' + (data?.error || 'Failed.'));
+      if (data?.success) await showQueue();
+    } catch (err) {
+      msg.textContent = 'Error: ' + err.toString();
+    }
   }
 
+  // ── Reset all ─────────────────────────────────────────────────────────
   async function resetAll() {
     if (prompt('Type "RESET ALL" to confirm:') !== 'RESET ALL') return;
     const pass = prompt('Admin password:');
     if (!pass) return;
-    const resp = await fetch(`${SHEET_URL}?action=reset_all&password=${encodeURIComponent(pass)}&timestamp=${Date.now()}`, {method:'POST'});
-    const data = await resp.json();
-    msg.textContent = data?.success ? 'All data reset.' : (data?.error || 'Failed.');
-    if (data?.success) await showQueue();
+    msg.textContent = 'Resetting all data...';
+    try {
+      const resp = await fetch(
+        `${SHEET_URL}?action=reset_all&password=${encodeURIComponent(pass)}&timestamp=${Date.now()}`,
+        { method: 'POST' }
+      );
+      const data = await resp.json();
+      msg.textContent = data?.success ? '✅ ' + data.message : ('❌ ' + (data?.error || 'Failed.'));
+      if (data?.success) await showQueue();
+    } catch (err) {
+      msg.textContent = 'Error: ' + err.toString();
+    }
   }
 
-  document.getElementById('refreshBtn').addEventListener('click', showQueue);
-  document.getElementById('loadBtn').addEventListener('click',    showQueue);
-  document.getElementById('resetBtn').addEventListener('click',   resetQueue);
+  // ── Auto-refresh every 30s ────────────────────────────────────────────
+  setInterval(showQueue, 30000);
+
+  // ── Event listeners ───────────────────────────────────────────────────
+  document.getElementById('refreshBtn').addEventListener('click',  showQueue);
+  document.getElementById('loadBtn').addEventListener('click',     showQueue);
+  document.getElementById('resetBtn').addEventListener('click',    resetQueue);
   document.getElementById('resetAllBtn').addEventListener('click', resetAll);
+
+  // Load on open
   showQueue();
 </script>
 </body>
