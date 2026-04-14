@@ -4,38 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mission: Algebra Lockdown</title>
+    <!-- Base URL agar GitHub tidak bingung mencari aset -->
+    <base href="./"> 
+    
     <style>
-        /* === RESET & GLOBAL STYLES === */
+        /* === RESET === */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #050505; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
         
-        /* === PAGE CONTAINER === */
-        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 1s; }
+        /* === STRUKTUR HALAMAN === */
+        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 0.5s; }
         .page.active { display: block; }
 
-        /* Elemen Gambar Background yang Dihasilkan oleh JS */
-        .bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.4; }
-        
-        #page2, #page3 { background-color: #0a0a0a; background-image: radial-gradient(circle, #111, #000); }
+        /* === GAMBAR BACKGROUND (DENGAN IMG MURNI) === */
+        .bg-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.35; /* Transparansi agar panel tetap terbaca */
+            pointer-events: none;
+        }
 
-        /* === UI ELEMENTS === */
-        .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 85%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.3); z-index: 10; max-height: 90vh; overflow-y: auto; }
-        .title-img { max-width: 100%; margin-bottom: 20px; }
+        /* Khusus halaman 2 dan 3 yang tidak punya gambar background */
+        #page2, #page3 { background-image: radial-gradient(circle, #1a1a1a, #000); }
+
+        /* === PANEL KONTEN UTAMA === */
+        .panel {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f0;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            width: 85%;
+            max-width: 600px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            z-index: 10; /* Berada di atas gambar background */
+            max-height: 85vh;
+            overflow-y: auto;
+        }
         
-        h2 { color: #fff; text-shadow: 0 0 5px #0f0; }
+        .title-img { max-width: 100%; margin-bottom: 20px; border-radius: 5px; }
+        h2 { color: #fff; text-shadow: 0 0 5px #0f0; margin-top: 0; }
         p { color: #ccc; line-height: 1.6; font-size: 1.1rem; }
 
-        .btn { display: inline-block; padding: 12px 25px; margin: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.3s; font-family: inherit; }
-        .btn:hover { background: rgba(0, 255, 0, 0.5); box-shadow: 0 0 15px #0f0; transform: scale(1.05); }
-        .btn.locked { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); box-shadow: none; }
-        .btn.locked:hover { background: rgba(255, 0, 0, 0.3); transform: none; cursor: not-allowed; }
+        /* === TOMBOL === */
+        .btn { display: inline-block; padding: 12px 25px; margin: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.2s; font-family: inherit; }
+        .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 10px #0f0; transform: scale(1.05); }
+        .btn.locked { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); }
+        .btn.locked:hover { background: rgba(255, 0, 0, 0.3); transform: none; box-shadow: 0 0 10px #f00; cursor: not-allowed; }
 
         /* === INPUT STYLES === */
-        input[type="text"], input[type="number"] { background: #000; border: 1px solid #0f0; color: #0f0; font-size: 1.5rem; padding: 10px; width: 150px; text-align: center; margin: 15px 0; font-family: inherit; outline: none; }
-        input[type="text"]:focus, input[type="number"]:focus { box-shadow: 0 0 10px #0f0; }
+        input[type="text"], input[type="number"] { background: #000; border: 1px solid #0f0; color: #0f0; font-size: 1.5rem; padding: 10px; width: 150px; text-align: center; margin: 15px 0; font-family: inherit; outline: none; border-radius: 5px; }
+        input[type="text"]:focus, input[type="number"]:focus { box-shadow: 0 0 10px #0f0; background: #111; }
 
-        .notification { margin-top: 15px; font-weight: bold; min-height: 24px; }
-        .success { color: #0f0; }
-        .error { color: #f00; }
+        .notification { margin-top: 15px; font-weight: bold; min-height: 24px; font-size: 1.1rem; }
+        .success { color: #0f0; text-shadow: 0 0 5px #0f0; }
+        .error { color: #f00; text-shadow: 0 0 5px #f00; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .glitch-text { animation: glitch 2s infinite; }
@@ -44,10 +75,18 @@
 </head>
 <body>
 
+    <!-- KUMPULAN AUDIO STATIS -->
+    <!-- Tag controls dibuang agar tidak terlihat, id dipakai untuk dipanggil JS -->
+    <audio id="audio4" src="halaman-4.mp3" preload="auto"></audio>
+    <audio id="audio5" src="halaman-5.mp3" preload="auto"></audio>
+    <audio id="audio6" src="halaman-6.mp3" preload="auto"></audio>
+    <audio id="audio7" src="halaman-7.mp3" preload="auto"></audio>
+
     <!-- HALAMAN 1 -->
     <div id="page1" class="page active">
+        <img src="Halaman-Awal.jpeg" class="bg-img" alt="Background">
         <div class="panel">
-            <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img" onerror="this.style.display='none'">
+            <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data. Dekripsi sistem dengan Aljabar atau terjebak selamanya.</p>
             <button class="btn" onclick="goToPage(2)">Pecahkan Kunci</button>
         </div>
@@ -82,10 +121,11 @@
 
     <!-- HALAMAN 4 -->
     <div id="page4" class="page">
+        <img src="tantangan-1.jpg" class="bg-img" alt="Sektor A">
         <div class="panel">
             <h2>SEKTOR A: RUANG SERVER</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor A:</p>
-            <p style="font-size: 1.5rem; color: #fff;">(2x + 4y) + (3x + 3y + 7) = ?</p>
+            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">(2x + 4y) + (3x + 3y + 7) = ?</p>
             <p>Masukkan koefisien dan konstanta hasil akhir berurutan (misal: 123):</p>
             <input type="number" id="jawabanA" placeholder="Jawaban">
             <br>
@@ -97,10 +137,11 @@
 
     <!-- HALAMAN 5 -->
     <div id="page5" class="page">
+        <img src="tantangan-2.jpg" class="bg-img" alt="Sektor B">
         <div class="panel">
             <h2>SEKTOR B: LAB KIMIA</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor B:</p>
-            <p style="font-size: 1.5rem; color: #fff;">(5x - 2y + 10) - (3x - 3y + 2) = ?</p>
+            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">(5x - 2y + 10) - (3x - 3y + 2) = ?</p>
             <p>Masukkan koefisien dan konstanta secara berurutan:</p>
             <input type="number" id="jawabanB" placeholder="Jawaban">
             <br>
@@ -112,10 +153,11 @@
 
     <!-- HALAMAN 6 -->
     <div id="page6" class="page">
+        <img src="tantangan-3.jpg" class="bg-img" alt="Sektor C">
         <div class="panel">
             <h2>SEKTOR C: INTI GENERATOR</h2>
             <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk kode C:</p>
-            <p style="font-size: 1.5rem; color: #fff;">Konstanta dari: (x + 3)(x + 3) = ?</p>
+            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">Konstanta dari: (x + 3)(x + 3) = ?</p>
             <input type="number" id="jawabanC" placeholder="Jawaban">
             <br>
             <button class="btn" onclick="cekSektorC()">Submit Jawaban</button>
@@ -126,6 +168,7 @@
 
     <!-- HALAMAN 7 -->
     <div id="page7" class="page">
+        <img src="misi-komplete.jpg" class="bg-img" alt="Mission Complete">
         <div class="panel">
             <h2>MISSION COMPLETE</h2>
             <p>Selamat Agen! Anda berhasil mendekripsi sistem, menstabilkan generator, dan membuka pintu utama.</p>
@@ -133,68 +176,47 @@
         </div>
     </div>
 
+    <!-- === JAVASCRIPT === -->
     <script>
-        // DAFTAR ASET (Ganti nama file di sini jika di GitHub ternyata berbeda)
-        const assets = {
-            bg1: 'Halaman-Awal.jpeg',
-            bg4: 'tantangan-1.jpg',
-            bg5: 'tantangan-2.jpg',
-            bg6: 'tantangan-3.jpg',
-            bg7: 'misi-komplete.jpg',
-            audio4: 'halaman-4.mp3',
-            audio5: 'halaman-5.mp3',
-            audio6: 'halaman-6.mp3',
-            audio7: 'halaman-7.mp3'
-        };
-
-        // INJEKSI BACKGROUND GAMBAR VIA JAVASCRIPT SAAT HALAMAN DIMUAT
-        window.onload = function() {
-            function setBg(pageId, filename) {
-                const page = document.getElementById(pageId);
-                if(page) {
-                    const img = document.createElement('img');
-                    img.src = filename;
-                    img.className = 'bg-layer';
-                    img.onerror = () => console.log("Gagal memuat gambar:", filename);
-                    // Menyisipkan gambar di urutan paling awal (di belakang panel)
-                    page.insertBefore(img, page.firstChild);
-                }
-            }
-            setBg('page1', assets.bg1);
-            setBg('page4', assets.bg4);
-            setBg('page5', assets.bg5);
-            setBg('page6', assets.bg6);
-            setBg('page7', assets.bg7);
-        };
-
-        // OBJEK AUDIO DINAMIS
-        let currentAudio = null;
-
-        function playAudio(filename) {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-            }
-            if (filename) {
-                currentAudio = new Audio(filename);
-                currentAudio.play().catch(e => console.log("Audio diblokir:", e));
-            }
-        }
-
         let unlockB = false;
         let unlockC = false;
 
+        function stopSemuaAudio() {
+            // Hentikan semua audio yang sedang berjalan
+            const allAudio = ['audio4', 'audio5', 'audio6', 'audio7'];
+            allAudio.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.pause();
+                    el.currentTime = 0;
+                }
+            });
+        }
+
         function goToPage(pageNum) {
+            // 1. Sembunyikan semua halaman
             const pages = document.querySelectorAll('.page');
             pages.forEach(p => p.classList.remove('active'));
+            
+            // 2. Tampilkan halaman yang dituju
             document.getElementById('page' + pageNum).classList.add('active');
             
-            // Panggil Audio Berdasarkan Halaman
-            if (pageNum === 4) playAudio(assets.audio4);
-            else if (pageNum === 5) playAudio(assets.audio5);
-            else if (pageNum === 6) playAudio(assets.audio6);
-            else if (pageNum === 7) playAudio(assets.audio7);
-            else playAudio(null); // Matikan audio untuk hal 1, 2, 3
+            // 3. Mainkan Audio (hanya jika halaman memiliki audio)
+            stopSemuaAudio();
+            const audioToPlay = document.getElementById('audio' + pageNum);
+            
+            if (audioToPlay) {
+                // Tangani error autoplay
+                let playPromise = audioToPlay.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        // Playback berhasil
+                    })
+                    .catch(error => {
+                        console.error("Browser memblokir pemutaran audio:", error);
+                    });
+                }
+            }
         }
 
         function checkUnlock(sektor) {
