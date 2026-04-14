@@ -6,23 +6,16 @@
     <title>Mission: Algebra Lockdown</title>
     <style>
         /* === RESET & GLOBAL STYLES === */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #050505; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
         
         /* === PAGE CONTAINER === */
-        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 1s; background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 1s; }
         .page.active { display: block; }
 
-        /* === PENGATURAN BACKGROUND MURNI === */
-        /* Jika file ada di repo yang sama dengan index.html, penulisan ini PASTI terbaca */
-        #page1 { background-image: url('Halaman-Awal.jpeg'); }
-        #page2, #page3 { background-color: #111; background-image: none; }
-        #page4 { background-image: url('tantangan-1.jpg'); }
-        #page5 { background-image: url('tantangan-2.jpg'); }
-        #page6 { background-image: url('tantangan-3.jpg'); }
-        #page7 { background-image: url('misi-komplete.jpg'); }
-
-        /* Layer hitam transparan buatan agar teks terbaca jelas tanpa merusak gambar */
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 1; }
+        /* Elemen Gambar Background yang Dihasilkan oleh JS */
+        .bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.4; }
+        
+        #page2, #page3 { background-color: #0a0a0a; background-image: radial-gradient(circle, #111, #000); }
 
         /* === UI ELEMENTS === */
         .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 85%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.3); z-index: 10; max-height: 90vh; overflow-y: auto; }
@@ -32,7 +25,7 @@
         p { color: #ccc; line-height: 1.6; font-size: 1.1rem; }
 
         .btn { display: inline-block; padding: 12px 25px; margin: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.3s; font-family: inherit; }
-        .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px #0f0; transform: scale(1.05); }
+        .btn:hover { background: rgba(0, 255, 0, 0.5); box-shadow: 0 0 15px #0f0; transform: scale(1.05); }
         .btn.locked { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); box-shadow: none; }
         .btn.locked:hover { background: rgba(255, 0, 0, 0.3); transform: none; cursor: not-allowed; }
 
@@ -53,9 +46,8 @@
 
     <!-- HALAMAN 1 -->
     <div id="page1" class="page active">
-        <div class="overlay"></div>
         <div class="panel">
-            <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
+            <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img" onerror="this.style.display='none'">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data. Dekripsi sistem dengan Aljabar atau terjebak selamanya.</p>
             <button class="btn" onclick="goToPage(2)">Pecahkan Kunci</button>
         </div>
@@ -90,8 +82,6 @@
 
     <!-- HALAMAN 4 -->
     <div id="page4" class="page">
-        <div class="overlay"></div>
-        <audio id="audio4" src="halaman-4.mp3"></audio>
         <div class="panel">
             <h2>SEKTOR A: RUANG SERVER</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor A:</p>
@@ -107,8 +97,6 @@
 
     <!-- HALAMAN 5 -->
     <div id="page5" class="page">
-        <div class="overlay"></div>
-        <audio id="audio5" src="halaman-5.mp3"></audio>
         <div class="panel">
             <h2>SEKTOR B: LAB KIMIA</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor B:</p>
@@ -124,8 +112,6 @@
 
     <!-- HALAMAN 6 -->
     <div id="page6" class="page">
-        <div class="overlay"></div>
-        <audio id="audio6" src="halaman-6.mp3"></audio>
         <div class="panel">
             <h2>SEKTOR C: INTI GENERATOR</h2>
             <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk kode C:</p>
@@ -140,8 +126,6 @@
 
     <!-- HALAMAN 7 -->
     <div id="page7" class="page">
-        <div class="overlay"></div>
-        <audio id="audio7" src="halaman-7.mp3"></audio>
         <div class="panel">
             <h2>MISSION COMPLETE</h2>
             <p>Selamat Agen! Anda berhasil mendekripsi sistem, menstabilkan generator, dan membuka pintu utama.</p>
@@ -150,38 +134,67 @@
     </div>
 
     <script>
+        // DAFTAR ASET (Ganti nama file di sini jika di GitHub ternyata berbeda)
+        const assets = {
+            bg1: 'Halaman-Awal.jpeg',
+            bg4: 'tantangan-1.jpg',
+            bg5: 'tantangan-2.jpg',
+            bg6: 'tantangan-3.jpg',
+            bg7: 'misi-komplete.jpg',
+            audio4: 'halaman-4.mp3',
+            audio5: 'halaman-5.mp3',
+            audio6: 'halaman-6.mp3',
+            audio7: 'halaman-7.mp3'
+        };
+
+        // INJEKSI BACKGROUND GAMBAR VIA JAVASCRIPT SAAT HALAMAN DIMUAT
+        window.onload = function() {
+            function setBg(pageId, filename) {
+                const page = document.getElementById(pageId);
+                if(page) {
+                    const img = document.createElement('img');
+                    img.src = filename;
+                    img.className = 'bg-layer';
+                    img.onerror = () => console.log("Gagal memuat gambar:", filename);
+                    // Menyisipkan gambar di urutan paling awal (di belakang panel)
+                    page.insertBefore(img, page.firstChild);
+                }
+            }
+            setBg('page1', assets.bg1);
+            setBg('page4', assets.bg4);
+            setBg('page5', assets.bg5);
+            setBg('page6', assets.bg6);
+            setBg('page7', assets.bg7);
+        };
+
+        // OBJEK AUDIO DINAMIS
+        let currentAudio = null;
+
+        function playAudio(filename) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            if (filename) {
+                currentAudio = new Audio(filename);
+                currentAudio.play().catch(e => console.log("Audio diblokir:", e));
+            }
+        }
+
         let unlockB = false;
         let unlockC = false;
 
-        function stopSemuaAudio() {
-            // Ambil semua elemen audio di dokumen dan hentikan
-            const audios = document.querySelectorAll('audio');
-            audios.forEach(audio => {
-                audio.pause();
-                audio.currentTime = 0;
-            });
-        }
-
         function goToPage(pageNum) {
-            // Sembunyikan semua halaman
             const pages = document.querySelectorAll('.page');
             pages.forEach(p => p.classList.remove('active'));
-            
-            // Tampilkan halaman tujuan
             document.getElementById('page' + pageNum).classList.add('active');
             
-            // Atur Audio
-            stopSemuaAudio();
-            const elemenAudio = document.getElementById('audio' + pageNum);
-            if (elemenAudio) {
-                // Mainkan audio jika tag audio ada di halaman tersebut
-                let playPromise = elemenAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log("Audio play error:", error);
-                    });
-                }
-            }
+            // Panggil Audio Berdasarkan Halaman
+            if (pageNum === 4) playAudio(assets.audio4);
+            else if (pageNum === 5) playAudio(assets.audio5);
+            else if (pageNum === 6) playAudio(assets.audio6);
+            else if (pageNum === 7) playAudio(assets.audio7);
+            else playAudio(null); // Matikan audio untuk hal 1, 2, 3
         }
 
         function checkUnlock(sektor) {
