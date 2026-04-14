@@ -1,317 +1,265 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English A-Z Catalog</title>
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="css/templatemo-style.css">
-<!--
-    
-TemplateMo 556 Catalog-Z
+    <title>Mission: Unindra Lockdown</title>
+    <style>
+        /* === RESET & GLOBAL STYLES === */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #050505; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
+        
+        /* === PAGE CONTAINER === */
+        .page { display: none; width: 100vw; height: 100vh; background-size: cover; background-position: center; position: relative; animation: fadeIn 1s; }
+        .page.active { display: block; }
 
-https://templatemo.com/tm-556-catalog-z
+        /* === BACKGROUND ASSIGNMENTS === */
+        #page1 { background-image: url('Halaman-Awal.jpeg'); }
+        /* Page 2 & 3 menggunakan background gelap ala terminal karena tidak ada gambar khusus yang dikirim */
+        #page2, #page3 { background-color: #0a0a0a; background-image: radial-gradient(#111, #000); } 
+        #page4 { background-image: url('tantangan-1.jpg'); }
+        #page5 { background-image: url('tantangan-2.jpg'); }
+        #page6 { background-image: url('tantangan-3.jpg'); }
+        #page7 { background-image: url('misi-komplete.jpg'); }
 
--->
+        /* === UI ELEMENTS === */
+        .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 80%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); }
+        .title-img { max-width: 100%; margin-bottom: 20px; }
+        
+        h2 { color: #fff; text-shadow: 0 0 5px #0f0; }
+        p { color: #ccc; line-height: 1.6; font-size: 1.1rem; }
+
+        .btn { display: inline-block; padding: 15px 30px; margin: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.3s; font-family: inherit; }
+        .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px #0f0; transform: scale(1.05); }
+        .btn.locked { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); box-shadow: none; }
+        .btn.locked:hover { background: rgba(255, 0, 0, 0.3); transform: none; cursor: not-allowed; }
+
+        /* === INPUT STYLES === */
+        input[type="text"], input[type="number"] { background: #000; border: 1px solid #0f0; color: #0f0; font-size: 1.5rem; padding: 10px; width: 150px; text-align: center; margin: 15px 0; font-family: inherit; outline: none; }
+        input[type="text"]:focus { box-shadow: 0 0 10px #0f0; }
+
+        .notification { margin-top: 15px; font-weight: bold; min-height: 24px; }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+
+        /* === ANIMATIONS === */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .glitch-text { animation: glitch 2s infinite; }
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 red, -2px 0 blue; }
+            5% { text-shadow: -2px 0 red, 2px 0 blue; }
+            10% { text-shadow: 2px 0 red, -2px 0 blue; }
+            15% { text-shadow: none; }
+            100% { text-shadow: none; }
+        }
+    </style>
 </head>
 <body>
-    <!-- Page Loader -->
-    <div id="loader-wrapper">
-        <div id="loader"></div>
 
-        <div class="loader-section section-left"></div>
-        <div class="loader-section section-right"></div>
-
-    </div>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-film mr-2"></i>
-                English A-Z Catalog
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link nav-link-1 active" aria-current="page" href="index.html">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link nav-link-3" href="about.html">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link nav-link-4" href="contact.html">Contact</a>
-                </li>
-            </ul>
-            </div>
+    <!-- HALAMAN 1: LANDING PAGE -->
+    <div id="page1" class="page active">
+        <div class="panel">
+            <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
+            <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data. Dekripsi sistem dengan Aljabar atau terjebak selamanya.</p>
+            <button class="btn" onclick="goToPage(2)">Pecahkan Kunci</button>
         </div>
-    </nav>
-
-    <div class="tm-hero d-flex justify-content-center align-items-center" data-parallax="scroll" data-image-src="img/hero.jpg">
-        <form class="d-flex tm-search-form">
-            <input class="form-control tm-search-input" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success tm-search-btn" type="submit">
-                <i class="fas fa-search"></i>
-            </button>
-        </form>
     </div>
 
-    <div class="container-fluid tm-container-content tm-mt-60">
-        <div class="row mb-4">
-            <h2 class="col-6 tm-text-primary">
-                Latest Resource
-            </h2>
+    <!-- HALAMAN 2: BRIEFING -->
+    <div id="page2" class="page">
+        <div class="panel">
+            <h2 class="glitch-text">SISTEM AI: MALFUNGSI</h2>
+            <p>"Agen, dengarkan baik-baik. Generator utama tidak stabil. Gunakan kemampuan Aljabar Anda sebagai kunci dekripsi. Selamatkan data berharga kita. Waktu Anda dimulai dari sekarang!"</p>
+            <button class="btn" onclick="goToPage(3)">Terima Misi</button>
         </div>
-        <div class="row tm-mb-90 tm-gallery">
-        	<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/findthewords.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>H5P Standalone</h2>
-                        <a href="h5p-standalone/content-example.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Find the words</span>
-                    <span>9,906 views</span>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/crossword.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Analytical Exposition</h2>
-                        <a href="h5p-standalone/content-example-1.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Crossword</span>
-                    <span>16,100 views</span>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/sortparagraph.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Analytical Exposition</h2>
-                        <a href="h5p-standalone/content-example-2.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Sort Paragraph</span>
-                    <span>12,460 views</span>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/markthewords.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Passive Voice</h2>
-                        <a href="h5p-standalone/content-example-3.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Mark the Words</span>
-                    <span>11,402 views</span>
-                </div>
-            </div>
+    </div>
+
+    <!-- HALAMAN 3: PETA MISI -->
+    <div id="page3" class="page">
+        <div class="panel">
+            <h2>BLUEPRINT LABORATORIUM</h2>
+            <p>Pilih sektor yang tersedia. Sektor B dan C dikunci dengan enkripsi dinamis. Kumpulkan kode sandi dari setiap sektor untuk bisa kabur!</p>
+            <button class="btn" onclick="goToPage(4)">Sektor A (Ruang Server)</button><br>
+            <button class="btn locked" id="btnSektorB" onclick="checkUnlock('B')">Sektor B (Lab Kimia) - TERKUNCI</button><br>
+            <button class="btn locked" id="btnSektorC" onclick="checkUnlock('C')">Sektor C (Inti Generator) - TERKUNCI</button><br>
+            <hr style="border-color: #333; margin: 20px 0;">
+            <h3>PINTU KELUAR UTAMA</h3>
+            <p>Masukkan total penjumlahan 3 kode sektor:</p>
+            <input type="number" id="finalCode" placeholder="???">
+            <br>
+            <button class="btn" onclick="cekFinal()">Buka Pintu Keluar</button>
+            <div id="notifMap" class="notification"></div>
+        </div>
+    </div>
+
+    <!-- HALAMAN 4: SEKTOR A (TANTANGAN 1) -->
+    <div id="page4" class="page">
+        <div class="panel">
+            <h2>SEKTOR A: RUANG SERVER</h2>
+            <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor A:</p>
+            <p style="font-size: 1.5rem; color: #fff;">(2x + 4y) + (3x + 3y + 7) = ?</p>
             
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/flashcards.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Passive Voice</h2>
-                        <a href="h5p-standalone/content-example-4.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Flashcards</span>
-                    <span>16,008 views</span>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/findthewords.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Passive Voice - Halloween</h2>
-                        <a href="h5p-standalone/content-example-5.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Find the Words</span>
-                    <span>12,860 views</span>
-                </div>
-            </div>
-             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/questionset.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Passive Voice - Worksheet</h2>
-                        <a href="h5p-standalone/worksheet-embeded.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Embeded Content</span>
-                    <span>4,860 views</span>
-                </div>
-            </div>
-	    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/crossword.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Personal Letter</h2>
-                        <a href="h5p-standalone/content-example-6.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Crossword</span>
-                    <span>16,100 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE -->  
-		<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/multichoice.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Digital Answersheet</h2>
-                        <a href="worksheet/main.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Answersheet</span>
-                    <span>9,999 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE -->  
-		<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/blanks.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Hot Potatoes Example</h2>
-                        <a href="h5p-standalone/content/hotpotatoes.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Hot Potatoes</span>
-                    <span>9,999 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE --> 	
-		
-		<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/memorygame.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Reading Worksheet</h2>
-                        <a href="h5p-standalone/content/readingtool.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Reading Worksheet</span>
-                    <span>1,000,000 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE -->
-		<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/essay.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Simpe Hangman</h2>
-                        <a href="game/hangman.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Hangman Game</span>
-                    <span>1,000,000 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE --> 
-		<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/crossword.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Practical Exam : Outline</h2>
-                        <a href="h5p-standalone/content-example-8.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Writing Outline</span>
-                    <span>16,100 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE -->
-	    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/crossword.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Practical Exam : First Draft</h2>
-                        <a href="h5p-standalone/content-example-9.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Writing Draft</span>
-                    <span>16,100 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE -->  
-	   <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/crossword.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Procedure Text : Jumbled Text</h2>
-                        <a href="h5p-standalone/content-example-10.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Procedure Text</span>
-                    <span>16,100 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE -->  
-           <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
-                <figure class="effect-ming tm-video-item">
-                    <img src="img/crossword.svg" alt="Image" class="img-fluid">
-                    <figcaption class="d-flex align-items-center justify-content-center">
-                        <h2>Procedure Text : Find the Words</h2>
-                        <a href="h5p-standalone/content-example-11.html">View more</a>
-                    </figcaption>                    
-                </figure>
-                <div class="d-flex justify-content-between tm-text-gray">
-                    <span class="tm-text-gray-bold">Procedure Text</span>
-                    <span>16,100 views</span>
-                </div>
-		</div>     <!-- COPY THERE TO HERE -->  
-        </div> <!-- row -->
-    </div> <!-- container-fluid, tm-container-content -->
-
-    <footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer">
-        <div class="container-fluid tm-container-small">
-            <div class="row">
-                <div class="col-lg-6 col-md-12 col-12 px-5 mb-5">
-                    <h3 class="tm-text-primary mb-4 tm-footer-title">English A-Z Catalog</h3>
-                    <p>English A-Z Catalog is educational resources I use personally to store learning content related to English Language Learning</p>
-                </div>
-                
-                <div class="col-lg-3 col-md-6 col-sm-6 col-12 px-5 mb-5">
-                    <ul class="tm-social-links d-flex justify-content-end pl-0 mb-5">
-                        <li class="mb-2"><a href="https://facebook.com/venturazz"><i class="fab fa-facebook"></i></a></li>
-                        <li class="mb-2"><a href="https://twitter.com/_venturazz"><i class="fab fa-twitter"></i></a></li>
-                        <li class="mb-2"><a href="https://instagram.com/venturazz"><i class="fab fa-instagram"></i></a></li>
-                        
-                    </ul>
-                   
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-8 col-md-7 col-12 px-5 mb-3">
-                    Copyright 2022 English A-Z Catalog. All rights reserved.
-                </div>
-                <div class="col-lg-4 col-md-5 col-12 px-5 text-right">
-                    Designed by <a href="" class="tm-text-gray" rel="sponsored" target="_parent">venturazz</a>
-                </div>
-            </div>
+            <p>Masukkan koefisien dan konstanta hasil akhir secara berurutan (misal: jika hasilnya 1x+2y+3, ketik 123):</p>
+            <input type="number" id="jawabanA" placeholder="Jawaban">
+            <br>
+            <button class="btn" onclick="cekSektorA()">Submit Jawaban</button>
+            <div id="notifA" class="notification"></div>
+            <button class="btn" style="display:none;" id="backA" onclick="goToPage(3)">Kembali ke Peta</button>
         </div>
-    </footer>
-    
-    <script src="js/plugins.js"></script>
+    </div>
+
+    <!-- HALAMAN 5: SEKTOR B (TANTANGAN 2) -->
+    <div id="page5" class="page">
+        <div class="panel">
+            <h2>SEKTOR B: LAB KIMIA</h2>
+            <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor B:</p>
+            <p style="font-size: 1.5rem; color: #fff;">(5x - 2y + 10) - (3x - 3y + 2) = ?</p>
+            
+            <p>Masukkan koefisien dan konstanta secara berurutan:</p>
+            <input type="number" id="jawabanB" placeholder="Jawaban">
+            <br>
+            <button class="btn" onclick="cekSektorB()">Submit Jawaban</button>
+            <div id="notifB" class="notification"></div>
+            <button class="btn" style="display:none;" id="backB" onclick="goToPage(3)">Kembali ke Peta</button>
+        </div>
+    </div>
+
+    <!-- HALAMAN 6: SEKTOR C (TANTANGAN 3) -->
+    <div id="page6" class="page">
+        <div class="panel">
+            <h2>SEKTOR C: INTI GENERATOR</h2>
+            <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk mendapatkan kode C:</p>
+            <p style="font-size: 1.5rem; color: #fff;">Konstanta dari: (x + 3)(x + 3) = ?</p>
+            
+            <input type="number" id="jawabanC" placeholder="Jawaban">
+            <br>
+            <button class="btn" onclick="cekSektorC()">Submit Jawaban</button>
+            <div id="notifC" class="notification"></div>
+            <button class="btn" style="display:none;" id="backC" onclick="goToPage(3)">Kembali ke Peta</button>
+        </div>
+    </div>
+
+    <!-- HALAMAN 7: MISI SELESAI -->
+    <div id="page7" class="page">
+        <div class="panel">
+            <h2>MISSION COMPLETE</h2>
+            <p>Selamat Agen! Anda berhasil mendekripsi sistem, menstabilkan generator, dan membuka pintu utama.</p>
+            <button class="btn" onclick="location.reload()">Main Lagi</button>
+        </div>
+    </div>
+
+    <!-- === JAVASCRIPT === -->
     <script>
-        $(window).on("load", function() {
-            $('body').addClass('loaded');
-        });
+        // Deklarasi Audio
+        const audioSektorA = new Audio('halaman-4.mp3');
+        const audioSektorB = new Audio('halaman-5.mp3');
+        const audioSektorC = new Audio('halaman-6.mp3');
+        const audioAkhir = new Audio('halaman-7.mp3');
+
+        // Status Unlock Sektor
+        let unlockB = false;
+        let unlockC = false;
+
+        function stopAllAudio() {
+            audioSektorA.pause(); audioSektorA.currentTime = 0;
+            audioSektorB.pause(); audioSektorB.currentTime = 0;
+            audioSektorC.pause(); audioSektorC.currentTime = 0;
+            audioAkhir.pause(); audioAkhir.currentTime = 0;
+        }
+
+        function goToPage(pageNum) {
+            // Sembunyikan semua halaman
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => p.classList.remove('active'));
+            
+            // Tampilkan halaman tujuan
+            document.getElementById('page' + pageNum).classList.add('active');
+            
+            // Manajemen Audio per halaman
+            stopAllAudio();
+            if(pageNum === 4) audioSektorA.play().catch(e => console.log("Audio play diizinkan setelah interaksi user."));
+            if(pageNum === 5) audioSektorB.play();
+            if(pageNum === 6) audioSektorC.play();
+            if(pageNum === 7) audioAkhir.play();
+        }
+
+        function checkUnlock(sektor) {
+            const notifMap = document.getElementById('notifMap');
+            if (sektor === 'B') {
+                if (unlockB) goToPage(5);
+                else {
+                    let pwd = prompt("Masukkan KODE SANDI Sektor B (Didapat dari Sektor A):");
+                    if (pwd === "577") {
+                        unlockB = true;
+                        document.getElementById('btnSektorB').classList.remove('locked');
+                        document.getElementById('btnSektorB').innerText = "Sektor B (Lab Kimia) - TERBUKA";
+                        goToPage(5);
+                    } else {
+                        notifMap.innerHTML = "<span class='error'>Akses Ditolak! Sandi Salah.</span>";
+                    }
+                }
+            } else if (sektor === 'C') {
+                if (unlockC) goToPage(6);
+                else {
+                    let pwd = prompt("Masukkan KODE SANDI Sektor C (Didapat dari Sektor B):");
+                    if (pwd === "218") {
+                        unlockC = true;
+                        document.getElementById('btnSektorC').classList.remove('locked');
+                        document.getElementById('btnSektorC').innerText = "Sektor C (Inti Generator) - TERBUKA";
+                        goToPage(6);
+                    } else {
+                        notifMap.innerHTML = "<span class='error'>Akses Ditolak! Sandi Salah.</span>";
+                    }
+                }
+            }
+        }
+
+        // Kunci Jawaban Aljabar (Disesuaikan agar menghasilkan kode storyboard Anda: 577, 218, 9)
+        function cekSektorA() {
+            const jaw = document.getElementById('jawabanA').value;
+            const notif = document.getElementById('notifA');
+            // Soal: (2x+4y) + (3x+3y+7) = 5x + 7y + 7 --> 577
+            if (jaw === "577") {
+                notif.innerHTML = "<span class='success'>Sistem Stabil! KODE SEKTOR A: 577 (Gunakan untuk membuka Sektor B)</span>";
+                document.getElementById('backA').style.display = 'inline-block';
+            } else {
+                notif.innerHTML = "<span class='error'>Error! Jawaban Salah. Hitung kembali koefisiennya.</span>";
+            }
+        }
+
+        function cekSektorB() {
+            const jaw = document.getElementById('jawabanB').value;
+            const notif = document.getElementById('notifB');
+            // Soal: (5x - 2y + 10) - (3x - 3y + 2) = 2x + 1y + 8 --> 218
+            if (jaw === "218") {
+                notif.innerHTML = "<span class='success'>Enkripsi Ditembus! KODE SEKTOR B: 218 (Gunakan untuk membuka Sektor C)</span>";
+                document.getElementById('backB').style.display = 'inline-block';
+            } else {
+                notif.innerHTML = "<span class='error'>Reaksi Kimia Tidak Stabil! Jawaban Salah.</span>";
+            }
+        }
+
+        function cekSektorC() {
+            const jaw = document.getElementById('jawabanC').value;
+            const notif = document.getElementById('notifC');
+            // Soal: Konstanta dari (x+3)(x+3) = x^2 + 6x + 9 --> Konstanta = 9
+            if (jaw === "9") {
+                notif.innerHTML = "<span class='success'>Generator Stabil! KODE SEKTOR C: 9. Segera jumlahkan ketiga kode untuk keluar!</span>";
+                document.getElementById('backC').style.display = 'inline-block';
+            } else {
+                notif.innerHTML = "<span class='error'>Awas Meledak! Jawaban Salah.</span>";
+            }
+        }
+
+        function cekFinal() {
+            const jaw = document.getElementById('finalCode').value;
+            const notif = document.getElementById('notifMap');
+            // 577 + 218 + 9 = 804
+            if (jaw === "804") {
+                goToPage(7);
+            } else {
+                notif.innerHTML = "<span class='error'>Pintu Utama Terkunci! Total sandi salah.</span>";
+            }
+        }
     </script>
 </body>
 </html>
