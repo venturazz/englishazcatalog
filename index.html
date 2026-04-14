@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mission: Unindra Lockdown</title>
+    <title>Mission: Algebra Lockdown</title>
     <style>
         /* === RESET & GLOBAL STYLES === */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #050505; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
@@ -12,14 +12,14 @@
         .page { display: none; width: 100vw; height: 100vh; background-size: cover; background-position: center; position: relative; animation: fadeIn 1s; }
         .page.active { display: block; }
 
-        /* === BACKGROUND ASSIGNMENTS === */
-        #page1 { background-image: url('Halaman-Awal.jpeg'); }
-        /* Page 2 & 3 menggunakan background gelap ala terminal karena tidak ada gambar khusus yang dikirim */
+        /* === BACKGROUND ASSIGNMENTS (DIPERBAIKI) === */
+        #page1 { background-image: url('./Halaman-Awal.jpeg'); }
+        /* Page 2 & 3 menggunakan background gelap ala terminal */
         #page2, #page3 { background-color: #0a0a0a; background-image: radial-gradient(#111, #000); } 
-        #page4 { background-image: url('tantangan-1.jpg'); }
-        #page5 { background-image: url('tantangan-2.jpg'); }
-        #page6 { background-image: url('tantangan-3.jpg'); }
-        #page7 { background-image: url('misi-komplete.jpg'); }
+        #page4 { background-image: url('./tantangan-1.jpg'); }
+        #page5 { background-image: url('./tantangan-2.jpg'); }
+        #page6 { background-image: url('./tantangan-3.jpg'); }
+        #page7 { background-image: url('./misi-komplete.jpg'); }
 
         /* === UI ELEMENTS === */
         .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 80%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); }
@@ -58,7 +58,7 @@
     <!-- HALAMAN 1: LANDING PAGE -->
     <div id="page1" class="page active">
         <div class="panel">
-            <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
+            <img src="./judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data. Dekripsi sistem dengan Aljabar atau terjebak selamanya.</p>
             <button class="btn" onclick="goToPage(2)">Pecahkan Kunci</button>
         </div>
@@ -149,11 +149,11 @@
 
     <!-- === JAVASCRIPT === -->
     <script>
-        // Deklarasi Audio
-        const audioSektorA = new Audio('halaman-4.mp3');
-        const audioSektorB = new Audio('halaman-5.mp3');
-        const audioSektorC = new Audio('halaman-6.mp3');
-        const audioAkhir = new Audio('halaman-7.mp3');
+        // Deklarasi Audio (Pastikan file mp3 ada di folder yang sama)
+        const audioSektorA = new Audio('./halaman-4.mp3');
+        const audioSektorB = new Audio('./halaman-5.mp3');
+        const audioSektorC = new Audio('./halaman-6.mp3');
+        const audioAkhir = new Audio('./halaman-7.mp3');
 
         // Status Unlock Sektor
         let unlockB = false;
@@ -176,10 +176,10 @@
             
             // Manajemen Audio per halaman
             stopAllAudio();
-            if(pageNum === 4) audioSektorA.play().catch(e => console.log("Audio play diizinkan setelah interaksi user."));
-            if(pageNum === 5) audioSektorB.play();
-            if(pageNum === 6) audioSektorC.play();
-            if(pageNum === 7) audioAkhir.play();
+            if(pageNum === 4) audioSektorA.play().catch(e => console.log("Audio diblokir browser, butuh klik."));
+            if(pageNum === 5) audioSektorB.play().catch(e => console.log("Audio diblokir browser."));
+            if(pageNum === 6) audioSektorC.play().catch(e => console.log("Audio diblokir browser."));
+            if(pageNum === 7) audioAkhir.play().catch(e => console.log("Audio diblokir browser."));
         }
 
         function checkUnlock(sektor) {
@@ -193,7 +193,7 @@
                         document.getElementById('btnSektorB').classList.remove('locked');
                         document.getElementById('btnSektorB').innerText = "Sektor B (Lab Kimia) - TERBUKA";
                         goToPage(5);
-                    } else {
+                    } else if (pwd !== null) {
                         notifMap.innerHTML = "<span class='error'>Akses Ditolak! Sandi Salah.</span>";
                     }
                 }
@@ -206,32 +206,32 @@
                         document.getElementById('btnSektorC').classList.remove('locked');
                         document.getElementById('btnSektorC').innerText = "Sektor C (Inti Generator) - TERBUKA";
                         goToPage(6);
-                    } else {
+                    } else if (pwd !== null) {
                         notifMap.innerHTML = "<span class='error'>Akses Ditolak! Sandi Salah.</span>";
                     }
                 }
             }
         }
 
-        // Kunci Jawaban Aljabar (Disesuaikan agar menghasilkan kode storyboard Anda: 577, 218, 9)
+        // Kunci Jawaban Aljabar (Menghasilkan 577, 218, 9)
         function cekSektorA() {
             const jaw = document.getElementById('jawabanA').value;
             const notif = document.getElementById('notifA');
-            // Soal: (2x+4y) + (3x+3y+7) = 5x + 7y + 7 --> 577
+            // 5x + 7y + 7 = 577
             if (jaw === "577") {
-                notif.innerHTML = "<span class='success'>Sistem Stabil! KODE SEKTOR A: 577 (Gunakan untuk membuka Sektor B)</span>";
+                notif.innerHTML = "<span class='success'>Sistem Stabil! KODE SEKTOR A: 577 (Gunakan untuk Sektor B)</span>";
                 document.getElementById('backA').style.display = 'inline-block';
             } else {
-                notif.innerHTML = "<span class='error'>Error! Jawaban Salah. Hitung kembali koefisiennya.</span>";
+                notif.innerHTML = "<span class='error'>Error! Jawaban Salah. Hitung kembali.</span>";
             }
         }
 
         function cekSektorB() {
             const jaw = document.getElementById('jawabanB').value;
             const notif = document.getElementById('notifB');
-            // Soal: (5x - 2y + 10) - (3x - 3y + 2) = 2x + 1y + 8 --> 218
+            // 2x + 1y + 8 = 218
             if (jaw === "218") {
-                notif.innerHTML = "<span class='success'>Enkripsi Ditembus! KODE SEKTOR B: 218 (Gunakan untuk membuka Sektor C)</span>";
+                notif.innerHTML = "<span class='success'>Enkripsi Ditembus! KODE SEKTOR B: 218 (Gunakan untuk Sektor C)</span>";
                 document.getElementById('backB').style.display = 'inline-block';
             } else {
                 notif.innerHTML = "<span class='error'>Reaksi Kimia Tidak Stabil! Jawaban Salah.</span>";
@@ -241,9 +241,9 @@
         function cekSektorC() {
             const jaw = document.getElementById('jawabanC').value;
             const notif = document.getElementById('notifC');
-            // Soal: Konstanta dari (x+3)(x+3) = x^2 + 6x + 9 --> Konstanta = 9
+            // Konstanta = 9
             if (jaw === "9") {
-                notif.innerHTML = "<span class='success'>Generator Stabil! KODE SEKTOR C: 9. Segera jumlahkan ketiga kode untuk keluar!</span>";
+                notif.innerHTML = "<span class='success'>Generator Stabil! KODE SEKTOR C: 9. Segera jumlahkan ketiga kode!</span>";
                 document.getElementById('backC').style.display = 'inline-block';
             } else {
                 notif.innerHTML = "<span class='error'>Awas Meledak! Jawaban Salah.</span>";
