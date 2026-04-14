@@ -6,27 +6,30 @@
     <title>Mission: Algebra Lockdown</title>
     <style>
         /* === RESET & GLOBAL STYLES === */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #050505; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
         
         /* === PAGE CONTAINER === */
-        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 1s; }
+        .page { display: none; width: 100vw; height: 100vh; background-size: cover; background-position: center; background-repeat: no-repeat; position: relative; animation: fadeIn 1s; }
         .page.active { display: block; }
 
-        /* MENGGUNAKAN IMG SEBAGAI BACKGROUND */
-        .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.5; pointer-events: none; }
-        
-        #page2 .bg-img, #page3 .bg-img { display: none; } 
-        #page2, #page3 { background-image: radial-gradient(#111, #000); }
+        /* === BACKGROUND GAMBAR (JALUR FILE LANGSUNG) === */
+        /* Pastikan nama file di repositori GitHub SAMA PERSIS dengan teks di dalam kurung ini */
+        #page1 { background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('Halaman-Awal.jpeg'); }
+        #page2, #page3 { background-color: #0a0a0a; background-image: radial-gradient(#111, #000); } 
+        #page4 { background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('tantangan-1.jpg'); }
+        #page5 { background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('tantangan-2.jpg'); }
+        #page6 { background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('tantangan-3.jpg'); }
+        #page7 { background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('misi-komplete.jpg'); }
 
         /* === UI ELEMENTS === */
-        .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 85%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); z-index: 10; max-height: 90vh; overflow-y: auto; }
+        .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 85%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.4); z-index: 10; }
         .title-img { max-width: 100%; margin-bottom: 20px; }
         
         h2 { color: #fff; text-shadow: 0 0 5px #0f0; }
         p { color: #ccc; line-height: 1.6; font-size: 1.1rem; }
 
         .btn { display: inline-block; padding: 12px 25px; margin: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.3s; font-family: inherit; }
-        .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px #0f0; transform: scale(1.05); }
+        .btn:hover { background: rgba(0, 255, 0, 0.5); box-shadow: 0 0 15px #0f0; transform: scale(1.05); }
         .btn.locked { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); box-shadow: none; }
         .btn.locked:hover { background: rgba(255, 0, 0, 0.3); transform: none; cursor: not-allowed; }
 
@@ -38,7 +41,6 @@
         .success { color: #0f0; }
         .error { color: #f00; }
 
-        /* === ANIMATIONS === */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .glitch-text { animation: glitch 2s infinite; }
         @keyframes glitch { 0% { text-shadow: 2px 0 red, -2px 0 blue; } 5% { text-shadow: -2px 0 red, 2px 0 blue; } 10% { text-shadow: 2px 0 red, -2px 0 blue; } 15% { text-shadow: none; } 100% { text-shadow: none; } }
@@ -46,17 +48,17 @@
 </head>
 <body>
 
-    <!-- AUDIO FILES (Menggunakan relative path murni) -->
-    <audio id="audioA" src="./halaman-4.mp3" preload="auto"></audio>
-    <audio id="audioB" src="./halaman-5.mp3" preload="auto"></audio>
-    <audio id="audioC" src="./halaman-6.mp3" preload="auto"></audio>
-    <audio id="audioD" src="./halaman-7.mp3" preload="auto"></audio>
+    <!-- AUDIO FILES (Tanpa awalan ./ untuk kompatibilitas server) -->
+    <audio id="audioA" src="halaman-4.mp3" preload="auto"></audio>
+    <audio id="audioB" src="halaman-5.mp3" preload="auto"></audio>
+    <audio id="audioC" src="halaman-6.mp3" preload="auto"></audio>
+    <audio id="audioD" src="halaman-7.mp3" preload="auto"></audio>
 
     <!-- HALAMAN 1 -->
     <div id="page1" class="page active">
-        <img src="./Halaman-Awal.jpeg" class="bg-img" alt="Background">
         <div class="panel">
-            <img src="./judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
+            <!-- Gambar Judul -->
+            <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data. Dekripsi sistem dengan Aljabar atau terjebak selamanya.</p>
             <button class="btn" onclick="goToPage(2)">Pecahkan Kunci</button>
         </div>
@@ -73,7 +75,7 @@
 
     <!-- HALAMAN 3 -->
     <div id="page3" class="page">
-        <div class="panel">
+        <div class="panel" style="max-height: 90vh; overflow-y: auto;">
             <h2>BLUEPRINT LABORATORIUM</h2>
             <p>Pilih sektor yang tersedia. Sektor B dan C dikunci. Kumpulkan kode sandi dari setiap sektor untuk kabur!</p>
             <button class="btn" onclick="goToPage(4)">Sektor A (Ruang Server)</button><br>
@@ -91,7 +93,6 @@
 
     <!-- HALAMAN 4 -->
     <div id="page4" class="page">
-        <img src="./tantangan-1.jpg" class="bg-img" alt="Sektor A">
         <div class="panel">
             <h2>SEKTOR A: RUANG SERVER</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor A:</p>
@@ -107,7 +108,6 @@
 
     <!-- HALAMAN 5 -->
     <div id="page5" class="page">
-        <img src="./tantangan-2.jpg" class="bg-img" alt="Sektor B">
         <div class="panel">
             <h2>SEKTOR B: LAB KIMIA</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor B:</p>
@@ -123,7 +123,6 @@
 
     <!-- HALAMAN 6 -->
     <div id="page6" class="page">
-        <img src="./tantangan-3.jpg" class="bg-img" alt="Sektor C">
         <div class="panel">
             <h2>SEKTOR C: INTI GENERATOR</h2>
             <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk kode C:</p>
@@ -138,7 +137,6 @@
 
     <!-- HALAMAN 7 -->
     <div id="page7" class="page">
-        <img src="./misi-komplete.jpg" class="bg-img" alt="Mission Complete">
         <div class="panel">
             <h2>MISSION COMPLETE</h2>
             <p>Selamat Agen! Anda berhasil mendekripsi sistem, menstabilkan generator, dan membuka pintu utama.</p>
@@ -151,20 +149,18 @@
         let unlockC = false;
 
         function playAudio(id) {
-            const audios = document.querySelectorAll('audio');
-            audios.forEach(audio => {
-                audio.pause();
-                audio.currentTime = 0;
-            });
+            // Matikan semua audio dulu
+            document.getElementById('audioA').pause(); document.getElementById('audioA').currentTime = 0;
+            document.getElementById('audioB').pause(); document.getElementById('audioB').currentTime = 0;
+            document.getElementById('audioC').pause(); document.getElementById('audioC').currentTime = 0;
+            document.getElementById('audioD').pause(); document.getElementById('audioD').currentTime = 0;
             
+            // Putar audio yang diminta
             const selectedAudio = document.getElementById(id);
             if(selectedAudio) {
-                // Menggunakan Promise catch untuk menangani kebijakan Autoplay Browser
                 let playPromise = selectedAudio.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log("Autoplay diblokir browser. User harus berinteraksi dulu.", error);
-                    });
+                    playPromise.catch(error => console.log("Playback error:", error));
                 }
             }
         }
@@ -174,6 +170,7 @@
             pages.forEach(p => p.classList.remove('active'));
             document.getElementById('page' + pageNum).classList.add('active');
             
+            // Suara dipanggil saat tombol diklik (User Interaction terverifikasi)
             if(pageNum === 4) playAudio('audioA');
             if(pageNum === 5) playAudio('audioB');
             if(pageNum === 6) playAudio('audioC');
