@@ -6,36 +6,33 @@
     <title>Mission: Algebra Lockdown</title>
     <style>
         /* === RESET & GLOBAL STYLES === */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #050505; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
         
         /* === PAGE CONTAINER === */
-        .page { display: none; width: 100vw; height: 100vh; background-size: cover; background-position: center; position: relative; animation: fadeIn 1s; }
+        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 1s; }
         .page.active { display: block; }
 
-        /* === BACKGROUND ASSIGNMENTS (DIPERBAIKI) === */
-        #page1 { background-image: url('./Halaman-Awal.jpeg'); }
-        /* Page 2 & 3 menggunakan background gelap ala terminal */
-        #page2, #page3 { background-color: #0a0a0a; background-image: radial-gradient(#111, #000); } 
-        #page4 { background-image: url('./tantangan-1.jpg'); }
-        #page5 { background-image: url('./tantangan-2.jpg'); }
-        #page6 { background-image: url('./tantangan-3.jpg'); }
-        #page7 { background-image: url('./misi-komplete.jpg'); }
+        /* MENGGUNAKAN IMG SEBAGAI BACKGROUND */
+        .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.5; pointer-events: none; }
+        
+        #page2 .bg-img, #page3 .bg-img { display: none; } 
+        #page2, #page3 { background-image: radial-gradient(#111, #000); }
 
         /* === UI ELEMENTS === */
-        .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 80%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); }
+        .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 85%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.2); z-index: 10; max-height: 90vh; overflow-y: auto; }
         .title-img { max-width: 100%; margin-bottom: 20px; }
         
         h2 { color: #fff; text-shadow: 0 0 5px #0f0; }
         p { color: #ccc; line-height: 1.6; font-size: 1.1rem; }
 
-        .btn { display: inline-block; padding: 15px 30px; margin: 10px; font-size: 1.2rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.3s; font-family: inherit; }
+        .btn { display: inline-block; padding: 12px 25px; margin: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.3s; font-family: inherit; }
         .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px #0f0; transform: scale(1.05); }
         .btn.locked { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); box-shadow: none; }
         .btn.locked:hover { background: rgba(255, 0, 0, 0.3); transform: none; cursor: not-allowed; }
 
         /* === INPUT STYLES === */
         input[type="text"], input[type="number"] { background: #000; border: 1px solid #0f0; color: #0f0; font-size: 1.5rem; padding: 10px; width: 150px; text-align: center; margin: 15px 0; font-family: inherit; outline: none; }
-        input[type="text"]:focus { box-shadow: 0 0 10px #0f0; }
+        input[type="text"]:focus, input[type="number"]:focus { box-shadow: 0 0 10px #0f0; }
 
         .notification { margin-top: 15px; font-weight: bold; min-height: 24px; }
         .success { color: #0f0; }
@@ -44,19 +41,20 @@
         /* === ANIMATIONS === */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .glitch-text { animation: glitch 2s infinite; }
-        @keyframes glitch {
-            0% { text-shadow: 2px 0 red, -2px 0 blue; }
-            5% { text-shadow: -2px 0 red, 2px 0 blue; }
-            10% { text-shadow: 2px 0 red, -2px 0 blue; }
-            15% { text-shadow: none; }
-            100% { text-shadow: none; }
-        }
+        @keyframes glitch { 0% { text-shadow: 2px 0 red, -2px 0 blue; } 5% { text-shadow: -2px 0 red, 2px 0 blue; } 10% { text-shadow: 2px 0 red, -2px 0 blue; } 15% { text-shadow: none; } 100% { text-shadow: none; } }
     </style>
 </head>
 <body>
 
-    <!-- HALAMAN 1: LANDING PAGE -->
+    <!-- AUDIO FILES (Menggunakan relative path murni) -->
+    <audio id="audioA" src="./halaman-4.mp3" preload="auto"></audio>
+    <audio id="audioB" src="./halaman-5.mp3" preload="auto"></audio>
+    <audio id="audioC" src="./halaman-6.mp3" preload="auto"></audio>
+    <audio id="audioD" src="./halaman-7.mp3" preload="auto"></audio>
+
+    <!-- HALAMAN 1 -->
     <div id="page1" class="page active">
+        <img src="./Halaman-Awal.jpeg" class="bg-img" alt="Background">
         <div class="panel">
             <img src="./judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data. Dekripsi sistem dengan Aljabar atau terjebak selamanya.</p>
@@ -64,7 +62,7 @@
         </div>
     </div>
 
-    <!-- HALAMAN 2: BRIEFING -->
+    <!-- HALAMAN 2 -->
     <div id="page2" class="page">
         <div class="panel">
             <h2 class="glitch-text">SISTEM AI: MALFUNGSI</h2>
@@ -73,11 +71,11 @@
         </div>
     </div>
 
-    <!-- HALAMAN 3: PETA MISI -->
+    <!-- HALAMAN 3 -->
     <div id="page3" class="page">
         <div class="panel">
             <h2>BLUEPRINT LABORATORIUM</h2>
-            <p>Pilih sektor yang tersedia. Sektor B dan C dikunci dengan enkripsi dinamis. Kumpulkan kode sandi dari setiap sektor untuk bisa kabur!</p>
+            <p>Pilih sektor yang tersedia. Sektor B dan C dikunci. Kumpulkan kode sandi dari setiap sektor untuk kabur!</p>
             <button class="btn" onclick="goToPage(4)">Sektor A (Ruang Server)</button><br>
             <button class="btn locked" id="btnSektorB" onclick="checkUnlock('B')">Sektor B (Lab Kimia) - TERKUNCI</button><br>
             <button class="btn locked" id="btnSektorC" onclick="checkUnlock('C')">Sektor C (Inti Generator) - TERKUNCI</button><br>
@@ -91,14 +89,14 @@
         </div>
     </div>
 
-    <!-- HALAMAN 4: SEKTOR A (TANTANGAN 1) -->
+    <!-- HALAMAN 4 -->
     <div id="page4" class="page">
+        <img src="./tantangan-1.jpg" class="bg-img" alt="Sektor A">
         <div class="panel">
             <h2>SEKTOR A: RUANG SERVER</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor A:</p>
             <p style="font-size: 1.5rem; color: #fff;">(2x + 4y) + (3x + 3y + 7) = ?</p>
-            
-            <p>Masukkan koefisien dan konstanta hasil akhir secara berurutan (misal: jika hasilnya 1x+2y+3, ketik 123):</p>
+            <p>Masukkan koefisien dan konstanta hasil akhir berurutan (misal: 123):</p>
             <input type="number" id="jawabanA" placeholder="Jawaban">
             <br>
             <button class="btn" onclick="cekSektorA()">Submit Jawaban</button>
@@ -107,13 +105,13 @@
         </div>
     </div>
 
-    <!-- HALAMAN 5: SEKTOR B (TANTANGAN 2) -->
+    <!-- HALAMAN 5 -->
     <div id="page5" class="page">
+        <img src="./tantangan-2.jpg" class="bg-img" alt="Sektor B">
         <div class="panel">
             <h2>SEKTOR B: LAB KIMIA</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor B:</p>
             <p style="font-size: 1.5rem; color: #fff;">(5x - 2y + 10) - (3x - 3y + 2) = ?</p>
-            
             <p>Masukkan koefisien dan konstanta secara berurutan:</p>
             <input type="number" id="jawabanB" placeholder="Jawaban">
             <br>
@@ -123,13 +121,13 @@
         </div>
     </div>
 
-    <!-- HALAMAN 6: SEKTOR C (TANTANGAN 3) -->
+    <!-- HALAMAN 6 -->
     <div id="page6" class="page">
+        <img src="./tantangan-3.jpg" class="bg-img" alt="Sektor C">
         <div class="panel">
             <h2>SEKTOR C: INTI GENERATOR</h2>
-            <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk mendapatkan kode C:</p>
+            <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk kode C:</p>
             <p style="font-size: 1.5rem; color: #fff;">Konstanta dari: (x + 3)(x + 3) = ?</p>
-            
             <input type="number" id="jawabanC" placeholder="Jawaban">
             <br>
             <button class="btn" onclick="cekSektorC()">Submit Jawaban</button>
@@ -138,8 +136,9 @@
         </div>
     </div>
 
-    <!-- HALAMAN 7: MISI SELESAI -->
+    <!-- HALAMAN 7 -->
     <div id="page7" class="page">
+        <img src="./misi-komplete.jpg" class="bg-img" alt="Mission Complete">
         <div class="panel">
             <h2>MISSION COMPLETE</h2>
             <p>Selamat Agen! Anda berhasil mendekripsi sistem, menstabilkan generator, dan membuka pintu utama.</p>
@@ -147,39 +146,38 @@
         </div>
     </div>
 
-    <!-- === JAVASCRIPT === -->
     <script>
-        // Deklarasi Audio (Pastikan file mp3 ada di folder yang sama)
-        const audioSektorA = new Audio('./halaman-4.mp3');
-        const audioSektorB = new Audio('./halaman-5.mp3');
-        const audioSektorC = new Audio('./halaman-6.mp3');
-        const audioAkhir = new Audio('./halaman-7.mp3');
-
-        // Status Unlock Sektor
         let unlockB = false;
         let unlockC = false;
 
-        function stopAllAudio() {
-            audioSektorA.pause(); audioSektorA.currentTime = 0;
-            audioSektorB.pause(); audioSektorB.currentTime = 0;
-            audioSektorC.pause(); audioSektorC.currentTime = 0;
-            audioAkhir.pause(); audioAkhir.currentTime = 0;
+        function playAudio(id) {
+            const audios = document.querySelectorAll('audio');
+            audios.forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
+            
+            const selectedAudio = document.getElementById(id);
+            if(selectedAudio) {
+                // Menggunakan Promise catch untuk menangani kebijakan Autoplay Browser
+                let playPromise = selectedAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Autoplay diblokir browser. User harus berinteraksi dulu.", error);
+                    });
+                }
+            }
         }
 
         function goToPage(pageNum) {
-            // Sembunyikan semua halaman
             const pages = document.querySelectorAll('.page');
             pages.forEach(p => p.classList.remove('active'));
-            
-            // Tampilkan halaman tujuan
             document.getElementById('page' + pageNum).classList.add('active');
             
-            // Manajemen Audio per halaman
-            stopAllAudio();
-            if(pageNum === 4) audioSektorA.play().catch(e => console.log("Audio diblokir browser, butuh klik."));
-            if(pageNum === 5) audioSektorB.play().catch(e => console.log("Audio diblokir browser."));
-            if(pageNum === 6) audioSektorC.play().catch(e => console.log("Audio diblokir browser."));
-            if(pageNum === 7) audioAkhir.play().catch(e => console.log("Audio diblokir browser."));
+            if(pageNum === 4) playAudio('audioA');
+            if(pageNum === 5) playAudio('audioB');
+            if(pageNum === 6) playAudio('audioC');
+            if(pageNum === 7) playAudio('audioD');
         }
 
         function checkUnlock(sektor) {
@@ -213,11 +211,9 @@
             }
         }
 
-        // Kunci Jawaban Aljabar (Menghasilkan 577, 218, 9)
         function cekSektorA() {
             const jaw = document.getElementById('jawabanA').value;
             const notif = document.getElementById('notifA');
-            // 5x + 7y + 7 = 577
             if (jaw === "577") {
                 notif.innerHTML = "<span class='success'>Sistem Stabil! KODE SEKTOR A: 577 (Gunakan untuk Sektor B)</span>";
                 document.getElementById('backA').style.display = 'inline-block';
@@ -229,7 +225,6 @@
         function cekSektorB() {
             const jaw = document.getElementById('jawabanB').value;
             const notif = document.getElementById('notifB');
-            // 2x + 1y + 8 = 218
             if (jaw === "218") {
                 notif.innerHTML = "<span class='success'>Enkripsi Ditembus! KODE SEKTOR B: 218 (Gunakan untuk Sektor C)</span>";
                 document.getElementById('backB').style.display = 'inline-block';
@@ -241,7 +236,6 @@
         function cekSektorC() {
             const jaw = document.getElementById('jawabanC').value;
             const notif = document.getElementById('notifC');
-            // Konstanta = 9
             if (jaw === "9") {
                 notif.innerHTML = "<span class='success'>Generator Stabil! KODE SEKTOR C: 9. Segera jumlahkan ketiga kode!</span>";
                 document.getElementById('backC').style.display = 'inline-block';
@@ -253,7 +247,6 @@
         function cekFinal() {
             const jaw = document.getElementById('finalCode').value;
             const notif = document.getElementById('notifMap');
-            // 577 + 218 + 9 = 804
             if (jaw === "804") {
                 goToPage(7);
             } else {
