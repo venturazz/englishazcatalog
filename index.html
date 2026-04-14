@@ -4,18 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mission: Algebra Lockdown</title>
-    <!-- Base URL agar GitHub tidak bingung mencari aset -->
     <base href="./"> 
-    
     <style>
         /* === RESET === */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #050505; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
         
         /* === STRUKTUR HALAMAN === */
-        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 0.5s; }
+        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 0.5s; cursor: pointer; }
         .page.active { display: block; }
 
-        /* === GAMBAR BACKGROUND (DENGAN IMG MURNI) === */
+        /* === GAMBAR BACKGROUND === */
         .bg-img {
             position: absolute;
             top: 0;
@@ -24,14 +22,12 @@
             height: 100%;
             object-fit: cover;
             z-index: 0;
-            opacity: 0.35; /* Transparansi agar panel tetap terbaca */
+            opacity: 0.35;
             pointer-events: none;
         }
-
-        /* Khusus halaman 2 dan 3 yang tidak punya gambar background */
         #page2, #page3 { background-image: radial-gradient(circle, #1a1a1a, #000); }
 
-        /* === PANEL KONTEN UTAMA === */
+        /* === PANEL KONTEN === */
         .panel {
             background: rgba(0, 0, 0, 0.9);
             border: 2px solid #0f0;
@@ -45,9 +41,10 @@
             left: 50%;
             transform: translate(-50%, -50%);
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-            z-index: 10; /* Berada di atas gambar background */
+            z-index: 10;
             max-height: 85vh;
             overflow-y: auto;
+            cursor: default;
         }
         
         .title-img { max-width: 100%; margin-bottom: 20px; border-radius: 5px; }
@@ -60,7 +57,7 @@
         .btn.locked { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); }
         .btn.locked:hover { background: rgba(255, 0, 0, 0.3); transform: none; box-shadow: 0 0 10px #f00; cursor: not-allowed; }
 
-        /* === INPUT STYLES === */
+        /* === INPUT === */
         input[type="text"], input[type="number"] { background: #000; border: 1px solid #0f0; color: #0f0; font-size: 1.5rem; padding: 10px; width: 150px; text-align: center; margin: 15px 0; font-family: inherit; outline: none; border-radius: 5px; }
         input[type="text"]:focus, input[type="number"]:focus { box-shadow: 0 0 10px #0f0; background: #111; }
 
@@ -75,19 +72,24 @@
 </head>
 <body>
 
-    <!-- KUMPULAN AUDIO STATIS -->
-    <!-- Tag controls dibuang agar tidak terlihat, id dipakai untuk dipanggil JS -->
-    <audio id="audio4" src="halaman 4.mp3" preload="auto"></audio>
-    <audio id="audio5" src="halaman 5.mp3" preload="auto"></audio>
-    <audio id="audio6" src="halaman 6.mp3" preload="auto"></audio>
-    <audio id="audio7" src="halaman 7.mp3" preload="auto"></audio>
+    <!-- SEMUA FILE AUDIO -->
+    <audio id="audio1" src="halaman-1.mp3" preload="auto"></audio> 
+    <audio id="audio2" src="halaman-2.mp3" preload="auto"></audio> 
+    <audio id="audio3" src="halaman-3.mp3" preload="auto"></audio> 
+    <audio id="audio4" src="halaman-4.mp3" preload="auto"></audio> 
+    <audio id="audio5" src="halaman-5.mp3" preload="auto"></audio> 
+    <audio id="audio6" src="halaman-6.mp3" preload="auto"></audio> 
+    <audio id="audio7" src="halaman-7.mp3" preload="auto"></audio>
 
     <!-- HALAMAN 1 -->
-    <div id="page1" class="page active">
-        <img src="Halaman-Awal.jpg" class="bg-img" alt="Background">
-        <div class="panel">
-            <img src="judul.png" alt="Mission: Algebra Lockdown" class="title-img">
-            <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data. Dekripsi sistem dengan Aljabar atau terjebak selamanya.</p>
+    <div id="page1" class="page active" onclick="playAudio1()">
+        <!-- Halaman-Awal.jpeg -->
+        <img src="Halaman-Awal.jpeg" class="bg-img" alt="Background">
+        <div class="panel" onclick="event.stopPropagation()">
+            <!-- judul.jpeg -->
+            <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
+            <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data.</p>
+            <p style="color: #888; font-size: 0.9rem;">(Klik area luar kotak ini untuk mengaktifkan Suara)</p>
             <button class="btn" onclick="goToPage(2)">Pecahkan Kunci</button>
         </div>
     </div>
@@ -121,6 +123,7 @@
 
     <!-- HALAMAN 4 -->
     <div id="page4" class="page">
+        <!-- tantangan-1.jpg -->
         <img src="tantangan-1.jpg" class="bg-img" alt="Sektor A">
         <div class="panel">
             <h2>SEKTOR A: RUANG SERVER</h2>
@@ -137,6 +140,7 @@
 
     <!-- HALAMAN 5 -->
     <div id="page5" class="page">
+        <!-- tantangan-2.jpg -->
         <img src="tantangan-2.jpg" class="bg-img" alt="Sektor B">
         <div class="panel">
             <h2>SEKTOR B: LAB KIMIA</h2>
@@ -153,6 +157,7 @@
 
     <!-- HALAMAN 6 -->
     <div id="page6" class="page">
+        <!-- tantangan-3.jpg -->
         <img src="tantangan-3.jpg" class="bg-img" alt="Sektor C">
         <div class="panel">
             <h2>SEKTOR C: INTI GENERATOR</h2>
@@ -168,6 +173,7 @@
 
     <!-- HALAMAN 7 -->
     <div id="page7" class="page">
+        <!-- misi-komplete.jpg -->
         <img src="misi-komplete.jpg" class="bg-img" alt="Mission Complete">
         <div class="panel">
             <h2>MISSION COMPLETE</h2>
@@ -180,11 +186,21 @@
     <script>
         let unlockB = false;
         let unlockC = false;
+        let audio1Started = false;
+
+        function playAudio1() {
+            if (!audio1Started) {
+                const bgAudio = document.getElementById('audio1');
+                if (bgAudio) {
+                    bgAudio.play().catch(e => console.log("Gagal putar audio 1:", e));
+                    audio1Started = true;
+                }
+            }
+        }
 
         function stopSemuaAudio() {
-            // Hentikan semua audio yang sedang berjalan
-            const allAudio = ['audio4', 'audio5', 'audio6', 'audio7'];
-            allAudio.forEach(id => {
+            const allAudioIds = ['audio1', 'audio2', 'audio3', 'audio4', 'audio5', 'audio6', 'audio7'];
+            allAudioIds.forEach(id => {
                 const el = document.getElementById(id);
                 if(el) {
                     el.pause();
@@ -194,26 +210,18 @@
         }
 
         function goToPage(pageNum) {
-            // 1. Sembunyikan semua halaman
             const pages = document.querySelectorAll('.page');
             pages.forEach(p => p.classList.remove('active'));
-            
-            // 2. Tampilkan halaman yang dituju
             document.getElementById('page' + pageNum).classList.add('active');
             
-            // 3. Mainkan Audio (hanya jika halaman memiliki audio)
             stopSemuaAudio();
-            const audioToPlay = document.getElementById('audio' + pageNum);
             
+            const audioToPlay = document.getElementById('audio' + pageNum);
             if (audioToPlay) {
-                // Tangani error autoplay
                 let playPromise = audioToPlay.play();
                 if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        // Playback berhasil
-                    })
-                    .catch(error => {
-                        console.error("Browser memblokir pemutaran audio:", error);
+                    playPromise.catch(error => {
+                        console.error("Browser memblokir audio:", error);
                     });
                 }
             }
