@@ -9,12 +9,20 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; font-family: 'Courier New', Courier, monospace; overflow: hidden; color: #0f0; }
         
         /* === PAGE CONTAINER === */
-        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 1s; }
+        .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 1s; background-size: cover; background-position: center; background-repeat: no-repeat; }
         .page.active { display: block; }
 
-        /* === GAMBAR BACKGROUND (AMAN & STABIL) === */
-        .bg-gambar { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.4; pointer-events: none; }
-        #page2, #page3 { background-image: radial-gradient(circle, #111, #000); }
+        /* === PENGATURAN BACKGROUND MURNI === */
+        /* Jika file ada di repo yang sama dengan index.html, penulisan ini PASTI terbaca */
+        #page1 { background-image: url('Halaman-Awal.jpeg'); }
+        #page2, #page3 { background-color: #111; background-image: none; }
+        #page4 { background-image: url('tantangan-1.jpg'); }
+        #page5 { background-image: url('tantangan-2.jpg'); }
+        #page6 { background-image: url('tantangan-3.jpg'); }
+        #page7 { background-image: url('misi-komplete.jpg'); }
+
+        /* Layer hitam transparan buatan agar teks terbaca jelas tanpa merusak gambar */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 1; }
 
         /* === UI ELEMENTS === */
         .panel { background: rgba(0, 0, 0, 0.85); border: 2px solid #0f0; padding: 30px; border-radius: 10px; text-align: center; width: 85%; max-width: 600px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 20px rgba(0, 255, 0, 0.3); z-index: 10; max-height: 90vh; overflow-y: auto; }
@@ -45,7 +53,7 @@
 
     <!-- HALAMAN 1 -->
     <div id="page1" class="page active">
-        <img src="Halaman-Awal.jpeg" class="bg-gambar" alt="Background">
+        <div class="overlay"></div>
         <div class="panel">
             <img src="judul.jpeg" alt="Mission: Algebra Lockdown" class="title-img">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data. Dekripsi sistem dengan Aljabar atau terjebak selamanya.</p>
@@ -82,7 +90,8 @@
 
     <!-- HALAMAN 4 -->
     <div id="page4" class="page">
-        <img src="tantangan-1.jpg" class="bg-gambar" alt="Sektor A">
+        <div class="overlay"></div>
+        <audio id="audio4" src="halaman-4.mp3"></audio>
         <div class="panel">
             <h2>SEKTOR A: RUANG SERVER</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor A:</p>
@@ -98,7 +107,8 @@
 
     <!-- HALAMAN 5 -->
     <div id="page5" class="page">
-        <img src="tantangan-2.jpg" class="bg-gambar" alt="Sektor B">
+        <div class="overlay"></div>
+        <audio id="audio5" src="halaman-5.mp3"></audio>
         <div class="panel">
             <h2>SEKTOR B: LAB KIMIA</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor B:</p>
@@ -114,7 +124,8 @@
 
     <!-- HALAMAN 6 -->
     <div id="page6" class="page">
-        <img src="tantangan-3.jpg" class="bg-gambar" alt="Sektor C">
+        <div class="overlay"></div>
+        <audio id="audio6" src="halaman-6.mp3"></audio>
         <div class="panel">
             <h2>SEKTOR C: INTI GENERATOR</h2>
             <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk kode C:</p>
@@ -129,7 +140,8 @@
 
     <!-- HALAMAN 7 -->
     <div id="page7" class="page">
-        <img src="misi-komplete.jpg" class="bg-gambar" alt="Mission Complete">
+        <div class="overlay"></div>
+        <audio id="audio7" src="halaman-7.mp3"></audio>
         <div class="panel">
             <h2>MISSION COMPLETE</h2>
             <p>Selamat Agen! Anda berhasil mendekripsi sistem, menstabilkan generator, dan membuka pintu utama.</p>
@@ -138,41 +150,38 @@
     </div>
 
     <script>
-        // DEKLARASI AUDIO VIA JAVASCRIPT (Lebih aman untuk GitHub Pages)
-        const sfxA = new Audio('halaman-4.mp3');
-        const sfxB = new Audio('halaman-5.mp3');
-        const sfxC = new Audio('halaman-6.mp3');
-        const sfxD = new Audio('halaman-7.mp3');
-
         let unlockB = false;
         let unlockC = false;
 
-        function playAudio(halaman) {
-            // Hentikan semua suara terlebih dahulu
-            sfxA.pause(); sfxA.currentTime = 0;
-            sfxB.pause(); sfxB.currentTime = 0;
-            sfxC.pause(); sfxC.currentTime = 0;
-            sfxD.pause(); sfxD.currentTime = 0;
-
-            // Putar suara berdasarkan halaman
-            try {
-                if (halaman === 4) sfxA.play();
-                if (halaman === 5) sfxB.play();
-                if (halaman === 6) sfxC.play();
-                if (halaman === 7) sfxD.play();
-            } catch (error) {
-                console.log("Audio diblokir browser: ", error);
-            }
+        function stopSemuaAudio() {
+            // Ambil semua elemen audio di dokumen dan hentikan
+            const audios = document.querySelectorAll('audio');
+            audios.forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
         }
 
         function goToPage(pageNum) {
-            // Sembunyikan semua halaman, lalu tampilkan yang dituju
+            // Sembunyikan semua halaman
             const pages = document.querySelectorAll('.page');
             pages.forEach(p => p.classList.remove('active'));
+            
+            // Tampilkan halaman tujuan
             document.getElementById('page' + pageNum).classList.add('active');
             
-            // Panggil fungsi putar audio
-            playAudio(pageNum);
+            // Atur Audio
+            stopSemuaAudio();
+            const elemenAudio = document.getElementById('audio' + pageNum);
+            if (elemenAudio) {
+                // Mainkan audio jika tag audio ada di halaman tersebut
+                let playPromise = elemenAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Audio play error:", error);
+                    });
+                }
+            }
         }
 
         function checkUnlock(sektor) {
