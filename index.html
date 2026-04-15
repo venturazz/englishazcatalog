@@ -22,14 +22,19 @@
             height: 100%;
             object-fit: cover;
             z-index: 0;
-            opacity: 0.35;
+            /* SEBELUMNYA 0.35, SEKARANG DIBUAT 0.7 AGAR BACKGROUND TERLIHAT JELAS DAN MENANTANG */
+            opacity: 0.7; 
             pointer-events: none;
         }
-        #page2, #page3, #page8 { background-image: radial-gradient(circle, #1a1a1a, #000); }
+        /* Halaman yang tidak punya image background spesifik kita beri gradient gelap */
+        #page2, #page3, #page8 { background-image: radial-gradient(circle, #2a2a2a, #000); }
 
-        /* === PANEL KONTEN === */
+        /* === PANEL KONTEN (GLASSMORPHISM EFFECT) === */
+        /* Membuat panel menjadi transparan agar background di belakangnya tetap terlihat */
         .panel {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.75); /* Transparan 75% */
+            backdrop-filter: blur(5px); /* Efek kaca blur */
+            -webkit-backdrop-filter: blur(5px);
             border: 2px solid #0f0;
             padding: 30px;
             border-radius: 10px;
@@ -40,7 +45,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3); /* Cahaya hijau berpendar */
             z-index: 10;
             max-height: 85vh;
             overflow-y: auto;
@@ -49,9 +54,8 @@
         }
         
         /* === ELEMEN TAMBAHAN (1.png - 6.png) === */
-        /* Gambar akan melayang di atas background dan di dalam panel */
         .element-img {
-            max-width: 120px; /* Sesuaikan ukuran elemen di sini */
+            max-width: 120px; 
             height: auto;
             margin-bottom: 15px;
             filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.3));
@@ -60,27 +64,28 @@
             z-index: 2;
         }
         
-        /* Efek melayang untuk elemen tambahan */
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
 
-        .title-img { max-width: 100%; margin-bottom: 20px; border-radius: 5px; }
+        .title-img { max-width: 100%; margin-bottom: 20px; border-radius: 5px; filter: drop-shadow(0 0 10px #0f0); }
         h2 { color: #fff; text-shadow: 0 0 5px #0f0; margin-top: 0; }
-        p { color: #ccc; line-height: 1.6; font-size: 1.1rem; }
+        
+        /* Teks dibuat lebih tajam karena background sekarang lebih cerah */
+        p { color: #fff; line-height: 1.6; font-size: 1.1rem; text-shadow: 1px 1px 3px #000; }
 
         /* === TOMBOL === */
-        .btn { display: inline-block; padding: 12px 25px; margin: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.2s; font-family: inherit; }
-        .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 10px #0f0; transform: scale(1.05); }
+        .btn { display: inline-block; padding: 12px 25px; margin: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.2); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.2s; font-family: inherit; backdrop-filter: blur(2px); }
+        .btn:hover { background: rgba(0, 255, 0, 0.6); box-shadow: 0 0 15px #0f0; transform: scale(1.05); color: #000; }
 
         /* === INPUT === */
-        input[type="text"], input[type="number"] { background: #000; border: 1px solid #0f0; color: #0f0; font-size: 1.5rem; padding: 10px; width: 150px; text-align: center; margin: 15px 0; font-family: inherit; outline: none; border-radius: 5px; }
-        input[type="text"]:focus, input[type="number"]:focus { box-shadow: 0 0 10px #0f0; background: #111; }
+        input[type="text"], input[type="number"] { background: rgba(0, 0, 0, 0.8); border: 1px solid #0f0; color: #0f0; font-size: 1.5rem; padding: 10px; width: 150px; text-align: center; margin: 15px 0; font-family: inherit; outline: none; border-radius: 5px; }
+        input[type="text"]:focus, input[type="number"]:focus { box-shadow: 0 0 10px #0f0; background: rgba(17, 17, 17, 0.9); }
 
         .notification { margin-top: 15px; font-weight: bold; min-height: 24px; font-size: 1.1rem; }
-        .success { color: #0f0; text-shadow: 0 0 5px #0f0; }
-        .error { color: #f00; text-shadow: 0 0 5px #f00; }
+        .success { color: #0f0; text-shadow: 0 0 5px #0f0; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;}
+        .error { color: #f00; text-shadow: 0 0 5px #f00; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;}
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .glitch-text { animation: glitch 2s infinite; }
@@ -90,7 +95,7 @@
         .panel-error { border-color: #f00; box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); }
         .panel-error h2 { color: #f00; text-shadow: 0 0 5px #f00; }
         .btn-error { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); }
-        .btn-error:hover { background: rgba(255, 0, 0, 0.4); box-shadow: 0 0 10px #f00; }
+        .btn-error:hover { background: rgba(255, 0, 0, 0.5); box-shadow: 0 0 15px #f00; color: #fff;}
     </style>
 </head>
 <body>
@@ -110,7 +115,7 @@
         <div class="panel" onclick="event.stopPropagation()">
             <img src="judul.png" alt="Mission: Algebra Lockdown" class="title-img">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung telah dikunci secara otomatis karena kebocoran data masif. Hanya deskripsi manual berbasis aljabar yang dapat menstabilkan sistem dan membuka pintu keluar.</p>
-            <p style="color: #888; font-size: 0.9rem;">(Klik area luar kotak ini untuk mengaktifkan Suara)</p>
+            <p style="color: #0f0; font-size: 0.9rem; margin-top: 20px;">(KLIK DI AREA MANA SAJA DI LUAR KOTAK INI UNTUK MENGAKTIFKAN SUARA)</p>
             <button class="btn" onclick="goToPage(2)">Pecahkan Kunci</button>
         </div>
     </div>
@@ -118,7 +123,6 @@
     <!-- HALAMAN 2 -->
     <div id="page2" class="page">
         <div class="panel">
-            <!-- Elemen Tambahan 1.png ditempatkan di sini -->
             <img src="1.png" class="element-img" alt="Elemen 1">
             <h2 class="glitch-text">SISTEM AI: MALFUNGSI</h2>
             <p>Agen, sistem AI laboratorium malfungsi total akibat kebocoran data! Protokol karantina aktif, generator utama tidak stabil. Gunakan kemampuan aljabar Anda untuk melakukan dekripsi manual. Waktu Anda dimulai dari sekarang!</p>
@@ -128,6 +132,7 @@
 
     <!-- HALAMAN 3 -->
     <div id="page3" class="page">
+        <!-- Anda bisa meletakkan blueprint background di sini jika punya, contoh <img src="blueprint.jpg" class="bg-img"> -->
         <div class="panel">
             <img src="2.png" class="element-img" alt="Elemen 2">
             <h2>BLUEPRINT LABORATORIUM</h2>
@@ -143,7 +148,7 @@
             <img src="3.png" class="element-img" alt="Elemen 3">
             <h2>SEKTOR A: RUANG SERVER</h2>
             <p>Malware memblokir akses data. Sederhanakan bentuk Aljabar berikut untuk menetralisir virus:</p>
-            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">2(3p - 5q) + 4(p + 2q) = ?</p>
+            <p style="font-size: 1.5rem; color: #fff; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px;">2(3p - 5q) + 4(p + 2q) = ?</p>
             
             <p>Masukkan gabungan koefisien yang dihasilkan berurutan (Sandi 3 digit):</p>
             <input type="number" id="jawabanA" placeholder="Jawaban">
@@ -161,7 +166,7 @@
             <img src="4.png" class="element-img" alt="Elemen 4">
             <h2>SEKTOR B: LAB KIMIA</h2>
             <p>Kebocoran gas! Katup hanya terbuka dengan distribusi daya merata. Sederhanakan bentuk berikut:</p>
-            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">-2(3p - 5q) + 4(p + 2q) = ?</p>
+            <p style="font-size: 1.5rem; color: #fff; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px;">-2(3p - 5q) + 4(p + 2q) = ?</p>
             
             <p>Masukkan gabungan koefisien yang dihasilkan berurutan (Sandi 3 digit):</p>
             <input type="number" id="jawabanB" placeholder="Jawaban">
@@ -179,7 +184,7 @@
             <img src="5.png" class="element-img" alt="Elemen 5">
             <h2>SEKTOR C: INTI GENERATOR</h2>
             <p>Level kritis! Generator hampir meledak. Tentukan nilai x dari persamaan berikut untuk menstabilkan putaran:</p>
-            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">5(x - 2) = 3x + 8</p>
+            <p style="font-size: 1.5rem; color: #fff; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px;">5(x - 2) = 3x + 8</p>
             
             <p>Masukkan nilai X yang didapat (Sandi 1 digit):</p>
             <input type="number" id="jawabanC" placeholder="Jawaban">
@@ -205,7 +210,7 @@
     <div id="page8" class="page">
         <div class="panel panel-error">
             <h2 class="glitch-text">SISTEM TERKUNCI</h2>
-            <p style="color: #ccc; font-size: 1.2rem;"><b>Akses Ditolak!</b><br><br>Sandi yang Anda masukkan tidak valid. Sistem keamanan mendeteksi adanya intrusi ilegal. Koneksi terputus.</p>
+            <p style="color: #fff; font-size: 1.2rem;"><b>Akses Ditolak!</b><br><br>Sandi yang Anda masukkan tidak valid. Sistem keamanan mendeteksi adanya intrusi ilegal. Koneksi terputus.</p>
             <button class="btn btn-error" onclick="goToPage(3)">Kembali ke Peta</button>
         </div>
     </div>
@@ -242,7 +247,7 @@
             
             stopSemuaAudio();
             
-            // Halaman 8 (Gagal) tidak memiliki audio khusus, jadi kita mainkan audio halaman tujuan jika ada
+            // Perbaikan krusial untuk memastikan Audio Halaman 7 (Berhasil) dimainkan
             const audioToPlay = document.getElementById('audio' + pageNum);
             if (audioToPlay) {
                 let playPromise = audioToPlay.play();
@@ -254,13 +259,11 @@
             }
         }
 
-        // ALUR JIKA GAGAL DIMASUKKAN KE DALAM FUNGSI INI
         function askPassword(targetPage, correctPassword, promptMessage) {
             let pwd = prompt(promptMessage);
             if (pwd === correctPassword) {
-                goToPage(targetPage);
+                goToPage(targetPage); // Ini akan memanggil goToPage(7) yang akan men-trigger audio7
             } else if (pwd !== null) {
-                // JIKA PASSWORD SALAH, DILEMPAR KE HALAMAN 8 (GAME OVER)
                 goToPage(8);
             }
         }
