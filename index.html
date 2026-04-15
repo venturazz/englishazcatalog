@@ -13,7 +13,7 @@
         .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 0.5s; cursor: pointer; }
         .page.active { display: block; }
 
-        /* === GAMBAR BACKGROUND (LUAR PANEL) === */
+        /* === GAMBAR BACKGROUND (Di Luar Panel) === */
         .bg-img {
             position: absolute;
             top: 0;
@@ -25,7 +25,7 @@
             opacity: 0.35;
             pointer-events: none;
         }
-        #page2, #page3 { background-image: radial-gradient(circle, #1a1a1a, #000); }
+        #page2, #page3, #page8 { background-image: radial-gradient(circle, #1a1a1a, #000); }
 
         /* === PANEL KONTEN === */
         .panel {
@@ -45,35 +45,25 @@
             max-height: 85vh;
             overflow-y: auto;
             cursor: default;
-            /* PENTING: Position relative agar pseudo-element background tertambat di dalam panel ini */
             position: relative;
-            overflow: hidden; /* Mencegah gambar background bocor keluar panel */
         }
         
-        /* === TRIK BACKGROUND PANEL DENGAN OPACITY === */
-        /* Kita gunakan class khusus (contoh: .panel-bg-1, .panel-bg-2) yang diterapkan pada panel */
-        .panel::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-size: cover;
-            background-position: center;
-            opacity: 0.2; /* <--- ATUR TRANSPARANSI GAMBAR PANEL DI SINI (0.0 sampai 1.0) */
-            z-index: -1; /* Meletakkan gambar di bawah teks */
+        /* === ELEMEN TAMBAHAN (1.png - 6.png) === */
+        /* Gambar akan melayang di atas background dan di dalam panel */
+        .element-img {
+            max-width: 120px; /* Sesuaikan ukuran elemen di sini */
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.3));
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
         }
         
-        /* Menyisipkan file 1.png s/d 6.png ke halaman masing-masing */
-        .panel-bg-1::before { background-image: url('1.png'); }
-        .panel-bg-2::before { background-image: url('2.png'); }
-        .panel-bg-3::before { background-image: url('3.png'); }
-        .panel-bg-4::before { background-image: url('4.png'); }
-        .panel-bg-5::before { background-image: url('5.png'); }
-        .panel-bg-6::before { background-image: url('6.png'); }
-
-        /* Memastikan semua konten di dalam panel (teks, input, button) berada di atas gambar background */
-        .panel > * {
-            position: relative;
-            z-index: 1;
+        /* Efek melayang untuk elemen tambahan */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .title-img { max-width: 100%; margin-bottom: 20px; border-radius: 5px; }
@@ -83,8 +73,6 @@
         /* === TOMBOL === */
         .btn { display: inline-block; padding: 12px 25px; margin: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background: rgba(0, 255, 0, 0.1); border: 2px solid #0f0; color: #0f0; text-transform: uppercase; border-radius: 5px; transition: 0.2s; font-family: inherit; }
         .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 10px #0f0; transform: scale(1.05); }
-        .btn.locked { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); }
-        .btn.locked:hover { background: rgba(255, 0, 0, 0.3); transform: none; box-shadow: 0 0 10px #f00; cursor: not-allowed; }
 
         /* === INPUT === */
         input[type="text"], input[type="number"] { background: #000; border: 1px solid #0f0; color: #0f0; font-size: 1.5rem; padding: 10px; width: 150px; text-align: center; margin: 15px 0; font-family: inherit; outline: none; border-radius: 5px; }
@@ -97,6 +85,12 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .glitch-text { animation: glitch 2s infinite; }
         @keyframes glitch { 0% { text-shadow: 2px 0 red, -2px 0 blue; } 5% { text-shadow: -2px 0 red, 2px 0 blue; } 10% { text-shadow: 2px 0 red, -2px 0 blue; } 15% { text-shadow: none; } 100% { text-shadow: none; } }
+        
+        /* Tema Khusus Halaman Gagal */
+        .panel-error { border-color: #f00; box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); }
+        .panel-error h2 { color: #f00; text-shadow: 0 0 5px #f00; }
+        .btn-error { border-color: #f00; color: #f00; background: rgba(255, 0, 0, 0.1); }
+        .btn-error:hover { background: rgba(255, 0, 0, 0.4); box-shadow: 0 0 10px #f00; }
     </style>
 </head>
 <body>
@@ -110,105 +104,114 @@
     <audio id="audio6" src="halaman 6.mp3" preload="auto"></audio> 
     <audio id="audio7" src="halaman 7.mp3" preload="auto"></audio>
 
-    <!-- HALAMAN 1 (Tanpa background panel karena sudah ada judul.png dan Halaman Awal.png) -->
+    <!-- HALAMAN 1 -->
     <div id="page1" class="page active" onclick="playAudio1()">
         <img src="Halaman Awal.png" class="bg-img" alt="Background">
         <div class="panel" onclick="event.stopPropagation()">
             <img src="judul.png" alt="Mission: Algebra Lockdown" class="title-img">
-            <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data.</p>
+            <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung telah dikunci secara otomatis karena kebocoran data masif. Hanya deskripsi manual berbasis aljabar yang dapat menstabilkan sistem dan membuka pintu keluar.</p>
             <p style="color: #888; font-size: 0.9rem;">(Klik area luar kotak ini untuk mengaktifkan Suara)</p>
             <button class="btn" onclick="goToPage(2)">Pecahkan Kunci</button>
         </div>
     </div>
 
-    <!-- HALAMAN 2 (Menggunakan 1.png di panel) -->
+    <!-- HALAMAN 2 -->
     <div id="page2" class="page">
-        <div class="panel panel-bg-1">
+        <div class="panel">
+            <!-- Elemen Tambahan 1.png ditempatkan di sini -->
+            <img src="1.png" class="element-img" alt="Elemen 1">
             <h2 class="glitch-text">SISTEM AI: MALFUNGSI</h2>
-            <p>"Agen, dengarkan baik-baik. Generator utama tidak stabil. Gunakan kemampuan Aljabar Anda sebagai kunci dekripsi. Selamatkan data berharga kita. Waktu Anda dimulai dari sekarang!"</p>
+            <p>Agen, sistem AI laboratorium malfungsi total akibat kebocoran data! Protokol karantina aktif, generator utama tidak stabil. Gunakan kemampuan aljabar Anda untuk melakukan dekripsi manual. Waktu Anda dimulai dari sekarang!</p>
             <button class="btn" onclick="goToPage(3)">Terima Misi</button>
         </div>
     </div>
 
-    <!-- HALAMAN 3 (Menggunakan 2.png di panel) -->
+    <!-- HALAMAN 3 -->
     <div id="page3" class="page">
-        <div class="panel panel-bg-2">
+        <div class="panel">
+            <img src="2.png" class="element-img" alt="Elemen 2">
             <h2>BLUEPRINT LABORATORIUM</h2>
-            <p>Pilih sektor yang tersedia. Sektor B dan C dikunci. Kumpulkan kode sandi dari setiap sektor untuk kabur!</p>
-            <button class="btn" onclick="goToPage(4)">Sektor A (Ruang Server)</button><br>
-            <button class="btn locked" id="btnSektorB" onclick="checkUnlock('B')">Sektor B (Lab Kimia) - TERKUNCI</button><br>
-            <button class="btn locked" id="btnSektorC" onclick="checkUnlock('C')">Sektor C (Inti Generator) - TERKUNCI</button><br>
-            <hr style="border-color: #333; margin: 20px 0;">
-            <h3>PINTU KELUAR UTAMA</h3>
-            <p>Masukkan total penjumlahan 3 kode sektor:</p>
-            <input type="number" id="finalCode" placeholder="???">
-            <br>
-            <button class="btn" onclick="cekFinal()">Buka Pintu Keluar</button>
-            <div id="notifMap" class="notification"></div>
+            <p>Sektor B dan C dilindungi oleh enkripsi dinamis tingkat tinggi. Password untuk membuka sektor berikutnya tersembunyi di dalam angka koefisien dan konstanta dari jawaban yang Anda kerjakan. Catat setiap kode yang muncul!</p>
+            <button class="btn" onclick="goToPage(4)">Mulai Sektor A</button>
         </div>
     </div>
 
-    <!-- HALAMAN 4 (Menggunakan 3.png di panel) -->
+    <!-- HALAMAN 4 -->
     <div id="page4" class="page">
         <img src="tantangan 1.jpg" class="bg-img" alt="Sektor A">
-        <div class="panel panel-bg-3">
+        <div class="panel">
+            <img src="3.png" class="element-img" alt="Elemen 3">
             <h2>SEKTOR A: RUANG SERVER</h2>
-            <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor A:</p>
-            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">(2x + 4y) + (3x + 3y + 7) = ?</p>
-            <p>Masukkan koefisien dan konstanta hasil akhir berurutan (misal: 123):</p>
+            <p>Malware memblokir akses data. Sederhanakan bentuk Aljabar berikut untuk menetralisir virus:</p>
+            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">2(3p - 5q) + 4(p + 2q) = ?</p>
+            
+            <p>Masukkan gabungan koefisien yang dihasilkan berurutan (Sandi 3 digit):</p>
             <input type="number" id="jawabanA" placeholder="Jawaban">
             <br>
             <button class="btn" onclick="cekSektorA()">Submit Jawaban</button>
             <div id="notifA" class="notification"></div>
-            <button class="btn" style="display:none;" id="backA" onclick="goToPage(3)">Kembali ke Peta</button>
+            <button class="btn" style="display:none;" id="btnNextB" onclick="askPassword(5, '577', 'Masukkan KODE AKSES B (Diperoleh dari Sektor A):')">Lanjut Sektor B</button>
         </div>
     </div>
 
-    <!-- HALAMAN 5 (Menggunakan 4.png di panel) -->
+    <!-- HALAMAN 5 -->
     <div id="page5" class="page">
         <img src="tantangan 2.jpg" class="bg-img" alt="Sektor B">
-        <div class="panel panel-bg-4">
+        <div class="panel">
+            <img src="4.png" class="element-img" alt="Elemen 4">
             <h2>SEKTOR B: LAB KIMIA</h2>
-            <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor B:</p>
-            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">(5x - 2y + 10) - (3x - 3y + 2) = ?</p>
-            <p>Masukkan koefisien dan konstanta secara berurutan:</p>
+            <p>Kebocoran gas! Katup hanya terbuka dengan distribusi daya merata. Sederhanakan bentuk berikut:</p>
+            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">-2(3p - 5q) + 4(p + 2q) = ?</p>
+            
+            <p>Masukkan gabungan koefisien yang dihasilkan berurutan (Sandi 3 digit):</p>
             <input type="number" id="jawabanB" placeholder="Jawaban">
             <br>
             <button class="btn" onclick="cekSektorB()">Submit Jawaban</button>
             <div id="notifB" class="notification"></div>
-            <button class="btn" style="display:none;" id="backB" onclick="goToPage(3)">Kembali ke Peta</button>
+            <button class="btn" style="display:none;" id="btnNextC" onclick="askPassword(6, '218', 'Masukkan KODE AKSES C (Diperoleh dari Sektor B):')">Lanjut Sektor C</button>
         </div>
     </div>
 
-    <!-- HALAMAN 6 (Menggunakan 5.png di panel) -->
+    <!-- HALAMAN 6 -->
     <div id="page6" class="page">
         <img src="tantangan 3.jpg" class="bg-img" alt="Sektor C">
-        <div class="panel panel-bg-5">
+        <div class="panel">
+            <img src="5.png" class="element-img" alt="Elemen 5">
             <h2>SEKTOR C: INTI GENERATOR</h2>
-            <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk kode C:</p>
-            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">Konstanta dari: (x + 3)(x + 3) = ?</p>
+            <p>Level kritis! Generator hampir meledak. Tentukan nilai x dari persamaan berikut untuk menstabilkan putaran:</p>
+            <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">5(x - 2) = 3x + 8</p>
+            
+            <p>Masukkan nilai X yang didapat (Sandi 1 digit):</p>
             <input type="number" id="jawabanC" placeholder="Jawaban">
             <br>
             <button class="btn" onclick="cekSektorC()">Submit Jawaban</button>
             <div id="notifC" class="notification"></div>
-            <button class="btn" style="display:none;" id="backC" onclick="goToPage(3)">Kembali ke Peta</button>
+            <button class="btn" style="display:none;" id="btnNextFinal" onclick="askPassword(7, '804', 'Masukkan penjumlahan: Kode A + Kode B + Nilai X')">Selesaikan Misi</button>
         </div>
     </div>
 
-    <!-- HALAMAN 7 (Menggunakan 6.png di panel) -->
+    <!-- HALAMAN 7 (SUKSES) -->
     <div id="page7" class="page">
         <img src="misi komplete.jpg" class="bg-img" alt="Mission Complete">
-        <div class="panel panel-bg-6">
+        <div class="panel">
+            <img src="6.png" class="element-img" alt="Elemen 6">
             <h2>MISSION COMPLETE</h2>
-            <p>Selamat Agen! Anda berhasil mendekripsi sistem, menstabilkan generator, dan membuka pintu utama.</p>
+            <p>Misi selesai! Sistem keamanan telah dinonaktifkan sepenuhnya. Anda telah membuktikan bahwa logika Aljabar adalah kunci untuk menguasai teknologi. Selamat Agen!</p>
             <button class="btn" onclick="location.reload()">Main Lagi</button>
+        </div>
+    </div>
+
+    <!-- HALAMAN 8 (GAGAL / AKSES DITOLAK) -->
+    <div id="page8" class="page">
+        <div class="panel panel-error">
+            <h2 class="glitch-text">SISTEM TERKUNCI</h2>
+            <p style="color: #ccc; font-size: 1.2rem;"><b>Akses Ditolak!</b><br><br>Sandi yang Anda masukkan tidak valid. Sistem keamanan mendeteksi adanya intrusi ilegal. Koneksi terputus.</p>
+            <button class="btn btn-error" onclick="goToPage(3)">Kembali ke Peta</button>
         </div>
     </div>
 
     <!-- === JAVASCRIPT === -->
     <script>
-        let unlockB = false;
-        let unlockC = false;
         let audio1Started = false;
 
         function playAudio1() {
@@ -239,6 +242,7 @@
             
             stopSemuaAudio();
             
+            // Halaman 8 (Gagal) tidak memiliki audio khusus, jadi kita mainkan audio halaman tujuan jika ada
             const audioToPlay = document.getElementById('audio' + pageNum);
             if (audioToPlay) {
                 let playPromise = audioToPlay.play();
@@ -250,34 +254,14 @@
             }
         }
 
-        function checkUnlock(sektor) {
-            const notifMap = document.getElementById('notifMap');
-            if (sektor === 'B') {
-                if (unlockB) goToPage(5);
-                else {
-                    let pwd = prompt("Masukkan KODE SANDI Sektor B (Didapat dari Sektor A):");
-                    if (pwd === "577") {
-                        unlockB = true;
-                        document.getElementById('btnSektorB').classList.remove('locked');
-                        document.getElementById('btnSektorB').innerText = "Sektor B (Lab Kimia) - TERBUKA";
-                        goToPage(5);
-                    } else if (pwd !== null) {
-                        notifMap.innerHTML = "<span class='error'>Akses Ditolak! Sandi Salah.</span>";
-                    }
-                }
-            } else if (sektor === 'C') {
-                if (unlockC) goToPage(6);
-                else {
-                    let pwd = prompt("Masukkan KODE SANDI Sektor C (Didapat dari Sektor B):");
-                    if (pwd === "218") {
-                        unlockC = true;
-                        document.getElementById('btnSektorC').classList.remove('locked');
-                        document.getElementById('btnSektorC').innerText = "Sektor C (Inti Generator) - TERBUKA";
-                        goToPage(6);
-                    } else if (pwd !== null) {
-                        notifMap.innerHTML = "<span class='error'>Akses Ditolak! Sandi Salah.</span>";
-                    }
-                }
+        // ALUR JIKA GAGAL DIMASUKKAN KE DALAM FUNGSI INI
+        function askPassword(targetPage, correctPassword, promptMessage) {
+            let pwd = prompt(promptMessage);
+            if (pwd === correctPassword) {
+                goToPage(targetPage);
+            } else if (pwd !== null) {
+                // JIKA PASSWORD SALAH, DILEMPAR KE HALAMAN 8 (GAME OVER)
+                goToPage(8);
             }
         }
 
@@ -285,8 +269,8 @@
             const jaw = document.getElementById('jawabanA').value;
             const notif = document.getElementById('notifA');
             if (jaw === "577") {
-                notif.innerHTML = "<span class='success'>Sistem Stabil! KODE SEKTOR A: 577 (Gunakan untuk Sektor B)</span>";
-                document.getElementById('backA').style.display = 'inline-block';
+                notif.innerHTML = "<span class='success'>Akses Terbuka! Catat Kode Akses B: 577</span>";
+                document.getElementById('btnNextB').style.display = 'inline-block';
             } else {
                 notif.innerHTML = "<span class='error'>Error! Jawaban Salah. Hitung kembali.</span>";
             }
@@ -296,8 +280,8 @@
             const jaw = document.getElementById('jawabanB').value;
             const notif = document.getElementById('notifB');
             if (jaw === "218") {
-                notif.innerHTML = "<span class='success'>Enkripsi Ditembus! KODE SEKTOR B: 218 (Gunakan untuk Sektor C)</span>";
-                document.getElementById('backB').style.display = 'inline-block';
+                notif.innerHTML = "<span class='success'>Enkripsi Ditembus! Catat Kode Akses C: 218</span>";
+                document.getElementById('btnNextC').style.display = 'inline-block';
             } else {
                 notif.innerHTML = "<span class='error'>Reaksi Kimia Tidak Stabil! Jawaban Salah.</span>";
             }
@@ -307,20 +291,10 @@
             const jaw = document.getElementById('jawabanC').value;
             const notif = document.getElementById('notifC');
             if (jaw === "9") {
-                notif.innerHTML = "<span class='success'>Generator Stabil! KODE SEKTOR C: 9. Segera jumlahkan ketiga kode!</span>";
-                document.getElementById('backC').style.display = 'inline-block';
+                notif.innerHTML = "<span class='success'>Generator Stabil! Nilai X: 9 <br>Password Final: Kode A + Kode B + Nilai X</span>";
+                document.getElementById('btnNextFinal').style.display = 'inline-block';
             } else {
                 notif.innerHTML = "<span class='error'>Awas Meledak! Jawaban Salah.</span>";
-            }
-        }
-
-        function cekFinal() {
-            const jaw = document.getElementById('finalCode').value;
-            const notif = document.getElementById('notifMap');
-            if (jaw === "804") {
-                goToPage(7);
-            } else {
-                notif.innerHTML = "<span class='error'>Pintu Utama Terkunci! Total sandi salah.</span>";
             }
         }
     </script>
