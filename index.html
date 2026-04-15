@@ -25,7 +25,7 @@
             opacity: 1 !important; 
             pointer-events: none;
         }
-        #page2, #page3, #page8 { background-image: radial-gradient(circle, #1a1a1a, #000); }
+        #page2, #page8 { background-image: radial-gradient(circle, #1a1a1a, #000); }
 
         /* === PANEL KONTEN (EFEK KACA TEMBUS PANDANG) === */
         .panel {
@@ -95,7 +95,7 @@
 </head>
 <body>
 
-    <!-- SEMUA FILE AUDIO (Disamakan dengan file Anda yang pakai strip '-') -->
+    <!-- SEMUA FILE AUDIO -->
     <audio id="audio1" src="halaman 1.mp3" preload="auto"></audio> 
     <audio id="audio2" src="halaman 2.mp3" preload="auto"></audio> 
     <audio id="audio3" src="halaman 3.mp3" preload="auto"></audio> 
@@ -106,10 +106,8 @@
 
     <!-- HALAMAN 1 -->
     <div id="page1" class="page active" onclick="playAudio1()">
-        <!-- Perbaikan Nama File Background -->
         <img src="Halaman Awal.png" class="bg-img" alt="Background">
         <div class="panel" onclick="event.stopPropagation()">
-            <!-- Perbaikan Nama File Judul -->
             <img src="judul.png" alt="Mission: Algebra Lockdown" class="title-img">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung telah dikunci secara otomatis karena kebocoran data masif. Hanya deskripsi manual berbasis aljabar yang dapat menstabilkan sistem dan membuka pintu keluar.</p>
             <p style="color: #0f0; font-size: 0.9rem;">(Klik area luar kotak ini untuk mengaktifkan Suara)</p>
@@ -129,6 +127,8 @@
 
     <!-- HALAMAN 3 -->
     <div id="page3" class="page">
+        <!-- BACKGROUND PETA DITERAPKAN DI SINI -->
+        <img src="blueprint peta.jpg" class="bg-img" alt="Blueprint Peta">
         <div class="panel">
             <img src="2.png" class="element-img" alt="Elemen 2">
             <h2>BLUEPRINT LABORATORIUM</h2>
@@ -139,7 +139,6 @@
 
     <!-- HALAMAN 4 -->
     <div id="page4" class="page">
-        <!-- Perbaikan Nama File Background -->
         <img src="tantangan 1.jpg" class="bg-img" alt="Sektor A">
         <div class="panel">
             <img src="3.png" class="element-img" alt="Elemen 3">
@@ -158,7 +157,6 @@
 
     <!-- HALAMAN 5 -->
     <div id="page5" class="page">
-        <!-- Perbaikan Nama File Background -->
         <img src="tantangan 2.jpg" class="bg-img" alt="Sektor B">
         <div class="panel">
             <img src="4.png" class="element-img" alt="Elemen 4">
@@ -177,7 +175,6 @@
 
     <!-- HALAMAN 6 -->
     <div id="page6" class="page">
-        <!-- Perbaikan Nama File Background -->
         <img src="tantangan 3.jpg" class="bg-img" alt="Sektor C">
         <div class="panel">
             <img src="5.png" class="element-img" alt="Elemen 5">
@@ -196,7 +193,6 @@
 
     <!-- HALAMAN 7 (SUKSES) -->
     <div id="page7" class="page">
-        <!-- Perbaikan Nama File Background -->
         <img src="misi komplete.jpg" class="bg-img" alt="Mission Complete">
         <div class="panel">
             <img src="6.png" class="element-img" alt="Elemen 6">
