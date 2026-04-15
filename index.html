@@ -13,7 +13,7 @@
         .page { display: none; width: 100vw; height: 100vh; position: relative; animation: fadeIn 0.5s; cursor: pointer; }
         .page.active { display: block; }
 
-        /* === GAMBAR BACKGROUND === */
+        /* === GAMBAR BACKGROUND (LUAR PANEL) === */
         .bg-img {
             position: absolute;
             top: 0;
@@ -45,8 +45,37 @@
             max-height: 85vh;
             overflow-y: auto;
             cursor: default;
+            /* PENTING: Position relative agar pseudo-element background tertambat di dalam panel ini */
+            position: relative;
+            overflow: hidden; /* Mencegah gambar background bocor keluar panel */
         }
         
+        /* === TRIK BACKGROUND PANEL DENGAN OPACITY === */
+        /* Kita gunakan class khusus (contoh: .panel-bg-1, .panel-bg-2) yang diterapkan pada panel */
+        .panel::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2; /* <--- ATUR TRANSPARANSI GAMBAR PANEL DI SINI (0.0 sampai 1.0) */
+            z-index: -1; /* Meletakkan gambar di bawah teks */
+        }
+        
+        /* Menyisipkan file 1.png s/d 6.png ke halaman masing-masing */
+        .panel-bg-1::before { background-image: url('1.png'); }
+        .panel-bg-2::before { background-image: url('2.png'); }
+        .panel-bg-3::before { background-image: url('3.png'); }
+        .panel-bg-4::before { background-image: url('4.png'); }
+        .panel-bg-5::before { background-image: url('5.png'); }
+        .panel-bg-6::before { background-image: url('6.png'); }
+
+        /* Memastikan semua konten di dalam panel (teks, input, button) berada di atas gambar background */
+        .panel > * {
+            position: relative;
+            z-index: 1;
+        }
+
         .title-img { max-width: 100%; margin-bottom: 20px; border-radius: 5px; }
         h2 { color: #fff; text-shadow: 0 0 5px #0f0; margin-top: 0; }
         p { color: #ccc; line-height: 1.6; font-size: 1.1rem; }
@@ -81,12 +110,10 @@
     <audio id="audio6" src="halaman 6.mp3" preload="auto"></audio> 
     <audio id="audio7" src="halaman 7.mp3" preload="auto"></audio>
 
-    <!-- HALAMAN 1 -->
+    <!-- HALAMAN 1 (Tanpa background panel karena sudah ada judul.png dan Halaman Awal.png) -->
     <div id="page1" class="page active" onclick="playAudio1()">
-        <!-- Halaman-Awal.jpeg -->
         <img src="Halaman Awal.png" class="bg-img" alt="Background">
         <div class="panel" onclick="event.stopPropagation()">
-            <!-- judul.png -->
             <img src="judul.png" alt="Mission: Algebra Lockdown" class="title-img">
             <p>Peringatan! Protokol karantina aktif. Seluruh akses gedung dikunci akibat kebocoran data.</p>
             <p style="color: #888; font-size: 0.9rem;">(Klik area luar kotak ini untuk mengaktifkan Suara)</p>
@@ -94,18 +121,18 @@
         </div>
     </div>
 
-    <!-- HALAMAN 2 -->
+    <!-- HALAMAN 2 (Menggunakan 1.png di panel) -->
     <div id="page2" class="page">
-        <div class="panel">
+        <div class="panel panel-bg-1">
             <h2 class="glitch-text">SISTEM AI: MALFUNGSI</h2>
             <p>"Agen, dengarkan baik-baik. Generator utama tidak stabil. Gunakan kemampuan Aljabar Anda sebagai kunci dekripsi. Selamatkan data berharga kita. Waktu Anda dimulai dari sekarang!"</p>
             <button class="btn" onclick="goToPage(3)">Terima Misi</button>
         </div>
     </div>
 
-    <!-- HALAMAN 3 -->
+    <!-- HALAMAN 3 (Menggunakan 2.png di panel) -->
     <div id="page3" class="page">
-        <div class="panel">
+        <div class="panel panel-bg-2">
             <h2>BLUEPRINT LABORATORIUM</h2>
             <p>Pilih sektor yang tersedia. Sektor B dan C dikunci. Kumpulkan kode sandi dari setiap sektor untuk kabur!</p>
             <button class="btn" onclick="goToPage(4)">Sektor A (Ruang Server)</button><br>
@@ -121,11 +148,10 @@
         </div>
     </div>
 
-    <!-- HALAMAN 4 -->
+    <!-- HALAMAN 4 (Menggunakan 3.png di panel) -->
     <div id="page4" class="page">
-        <!-- tantangan 1.jpg -->
         <img src="tantangan 1.jpg" class="bg-img" alt="Sektor A">
-        <div class="panel">
+        <div class="panel panel-bg-3">
             <h2>SEKTOR A: RUANG SERVER</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor A:</p>
             <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">(2x + 4y) + (3x + 3y + 7) = ?</p>
@@ -138,11 +164,10 @@
         </div>
     </div>
 
-    <!-- HALAMAN 5 -->
+    <!-- HALAMAN 5 (Menggunakan 4.png di panel) -->
     <div id="page5" class="page">
-        <!-- tantangan 2.jpg -->
         <img src="tantangan 2.jpg" class="bg-img" alt="Sektor B">
-        <div class="panel">
+        <div class="panel panel-bg-4">
             <h2>SEKTOR B: LAB KIMIA</h2>
             <p>Selesaikan bentuk Aljabar berikut untuk mendapatkan kode Sektor B:</p>
             <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">(5x - 2y + 10) - (3x - 3y + 2) = ?</p>
@@ -155,11 +180,10 @@
         </div>
     </div>
 
-    <!-- HALAMAN 6 -->
+    <!-- HALAMAN 6 (Menggunakan 5.png di panel) -->
     <div id="page6" class="page">
-        <!-- tantangan 3.jpg -->
         <img src="tantangan 3.jpg" class="bg-img" alt="Sektor C">
-        <div class="panel">
+        <div class="panel panel-bg-5">
             <h2>SEKTOR C: INTI GENERATOR</h2>
             <p>Selesaikan perkalian Aljabar berikut (hanya konstanta) untuk kode C:</p>
             <p style="font-size: 1.5rem; color: #fff; background: #222; padding: 10px; border-radius: 5px;">Konstanta dari: (x + 3)(x + 3) = ?</p>
@@ -171,11 +195,10 @@
         </div>
     </div>
 
-    <!-- HALAMAN 7 -->
+    <!-- HALAMAN 7 (Menggunakan 6.png di panel) -->
     <div id="page7" class="page">
-        <!-- misi komplete.jpg -->
         <img src="misi komplete.jpg" class="bg-img" alt="Mission Complete">
-        <div class="panel">
+        <div class="panel panel-bg-6">
             <h2>MISSION COMPLETE</h2>
             <p>Selamat Agen! Anda berhasil mendekripsi sistem, menstabilkan generator, dan membuka pintu utama.</p>
             <button class="btn" onclick="location.reload()">Main Lagi</button>
