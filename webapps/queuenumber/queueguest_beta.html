@@ -38,7 +38,7 @@
     .small { font-size:12px; color:var(--muted); margin-top:12px; }
     .msg   { margin-top:8px; min-height:18px; color:#fbbf24; font-size:13px; }
 
-    /* --- MOBILE OPTIMIZATION ADDED HERE --- */
+    /* Mobile scaling */
     @media (max-width: 400px) {
       .wrap { padding: 20px 16px; }
       h1 { font-size: 22px; }
@@ -91,14 +91,36 @@
     let alarmOsc   = null, alarmGain = null, alarmTimer = null;
     let swReg      = null;
 
-    function getDeviceId() {
+    // --- NEW FINGERPRINT SYSTEM ---
+    async function generateFingerprint() {
+      const components = [
+        navigator.userAgent,
+        window.screen.width + 'x' + window.screen.height,
+        window.screen.colorDepth,
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+        navigator.hardwareConcurrency || 'unknown',
+        navigator.deviceMemory || 'unknown',
+        navigator.language
+      ];
+      
+      const rawString = components.join('|');
+      let hash = 0;
+      for (let i = 0; i < rawString.length; i++) {
+        hash = ((hash << 5) - hash) + rawString.charCodeAt(i);
+        hash |= 0; 
+      }
+      return 'fp_' + Math.abs(hash).toString(36);
+    }
+
+    async function getDeviceId() {
       let id = localStorage.getItem('queue_device_id');
       if (!id) {
-        id = 'device_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-        localStorage.setItem('queue_device_id', id);
+        id = await generateFingerprint();
+        try { localStorage.setItem('queue_device_id', id); } catch(e) {}
       }
       return id;
     }
+    // ------------------------------
 
     function unlockAudio() {
       try {
@@ -233,7 +255,8 @@
     }
 
     async function fetchNumber() {
-      myDeviceId = getDeviceId();
+      // ⚠️ Use AWAIT for the new fingerprint function
+      myDeviceId = await getDeviceId();
       const url = `${SHEET_URL}?action=get_number&device_id=${encodeURIComponent(myDeviceId)}&timestamp=${Date.now()}`;
       msgEl.textContent = 'Loading...';
       try {
