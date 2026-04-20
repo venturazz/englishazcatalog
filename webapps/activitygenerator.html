@@ -3,58 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E-Kinerja Automation Hub v6.0 (Mobile Ready)</title>
+    <title>E-Kinerja Automation Hub v7.2 (Bug-Free Edition)</title>
     <style>
         :root { --primary: #1e293b; --accent: #3b82f6; --success: #10b981; --bg: #f8fafc; }
         body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #334155; }
         
-        /* Grid responsif: 2 kolom untuk PC, 1 kolom otomatis untuk HP */
         .wrapper { max-width: 1250px; margin: auto; display: grid; grid-template-columns: 450px 1fr; gap: 20px; }
-        
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: visible; box-sizing: border-box; }
         h2 { margin-top: 0; font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         
-        .form-group { margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; color: #475569; }
         
-        /* Ukuran font 16px pada input mencegah iPhone otomatis nge-zoom */
         input[type="text"], input[type="number"], input[type="time"], input[type="date"], select, textarea { 
-            width: 100%; padding: 12px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; transition: 0.2s; box-sizing: border-box; 
+            width: 100%; padding: 12px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; transition: 0.2s; box-sizing: border-box; background: #fff;
         }
-        input:focus, select:focus { outline: none; border-color: var(--accent); }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         
         .flex-row { display: flex; gap: 10px; }
         .date-badge { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 6px 12px; border-radius: 4px; font-size: 12px; margin: 4px 4px 0 0; border: 1px solid #bae6fd; }
         
-        /* Wrapper agar tabel bisa digeser kiri-kanan di HP */
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
-        th { background: #f1f5f9; text-align: left; padding: 12px; color: #475569; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f1f5f9; text-align: left; padding: 12px; color: #475569; border-bottom: 2px solid #e2e8f0; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
         
-        .col-ind { font-size: 10px; color: #64748b; margin-bottom: 4px; display: block; font-weight:bold; }
+        .col-ind { font-size: 10px; color: #64748b; margin-bottom: 6px; display: inline-block; font-weight:bold; }
         .badge-index { background: #fef08a; color: #854d0e; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 5px; }
         .badge-umum { background: #d8b4fe; color: #581c87; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
         
-        .btn { padding: 12px 15px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        .btn { padding: 12px 15px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; box-sizing: border-box; }
         .btn-add { background: var(--accent); color: white; width: 100%; margin-top: 10px; }
         .btn-generate { background: var(--primary); color: white; width: 100%; margin-top: 20px; padding: 15px; }
-        .btn-danger { background: #fee2e2; color: #dc2626; padding: 6px 10px; font-size: 12px; }
+        .btn-danger { background: #fee2e2; color: #dc2626; padding: 6px 12px; font-size: 12px; border-radius: 4px; }
         .btn-copy { background: var(--success); color: white; padding: 8px 15px; font-size: 12px; display: none; }
         
-        .radio-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .radio-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; box-sizing: border-box; }
         .radio-group label { display: flex; align-items: center; font-weight: 500; font-size: 14px; margin: 0; cursor: pointer; width: 100%; }
         .radio-group input { width: auto; margin-right: 8px; transform: scale(1.2); }
 
-        .output-header { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; flex-wrap: wrap; gap: 10px; }
-        #finalCode { background: #0f172a; color: #38bdf8; padding: 15px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 12px; white-space: pre-wrap; margin-top: 10px; display: none; border: 1px solid #334155; max-height: 400px; overflow-y: auto; }
+        .autocomplete-items {
+            position: absolute; border: 1px solid #cbd5e1; border-bottom: none; border-top: none;
+            z-index: 99; top: 100%; left: 0; right: 0; max-height: 250px; overflow-y: auto;
+            background-color: #fff; border-radius: 0 0 6px 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); display: none;
+        }
+        .autocomplete-items div { padding: 12px 10px; cursor: pointer; border-bottom: 1px solid #cbd5e1; font-size: 14px; color: #334155; }
+        .autocomplete-items div:hover { background-color: #e2e8f0; font-weight: 500; }
+
+        .output-header { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; flex-wrap: wrap; gap: 10px; width: 100%; }
+        
+        #finalCode { 
+            background: #0f172a; color: #38bdf8; padding: 15px; border-radius: 8px; 
+            font-family: 'Fira Code', monospace; font-size: 11px; white-space: pre-wrap; 
+            word-wrap: break-word; overflow-wrap: anywhere; box-sizing: border-box; 
+            width: 100%; margin-top: 10px; display: none; border: 1px solid #334155; 
+            max-height: 400px; overflow-y: auto; overflow-x: hidden; 
+        }
         .vol-info { font-size: 11px; color: #64748b; font-style: italic; margin-top: 6px; }
 
-        /* --- MEDIA QUERIES UNTUK HP / TABLET --- */
         @media (max-width: 900px) {
-            .wrapper { grid-template-columns: 1fr; }
-            body { padding: 10px; }
+            .wrapper { grid-template-columns: 1fr; width: 100%; }
+            body { padding: 10px; background: #e2e8f0; overflow-x: hidden; }
             .radio-group label { width: auto; }
+            
+            table, thead, tbody, th, td, tr { display: block; width: 100%; box-sizing: border-box; }
+            thead tr { display: none; }
+            tr { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 15px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            td { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; text-align: left; }
+            td:last-child { border-bottom: none; padding-bottom: 0; }
+            td::before { content: attr(data-label); font-weight: 800; color: #94a3b8; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+            
+            .btn-danger { width: 100%; padding: 10px; margin-top: 5px; font-size: 14px; box-sizing: border-box; }
         }
     </style>
 </head>
@@ -73,7 +91,7 @@
             <div id="selectedDates" style="margin-top:10px;"></div>
         </div>
 
-        <div class="form-group" style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+        <div class="form-group" style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; box-sizing: border-box;">
             <label>2. Kategori & Indikator:</label>
             
             <div class="radio-group">
@@ -105,7 +123,8 @@
 
         <div class="form-group">
             <label>3. Cari Aktivitas:</label>
-            <input list="actList" id="actInput" placeholder="Ketik kata kunci (misal: Mengajar)..." onchange="calcVolume()">
+            <input type="text" id="actInput" placeholder="Ketik kata kunci (misal: Mengajar)..." autocomplete="off">
+            <div id="autocomplete-list" class="autocomplete-items"></div>
         </div>
 
         <div class="flex-row">
@@ -133,17 +152,17 @@
         <button class="btn btn-add" onclick="addToTable()">Tambahkan ke Rencana ➡️</button>
     </div>
 
-    <div class="card">
-        <h2>📊 Monitor Rencana Batch</h2>
+    <div class="card" style="background: transparent; box-shadow: none; padding: 0;">
+        <h2 style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">📊 Monitor Rencana Batch</h2>
         
-        <div class="table-responsive">
+        <div style="width: 100%; overflow: hidden;">
             <table>
-                <thead>
+                <thead style="background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
                     <tr>
-                        <th width="20%">Tanggal</th>
+                        <th width="15%">Tanggal</th>
                         <th width="45%">Aktivitas & Indikator</th>
                         <th width="20%">Waktu</th>
-                        <th width="5%">Vol</th>
+                        <th width="10%">Vol</th>
                         <th width="10%">Aksi</th>
                     </tr>
                 </thead>
@@ -151,19 +170,20 @@
             </table>
         </div>
 
-        <div style="margin-top:30px; border-top:2px solid #f1f5f9; padding-top:20px;">
-            <button class="btn btn-generate" onclick="generateScript()">⚡ GENERATE BATCH SCRIPT</button>
+        <div style="margin-top:20px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; width: 100%;">
+            <button class="btn btn-generate" style="margin-top:0;" onclick="generateScript()">⚡ GENERATE BATCH SCRIPT</button>
+            
+            <div class="output-header">
+                <h3 id="scriptTitle" style="margin:0; font-size:14px; color:var(--primary); display:none;">📜 Hasil Script Automation:</h3>
+                <button id="copyBtn" class="btn btn-copy" onclick="copyToClipboard()">📋 Copy Script</button>
+            </div>
+            
+            <div id="finalCode"></div>
         </div>
-
-        <div class="output-header">
-            <h3 id="scriptTitle" style="margin:0; font-size:14px; color:var(--primary); display:none;">📜 Hasil Script Automation:</h3>
-            <button id="copyBtn" class="btn btn-copy" onclick="copyToClipboard()">📋 Copy Script</button>
-        </div>
-        <div id="finalCode"></div>
     </div>
 </div>
 
-<datalist id="actList">
+<datalist id="actList" style="display:none;">
     <option value="Memeriksa kelengkapan surat kendaraan bermotor (Per 1 dokumen) 15 menit">
     <option value="Menyusun dan mengerjakan SPJ Langsung (LS) per paket 30 menit">
     <option value="Menyusun dan mengerjakan SPJ Langsung (LS) per paket 60 menit">
@@ -1436,6 +1456,47 @@
 <script>
     let dateQueue = [];
     let activityQueue = [];
+    let databaseAktivitas = [];
+
+    window.onload = function() {
+        const options = document.querySelectorAll('#actList option');
+        options.forEach(opt => databaseAktivitas.push(opt.value));
+    };
+
+    const actInput = document.getElementById("actInput");
+    const autoList = document.getElementById("autocomplete-list");
+
+    actInput.addEventListener("input", function() {
+        const val = this.value;
+        autoList.innerHTML = "";
+        
+        if (!val) { autoList.style.display = "none"; return; }
+        
+        autoList.style.display = "block";
+        let count = 0;
+        
+        for (let i = 0; i < databaseAktivitas.length; i++) {
+            if (databaseAktivitas[i].toLowerCase().includes(val.toLowerCase())) {
+                const div = document.createElement("div");
+                div.innerHTML = databaseAktivitas[i]; 
+                
+                div.addEventListener("click", function() {
+                    actInput.value = this.innerText; 
+                    autoList.style.display = "none"; 
+                    calcVolume(); 
+                });
+                
+                autoList.appendChild(div);
+                count++;
+                if(count >= 30) break; 
+            }
+        }
+        if(count === 0) autoList.style.display = "none";
+    });
+
+    document.addEventListener("click", function(e) {
+        if (e.target !== actInput) autoList.style.display = "none";
+    });
 
     function pushDate() {
         const val = document.getElementById('tglInput').value;
@@ -1490,8 +1551,7 @@
 
         const cleanAct = cleanText(rawAct);
 
-        const allOptions = [...document.querySelectorAll('#actList option')].map(o => o.value);
-        const siblings = allOptions.filter(val => cleanText(val) === cleanAct);
+        const siblings = databaseAktivitas.filter(val => cleanText(val) === cleanAct);
         let matchIdx = siblings.indexOf(rawAct);
         if(matchIdx === -1) matchIdx = 0;
 
@@ -1514,25 +1574,25 @@
         dateQueue = [];
         renderDates();
         renderTable();
+        document.getElementById('actInput').value = "";
     }
 
     function renderTable() {
         const tbody = document.getElementById('monitorTable');
         tbody.innerHTML = activityQueue.map((item, i) => `
             <tr>
-                <td>${item.tgl}</td>
-                <td>
+                <td data-label="📅 Tanggal">${item.tgl}</td>
+                <td data-label="📌 Aktivitas & Indikator">
                     <span class="col-ind" style="color: ${item.jenis === 'Umum' ? '#9333ea' : '#64748b'}">
                         [ ${item.jenis === 'Umum' ? '<span class="badge-umum">UMUM</span> ' : ''}${item.indLabel} ]
                     </span>
                     <b>${item.actClean}</b> 
                     ${item.matchIndex > 0 ? `<span class="badge-index">Varian ke-${item.matchIndex + 1}</span>` : ''}
-                    <br>
-                    <span style="font-size:11px; color:#94a3b8">${item.ket || '-'}</span>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:3px">${item.ket || '-'}</div>
                 </td>
-                <td>${item.jamM} - ${item.jamS}</td>
-                <td>${item.vol}</td>
-                <td><button class="btn-danger" onclick="activityQueue.splice(${i},1);renderTable()">Hapus</button></td>
+                <td data-label="⏰ Waktu">${item.jamM} - ${item.jamS}</td>
+                <td data-label="📦 Volume"><b style="color:var(--accent)">${item.vol}</b></td>
+                <td data-label="⚙️ Aksi"><button class="btn-danger" onclick="activityQueue.splice(${i},1);renderTable()">Hapus</button></td>
             </tr>
         `).join('');
     }
@@ -1556,7 +1616,7 @@
 
         const scriptTemplate = `
 (async () => {
-  const batchData = ${JSON.stringify(activityQueue)};
+  const batchData = ${JSON.stringify(activityQueue, null, 4)};
   const delay = ms => new Promise(r => setTimeout(r, ms));
 
   const formatTanggalAman = (tgl) => {
@@ -1625,7 +1685,8 @@
     if (!modal) continue;
     await delay(1500); 
 
-    const labels = [...document.querySelectorAll('label, span, div')];
+    /* BUG FIX V7.2: Menghapus 'div' dari selektor agar tidak salah klik kontainer */
+    const labels = [...document.querySelectorAll('label, span, button, a, .nav-link, .custom-control-label')];
     if (item.jenis === 'Umum') {
         const btnUmum = labels.find(x => {
             const txt = x.innerText.trim().toLowerCase();
@@ -1657,13 +1718,19 @@
     const msList = [...modal.querySelectorAll('.multiselect')];
     let dropA = null;
     
-    const dropV = document.querySelector('.input-volume-aktivitas') || msList[msList.length - 1];
-    
-    if (dropV) {
-        const vIdx = msList.indexOf(dropV);
-        if (vIdx > 0) { dropA = msList[vIdx - 1]; }
+    /* LOGIKA JANGKAR AKTIVITAS YANG LEBIH KUAT */
+    if (item.jenis === 'Umum') {
+        // Jika form Umum, aktivitas pasti ada di urutan pertama
+        dropA = msList[0]; 
+    } else {
+        // Jika form Utama, gunakan patokan dari kolom Volume
+        const dropV = document.querySelector('.input-volume-aktivitas') || msList[msList.length - 1];
+        if (dropV) {
+            const vIdx = msList.indexOf(dropV);
+            if (vIdx > 0) { dropA = msList[vIdx - 1]; }
+        }
+        if (!dropA && msList.length > 1) dropA = msList[1];
     }
-    if (!dropA && msList.length > 0) dropA = msList[0];
 
     if(dropA) {
         deepClick(dropA); await delay(1000);
@@ -1687,9 +1754,10 @@
     const textAreas = [...modal.querySelectorAll('textarea')];
     if(textAreas.length > 0) { injectUniversal(textAreas[0], item.ket); }
 
-    if (dropV) {
-      deepClick(dropV); await delay(800);
-      const vOpt = [...dropV.querySelectorAll('.multiselect__option')].find(x => x.innerText.trim() === item.vol.toString());
+    const dropVFinal = document.querySelector('.input-volume-aktivitas') || msList[msList.length - 1];
+    if (dropVFinal) {
+      deepClick(dropVFinal); await delay(800);
+      const vOpt = [...dropVFinal.querySelectorAll('.multiselect__option')].find(x => x.innerText.trim() === item.vol.toString());
       if (vOpt) deepClick(vOpt);
     }
 
