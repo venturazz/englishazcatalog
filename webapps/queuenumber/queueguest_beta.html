@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Queue Number</title>
+  <style>
+    :root { --text:#e5e7eb; --muted:#94a3b8; --accent:#22c55e; --warn:#f59e0b; --blue:#60a5fa; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; font-family:system-ui,Segoe UI,Arial,sans-serif; background:linear-gradient(135deg,#0f172a,#1e293b); color:var(--text); transition:background .4s; }
+    body.calling { background:linear-gradient(135deg,#1c1a00,#3d2b00) !important; }
+    body.served  { background:linear-gradient(135deg,#0a1628,#0f2a4a) !important; }
+    .wrap { width:min(92vw,560px); background:rgba(17,24,39,.92); border:1px solid rgba(148,163,184,.2); border-radius:20px; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.35); text-align:center; transition:border-color .4s; }
+    .wrap.calling { border-color:var(--warn); }
+    .wrap.served  { border-color:var(--blue); }
+    h1 { margin:0 0 6px; font-size:26px; }
+    .subtitle { margin:0 0 14px; color:var(--muted); font-size:14px; }
+    .num { font-size:72px; font-weight:800; letter-spacing:4px; padding:22px; border-radius:16px; background:#0b1220; border:1px solid rgba(148,163,184,.15); margin:14px 0; transition:all .4s; }
+    .num.calling { color:var(--warn); border-color:var(--warn); }
+    .num.served  { color:var(--blue); border-color:var(--blue); text-decoration:line-through; opacity:.6; }
+    .status { font-size:14px; font-weight:600; padding:8px 18px; border-radius:20px; display:inline-block; margin-bottom:10px; }
+    .status.waiting { background:rgba(34,197,94,.15); color:var(--accent); }
+    .status.called  { background:rgba(245,158,11,.2);  color:var(--warn); animation:pulse 1s infinite; }
+    .status.served  { background:rgba(96,165,250,.15); color:var(--blue); }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+    #notifBtn { background:rgba(34,197,94,.1); border:1px solid #22c55e; color:#22c55e; border-radius:10px; padding:10px 18px; font-size:14px; cursor:pointer; margin-bottom:14px; font-weight:700; transition:all .3s; width:100%; }
+    #notifBtn:disabled { opacity:.6; cursor:default; }
+    #notifBtn.denied { border-color:#ef4444; color:#ef4444; background:rgba(239,68,68,.1); }
+    #notifBtn.ready  { border-color:#22c55e; color:#22c55e; background:rgba(34,197,94,.15); }
+    #stopBtn { display:none; width:100%; border:0; border-radius:10px; padding:10px 18px; font-size:14px; cursor:pointer; font-weight:700; margin-top:10px; background:var(--warn); color:#1c1000; }
+    #stopBtn.show { display:block; animation:pulse 1s infinite; }
+    .alert-box { display:none; border-radius:14px; padding:18px 16px; margin-top:12px; font-size:17px; font-weight:700; }
+    .alert-box.calling { display:block; background:rgba(245,158,11,.15); border:2px solid var(--warn); color:var(--warn); animation:pulse 1.5s infinite; }
+    .alert-box.served  { display:block; background:rgba(96,165,250,.1);  border:2px solid var(--blue); color:var(--blue); }
+    .thank-icon  { font-size:52px; margin-bottom:10px; }
+    .thank-title { font-size:22px; font-weight:800; margin-bottom:6px; }
+    .thank-sub   { font-size:14px; color:var(--muted); }
+    .small { font-size:12px; color:var(--muted); margin-top:12px; }
+    .msg   { margin-top:8px; min-height:18px; color:#fbbf24; font-size:13px; }
+
+    /* --- MOBILE OPTIMIZATION ADDED HERE --- */
+    @media (max-width: 400px) {
+      .wrap { padding: 20px 16px; }
+      h1 { font-size: 22px; }
+      .num { font-size: 56px; padding: 16px; letter-spacing: 2px; }
+      #notifBtn, #stopBtn { font-size: 13px; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="mainWrap">
+    <h1>Queue Number</h1>
+    <p class="subtitle">Your number is assigned automatically when you open this page.</p>
+
+    <button id="notifBtn">🔔 Tap to enable notifications &amp; sound</button>
+
+    <div id="queueNumber" class="num">----</div>
+    <div id="statusBadge" class="status waiting">Waiting</div>
+
+    <div id="calledAlert" class="alert-box">
+      📢 Your number is being called!<br>Please proceed to the counter.
+    </div>
+    <div id="servedAlert" class="alert-box">
+      <div class="thank-icon">🎉</div>
+      <div class="thank-title">Thank You!</div>
+      <div class="thank-sub">You have been served. We hope to see you again!</div>
+    </div>
+
+    <button id="stopBtn" onclick="stopBeep()">🔕 Tap to stop alarm</button>
+
+    <p class="small" id="hintText">Keep this page open. You will be notified when your number is called.</p>
+    <div id="msg" class="msg"></div>
+  </div>
+
+  <script>
+    // ⚠️ REPLACE THIS WITH YOUR APPS SCRIPT URL ⚠️
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxWtIsLZ-qmLYxLsMNXeZlXNMy0VOJ5eGdidkYMSEPvbOUUos-LUBRvQrur3vaM8w7tFQ/exec';
+
+    const queueNumberEl = document.getElementById('queueNumber');
+    const statusBadge   = document.getElementById('statusBadge');
+    const calledAlert   = document.getElementById('calledAlert');
+    const servedAlert   = document.getElementById('servedAlert');
+    const mainWrap      = document.getElementById('mainWrap');
+    const hintText      = document.getElementById('hintText');
+    const msgEl         = document.getElementById('msg');
+    const notifBtn      = document.getElementById('notifBtn');
+    const stopBtn       = document.getElementById('stopBtn');
+
+    let myDeviceId = null, myNumber = null, lastStatus = null, pollTimer = null;
+    let audioCtx   = null, audioReady = false;
+    let alarmOsc   = null, alarmGain = null, alarmTimer = null;
+    let swReg      = null;
+
+    function getDeviceId() {
+      let id = localStorage.getItem('queue_device_id');
+      if (!id) {
+        id = 'device_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        localStorage.setItem('queue_device_id', id);
+      }
+      return id;
+    }
+
+    function unlockAudio() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume().then(() => {
+          audioReady = true;
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(audioCtx.currentTime);
+          o.stop(audioCtx.currentTime + 0.1);
+        });
+      } catch(e) {}
+    }
+
+    function playBeep() {
+      if (!audioCtx || !audioReady) return;
+      stopBeep();
+      try {
+        audioCtx.resume();
+        alarmGain = audioCtx.createGain();
+        alarmGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        alarmGain.connect(audioCtx.destination);
+
+        alarmOsc = audioCtx.createOscillator();
+        alarmOsc.type = 'sine';
+        alarmOsc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        alarmOsc.connect(alarmGain);
+        alarmOsc.start();
+
+        let on = true;
+        alarmTimer = setInterval(() => {
+          if (!alarmGain || !audioCtx) return;
+          try {
+            const t = audioCtx.currentTime;
+            if (on) {
+              alarmGain.gain.setValueAtTime(0.8, t);
+              alarmGain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+            }
+            on = !on;
+          } catch(e) {}
+        }, 500);
+
+        stopBtn.classList.add('show');
+      } catch(e) {}
+    }
+
+    function stopBeep() {
+      if (alarmTimer) { clearInterval(alarmTimer); alarmTimer = null; }
+      if (alarmOsc)   { try { alarmOsc.stop(); } catch(e) {} alarmOsc = null; }
+      if (alarmGain)  { try { alarmGain.disconnect(); } catch(e) {} alarmGain = null; }
+      stopBtn.classList.remove('show');
+    }
+
+    async function registerSW() {
+      if (!('serviceWorker' in navigator)) return;
+      try { swReg = await navigator.serviceWorker.register('/sw.js'); } catch(e) {}
+    }
+
+    async function showNotif(title, body) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification(title, {
+          body, vibrate:[300,100,300,100,300], tag:'queue-alert', renotify:true
+        });
+      } catch(e) {
+        try { new Notification(title, { body }); } catch(e2) {}
+      }
+    }
+
+    notifBtn.addEventListener('click', async function() {
+      unlockAudio();
+      if (!('Notification' in window)) {
+        notifBtn.textContent = '❌ Not supported on this device';
+        notifBtn.classList.add('denied'); notifBtn.disabled = true; return;
+      }
+      if (Notification.permission === 'denied') {
+        notifBtn.textContent = '❌ Blocked — allow in browser Settings';
+        notifBtn.classList.add('denied'); notifBtn.disabled = true; return;
+      }
+      if (Notification.permission === 'granted') {
+        notifBtn.textContent = '✅ Notifications & sound enabled';
+        notifBtn.classList.add('ready'); notifBtn.disabled = true;
+        await registerSW(); return;
+      }
+      const perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        notifBtn.textContent = '✅ Notifications & sound enabled';
+        notifBtn.classList.add('ready'); notifBtn.disabled = true;
+        await registerSW();
+      } else {
+        notifBtn.textContent = '❌ Blocked — allow in browser Settings';
+        notifBtn.classList.add('denied'); notifBtn.disabled = true;
+      }
+    });
+
+    async function updateUI(status) {
+      if (lastStatus === status) return;
+      lastStatus = status;
+      stopBeep();
+
+      document.body.className = '';
+      mainWrap.className      = 'wrap';
+      queueNumberEl.className = 'num';
+      calledAlert.className   = 'alert-box';
+      servedAlert.className   = 'alert-box';
+      statusBadge.className   = 'status ' + status;
+      const labels = { waiting:'Waiting', called:'Being Called!', served:'Served' };
+      statusBadge.textContent = labels[status] || status;
+
+      if (status === 'called') {
+        document.body.classList.add('calling');
+        mainWrap.classList.add('calling');
+        queueNumberEl.classList.add('calling');
+        calledAlert.classList.add('calling');
+        hintText.textContent = 'Please proceed to the counter now.';
+        playBeep();
+        await showNotif('Queue Alert 📢', 'Number ' + String(myNumber).padStart(4,'0') + ' is being called!');
+      } else if (status === 'served') {
+        document.body.classList.add('served');
+        mainWrap.classList.add('served');
+        queueNumberEl.classList.add('served');
+        servedAlert.classList.add('served');
+        hintText.textContent = 'This queue session is complete. Thank you!';
+        if (pollTimer) clearInterval(pollTimer);
+        await showNotif('Queue ✅', 'You have been served. Thank you!');
+      } else {
+        hintText.textContent = 'Keep this page open. You will be notified when your number is called.';
+      }
+    }
+
+    async function fetchNumber() {
+      myDeviceId = getDeviceId();
+      const url = `${SHEET_URL}?action=get_number&device_id=${encodeURIComponent(myDeviceId)}&timestamp=${Date.now()}`;
+      msgEl.textContent = 'Loading...';
+      try {
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (resp.ok && data && typeof data.number === 'number') {
+          myNumber = data.number;
+          queueNumberEl.textContent = String(data.number).padStart(4,'0');
+          msgEl.textContent = data.is_new ? 'New number issued.' : 'Existing number reused.';
+          await updateUI(data.status || 'waiting');
+          if (data.status !== 'served') startPolling();
+        } else {
+          queueNumberEl.textContent = 'ERR';
+          msgEl.textContent = data?.error || 'Error loading number.';
+        }
+      } catch(err) {
+        queueNumberEl.textContent = 'ERR';
+        msgEl.textContent = 'Network error. Please refresh.';
+      }
+    }
+
+    async function pollStatus() {
+      if (!myDeviceId) return;
+      try {
+        const url = `${SHEET_URL}?action=get_status&device_id=${encodeURIComponent(myDeviceId)}&timestamp=${Date.now()}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (data && data.status) await updateUI(data.status);
+      } catch(e) {}
+    }
+
+    function startPolling() {
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(pollStatus, 5000);
+    }
+
+    if (!('Notification' in window)) {
+      notifBtn.textContent = '❌ Not supported on this device';
+      notifBtn.classList.add('denied'); notifBtn.disabled = true;
+    } else if (Notification.permission === 'granted') {
+      notifBtn.textContent = '✅ Notifications & sound enabled — tap to re-activate sound';
+      notifBtn.classList.add('ready');
+      registerSW();
+    }
+
+    fetchNumber();
+  </script>
+</body>
+</html>
