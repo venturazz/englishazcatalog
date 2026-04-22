@@ -1,0 +1,1940 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fantasy Quest Race</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&amp;family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --mystic-purple: #A855F7;
+      --emerald-green: #6BCB77;
+      --gold: #FFD93D;
+      --crimson: #EC4899;
+    }
+    body { font-family: 'Quicksand', sans-serif; }
+    .fantasy-title { font-family: 'Cinzel', serif; }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes glow {
+      0%, 100% { filter: drop-shadow(0 0 5px var(--mystic-purple)); }
+      50% { filter: drop-shadow(0 0 20px var(--mystic-purple)); }
+    }
+    @keyframes sparkle {
+      0% { transform: scale(1) rotate(0deg); opacity: 1; }
+      50% { transform: scale(1.5) rotate(180deg); opacity: 0.5; }
+      100% { transform: scale(1) rotate(360deg); opacity: 1; }
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100%) rotate(720deg); opacity: 0; }
+    }
+    @keyframes bounce-in {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    @keyframes sad-fade {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.8); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 5px var(--gold); }
+      50% { box-shadow: 0 0 30px var(--gold), 0 0 60px var(--gold); }
+    }
+    
+    .floating { animation: float 3s ease-in-out infinite; }
+    .glowing { animation: glow 2s ease-in-out infinite; }
+    .sparkle-burst { animation: sparkle 0.5s ease-out; }
+    .bounce-in { animation: bounce-in 0.5s ease-out; }
+    .sad-fade { animation: sad-fade 0.5s ease-out; }
+    .pulse-glow { animation: pulse-glow 1s ease-in-out infinite; }
+    
+    .mushroom {
+      position: absolute;
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    .track-step {
+      transition: all 0.3s ease;
+    }
+    .track-step:hover {
+      transform: scale(1.1);
+    }
+    
+    .power-up {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .power-up:hover:not(.used):not(.locked) {
+      transform: scale(1.15);
+    }
+    .power-up.locked {
+      filter: grayscale(100%);
+      opacity: 0.5;
+    }
+    .power-up.used {
+      filter: grayscale(100%);
+      opacity: 0.3;
+    }
+    
+    .option-btn {
+      transition: all 0.2s ease;
+    }
+    .option-btn:hover {
+      transform: translateX(5px);
+    }
+    
+    .team-buzzer {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .team-buzzer:hover {
+      transform: scale(1.05);
+    }
+    .team-buzzer.selected {
+      ring: 4px solid var(--gold);
+    }
+    
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      animation: confetti-fall 3s linear forwards;
+    }
+    
+    .forest-bg {
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+    
+    .scrollbar-fantasy::-webkit-scrollbar {
+      width: 8px;
+    }
+    .scrollbar-fantasy::-webkit-scrollbar-track {
+      background: rgba(168, 85, 247, 0.1);
+      border-radius: 4px;
+    }
+    .scrollbar-fantasy::-webkit-scrollbar-thumb {
+      background: var(--mystic-purple);
+      border-radius: 4px;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full forest-bg text-white overflow-auto scrollbar-fantasy">
+  <div id="app" class="min-h-full w-full"></div>
+  <script>
+    // ===== GAME STATE =====
+    const defaultConfig = {
+      game_title: "Fantasy Quest Race: Ultimate Knowledge Challenge!"
+    };
+    
+    let config = { ...defaultConfig };
+    
+    let bgmAudio = null;
+    let isMusicPlaying = false;
+
+    const gameState = {
+      screen: 'tutorial', 
+      questions: [],
+      teams: [],
+      teamCount: 4,
+      timerDuration: 30,
+      currentQuestion: 0,
+      currentRound: 1,
+      selectedTeam: null,
+      answeringTeams: [],
+      timer: null,
+      timeLeft: 30,
+      roundNames: [
+        "Round 1",
+        "Round 2",
+        "Round 3",
+        "Round 4",
+        "Round 5"
+      ],
+      fastestCount: {},
+      correctStreak: {},
+      roundWinner: null,
+      questionAnsweredCorrectly: false,
+      teamAnswerCount: {},
+      isPaused: false,
+      pausedTime: 0
+    };
+
+    const animals = ['🦊', '🦉', '🐺', '🦌', '🐉', '🦅', '🦋', '🐸', '🦚', '🦄'];
+    const colors = ['#A855F7', '#6BCB77', '#FFD93D', '#EC4899', '#3B82F6', '#F97316', '#14B8A6', '#8B5CF6', '#EF4444', '#84CC16'];
+    
+    const powerUpDefs = [
+      { id: 'boost', emoji: '🚀', name: 'Magic Boost', desc: '+1 extra step', trigger: 'fastest3', effect: 'extraStep' },
+      { id: 'shield', emoji: '🛡️', name: 'Spell Shield', desc: 'Block next -1', trigger: 'streak3', effect: 'blockPenalty' },
+      { id: 'portal', emoji: '⏭️', name: 'Portal Skip', desc: 'Skip question', trigger: 'correct5', effect: 'skipQuestion' },
+      { id: 'dragon', emoji: '💥', name: 'Dragon Fire', desc: '-2 to opponent', trigger: 'winRound', effect: 'attackOpponent' },
+      { id: 'phoenix', emoji: '❤️', name: 'Phoenix Revive', desc: 'Nullify -1', trigger: 'hard3', effect: 'nullifyPenalty' },
+      { id: 'time', emoji: '⏱️', name: 'Time Spell', desc: '+10s next Q', trigger: 'fastest5', effect: 'extraTime' }
+    ];
+
+    function toggleMusic() {
+      if (!bgmAudio) {
+        bgmAudio = document.createElement('audio');
+        bgmAudio.loop = true;
+        bgmAudio.volume = 0.3; 
+        bgmAudio.src = 'https://cdn.pixabay.com/download/audio/2022/01/21/audio_31743c58b4.mp3'; 
+        document.body.appendChild(bgmAudio);
+      }
+      
+      const musicBtn = document.getElementById('music-toggle-btn');
+      
+      if (isMusicPlaying) {
+        bgmAudio.pause();
+        isMusicPlaying = false;
+        if(musicBtn) musicBtn.innerHTML = '🔇 BGM';
+      } else {
+        bgmAudio.play().catch(e => console.log('Autoplay ditolak:', e));
+        isMusicPlaying = true;
+        if(musicBtn) musicBtn.innerHTML = '🔊 BGM';
+      }
+    }
+
+    // ===== AIKEN PARSER =====
+    function parseAIKEN(text) {
+      const questions = [];
+      const blocks = text.trim().split(/\n\n+/);
+      
+      for (const block of blocks) {
+        const lines = block.trim().split('\n').filter(l => l.trim());
+        if (lines.length < 3) continue;
+        
+        const questionText = lines[0].trim();
+        const options = [];
+        let answer = '';
+        
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          const optionMatch = line.match(/^([A-Z])[.)]\s*(.+)/i);
+          const answerMatch = line.match(/^ANSWER:\s*([A-Z])/i);
+          
+          if (optionMatch) {
+            options.push({ letter: optionMatch[1].toUpperCase(), text: optionMatch[2] });
+          } else if (answerMatch) {
+            answer = answerMatch[1].toUpperCase();
+          }
+        }
+        
+        if (questionText && options.length >= 2 && answer) {
+          questions.push({ question: questionText, options, answer });
+        }
+      }
+      
+      return questions;
+    }
+
+    // ===== SAMPLE QUESTIONS =====
+    function getSampleQuestions() {
+      return [
+        { question: "In the story of the Lost Kingdom, which part introduces the brave knight Sir Aldric and the enchanted forest setting?", options: [{letter: 'A', text: 'Resolution'}, {letter: 'B', text: 'Orientation'}, {letter: 'C', text: 'Complication'}, {letter: 'D', text: 'Climax'}], answer: 'B' },
+        { question: "When the dragon suddenly awakens and threatens the village, this represents which narrative element?", options: [{letter: 'A', text: 'Orientation'}, {letter: 'B', text: 'Resolution'}, {letter: 'C', text: 'Complication'}, {letter: 'D', text: 'Setting'}], answer: 'C' },
+        { question: "The wizard finally defeats the dark curse and peace returns - this is the story's:", options: [{letter: 'A', text: 'Orientation'}, {letter: 'B', text: 'Complication'}, {letter: 'C', text: 'Rising action'}, {letter: 'D', text: 'Resolution'}], answer: 'D' },
+        { question: "\"Once upon a time in a magical realm...\" typically appears in which part of narrative structure?", options: [{letter: 'A', text: 'Complication'}, {letter: 'B', text: 'Resolution'}, {letter: 'C', text: 'Orientation'}, {letter: 'D', text: 'Conclusion'}], answer: 'C' },
+        { question: "The enchanted sword breaks during the final battle - what narrative element does this represent?", options: [{letter: 'A', text: 'Orientation'}, {letter: 'B', text: 'Complication'}, {letter: 'C', text: 'Resolution'}, {letter: 'D', text: 'Introduction'}], answer: 'B' },
+        { question: "When the princess is reunited with her kingdom and crowned queen, we're reading the:", options: [{letter: 'A', text: 'Setting'}, {letter: 'B', text: 'Complication'}, {letter: 'C', text: 'Orientation'}, {letter: 'D', text: 'Resolution'}], answer: 'D' },
+        { question: "The story begins: 'In the northern mountains lived a young apprentice named Kira.' This is:", options: [{letter: 'A', text: 'Complication'}, {letter: 'B', text: 'Resolution'}, {letter: 'C', text: 'Orientation'}, {letter: 'D', text: 'Climax'}], answer: 'C' },
+        { question: "A mysterious stranger steals the Crystal of Power - this creates the story's:", options: [{letter: 'A', text: 'Orientation'}, {letter: 'B', text: 'Resolution'}, {letter: 'C', text: 'Complication'}, {letter: 'D', text: 'Background'}], answer: 'C' },
+        { question: "After years of adventure, the hero returns home wiser - this exemplifies which structure?", options: [{letter: 'A', text: 'Orientation'}, {letter: 'B', text: 'Complication'}, {letter: 'C', text: 'Character arc'}, {letter: 'D', text: 'Resolution'}], answer: 'D' },
+        { question: "Which element typically comes FIRST in fantasy narrative structure?", options: [{letter: 'A', text: 'Resolution'}, {letter: 'B', text: 'Complication'}, {letter: 'C', text: 'Orientation'}, {letter: 'D', text: 'Conflict'}], answer: 'C' },
+        { question: "Convert to indirect speech: The wizard said, \"I will cast the protection spell.\"", options: [{letter: 'A', text: 'The wizard said he will cast the protection spell'}, {letter: 'B', text: 'The wizard said that he would cast the protection spell'}, {letter: 'C', text: 'The wizard says he would cast the protection spell'}, {letter: 'D', text: 'The wizard told that I would cast the protection spell'}], answer: 'B' },
+        { question: "Convert to direct speech: The princess told the knight that she needed his help immediately.", options: [{letter: 'A', text: 'The princess said, \"She needs your help immediately.\"'}, {letter: 'B', text: 'The princess said, \"I need your help immediately.\"'}, {letter: 'C', text: 'The princess told, \"I needed his help immediately.\"'}, {letter: 'D', text: 'The princess said, \"I needed your help immediately.\"'}], answer: 'B' },
+        { question: "\"Stay away from the dark forest,\" warned the elder. In indirect speech:", options: [{letter: 'A', text: 'The elder warned to stay away from the dark forest'}, {letter: 'B', text: 'The elder warned them to stay away from the dark forest'}, {letter: 'C', text: 'The elder said stay away from the dark forest'}, {letter: 'D', text: 'The elder warns to stay away from dark forest'}], answer: 'B' },
+        { question: "The dragon asked where the treasure was hidden. Convert to direct speech:", options: [{letter: 'A', text: 'The dragon asked, \"Where is the treasure hidden?\"'}, {letter: 'B', text: 'The dragon said, \"Where was the treasure hidden?\"'}, {letter: 'C', text: 'The dragon asks, \"Where is treasure hidden?\"'}, {letter: 'D', text: 'The dragon asked, \"Where the treasure is hidden?\"'}], answer: 'A' },
+        { question: "\"I have discovered the ancient map,\" exclaimed the explorer. Indirect form:", options: [{letter: 'A', text: 'The explorer exclaimed that he has discovered the ancient map'}, {letter: 'B', text: 'The explorer exclaimed that he had discovered the ancient map'}, {letter: 'C', text: 'The explorer exclaimed he discovers the ancient map'}, {letter: 'D', text: 'The explorer said I have discovered the ancient map'}], answer: 'B' },
+        { question: "The queen commanded her guards to protect the castle. Direct speech:", options: [{letter: 'A', text: 'The queen commanded, \"Protect the castle, guards!\"'}, {letter: 'B', text: 'The queen said, \"Guards protect the castle.\"'}, {letter: 'C', text: 'The queen commanded, \"Protect my castle!\"'}, {letter: 'D', text: 'The queen told, \"You protect the castle.\"'}], answer: 'C' },
+        { question: "\"Will you join our quest?\" asked the elf. Indirect speech:", options: [{letter: 'A', text: 'The elf asked will you join their quest'}, {letter: 'B', text: 'The elf asked if I would join their quest'}, {letter: 'C', text: 'The elf asked that would I join their quest'}, {letter: 'D', text: 'The elf said will you join our quest'}], answer: 'B' },
+        { question: "The sorcerer admitted that he had made a terrible mistake. Direct speech:", options: [{letter: 'A', text: 'The sorcerer admitted, \"I had made a terrible mistake.\"'}, {letter: 'B', text: 'The sorcerer said, \"He has made a terrible mistake.\"'}, {letter: 'C', text: 'The sorcerer admitted, \"I have made a terrible mistake.\"'}, {letter: 'D', text: 'The sorcerer told, \"I made terrible mistake.\"'}], answer: 'C' },
+        { question: "\"Don't open that cursed book!\" shouted the librarian. Indirect:", options: [{letter: 'A', text: 'The librarian shouted not to open that cursed book'}, {letter: 'B', text: 'The librarian shouted don\'t open that cursed book'}, {letter: 'C', text: 'The librarian said to not open cursed book'}, {letter: 'D', text: 'The librarian shouts not opening that cursed book'}], answer: 'A' },
+        { question: "The goblin whispered that the passage led to the treasure vault. Direct:", options: [{letter: 'A', text: 'The goblin whispered, \"The passage led to treasure vault.\"'}, {letter: 'B', text: 'The goblin whispered, \"This passage leads to the treasure vault.\"'}, {letter: 'C', text: 'The goblin says, \"Passage leads to treasure vault.\"'}, {letter: 'D', text: 'The goblin whisper, \"The passage lead to treasure.\"'}], answer: 'B' },
+        { question: "\"The dragon's roar was thunder across the mountains.\" This is a:", options: [{letter: 'A', text: 'Simile'}, {letter: 'B', text: 'Metaphor'}, {letter: 'C', text: 'Personification'}, {letter: 'D', text: 'Hyperbole'}], answer: 'B' },
+        { question: "\"Her eyes sparkled like the stars in the enchanted sky.\" Identify:", options: [{letter: 'A', text: 'Metaphor'}, {letter: 'B', text: 'Personification'}, {letter: 'C', text: 'Simile'}, {letter: 'D', text: 'Onomatopoeia'}], answer: 'C' },
+        { question: "\"The wind whispered secrets through the ancient trees.\" This is:", options: [{letter: 'A', text: 'Simile'}, {letter: 'B', text: 'Hyperbole'}, {letter: 'C', text: 'Onomatopoeia'}, {letter: 'D', text: 'Personification'}], answer: 'D' },
+        { question: "\"I've told you a million times not to anger the wizard!\" Identify:", options: [{letter: 'A', text: 'Metaphor'}, {letter: 'B', text: 'Hyperbole'}, {letter: 'C', text: 'Simile'}, {letter: 'D', text: 'Personification'}], answer: 'B' },
+        { question: "\"The sword went CLANG against the enemy's shield.\" This uses:", options: [{letter: 'A', text: 'Simile'}, {letter: 'B', text: 'Metaphor'}, {letter: 'C', text: 'Onomatopoeia'}, {letter: 'D', text: 'Hyperbole'}], answer: 'C' },
+        { question: "\"The knight was a lion in battle, fierce and unstoppable.\" This is:", options: [{letter: 'A', text: 'Simile'}, {letter: 'B', text: 'Metaphor'}, {letter: 'C', text: 'Personification'}, {letter: 'D', text: 'Onomatopoeia'}], answer: 'B' },
+        { question: "\"The castle walls stood as tall as giants guarding the realm.\" Identify:", options: [{letter: 'A', text: 'Metaphor'}, {letter: 'B', text: 'Personification'}, {letter: 'C', text: 'Hyperbole'}, {letter: 'D', text: 'Simile'}], answer: 'D' },
+        { question: "\"The ancient book groaned when opened, revealing its secrets.\" This is:", options: [{letter: 'A', text: 'Simile'}, {letter: 'B', text: 'Personification'}, {letter: 'C', text: 'Metaphor'}, {letter: 'D', text: 'Hyperbole'}], answer: 'B' },
+        { question: "\"The magical explosion went BOOM, shaking the entire kingdom.\" Uses:", options: [{letter: 'A', text: 'Simile'}, {letter: 'B', text: 'Personification'}, {letter: 'C', text: 'Hyperbole'}, {letter: 'D', text: 'Onomatopoeia'}], answer: 'D' },
+        { question: "\"This backpack weighs a ton with all these spell books!\" This is:", options: [{letter: 'A', text: 'Simile'}, {letter: 'B', text: 'Hyperbole'}, {letter: 'C', text: 'Metaphor'}, {letter: 'D', text: 'Personification'}], answer: 'B' },
+        { question: "\"The wizard cast his spell. IT illuminated the entire chamber.\" What does 'IT' refer to?", options: [{letter: 'A', text: 'The wizard'}, {letter: 'B', text: 'The chamber'}, {letter: 'C', text: 'The spell'}, {letter: 'D', text: 'The light'}], answer: 'C' },
+        { question: "\"Elena found the crystal. SHE knew it was the key.\" The pronoun 'SHE' refers to:", options: [{letter: 'A', text: 'The crystal'}, {letter: 'B', text: 'Elena'}, {letter: 'C', text: 'The key'}, {letter: 'D', text: 'Another character'}], answer: 'B' },
+        { question: "\"The knights rode THEIR horses through the forest. THEY were exhausted.\" 'THEY' refers to:", options: [{letter: 'A', text: 'The horses'}, {letter: 'B', text: 'The knights'}, {letter: 'C', text: 'The forest'}, {letter: 'D', text: 'Both knights and horses'}], answer: 'B' },
+        { question: "\"The dragon guarded ITS treasure fiercely.\" 'ITS' refers to:", options: [{letter: 'A', text: 'The treasure'}, {letter: 'B', text: 'The cave'}, {letter: 'C', text: 'The dragon'}, {letter: 'D', text: 'The guardian'}], answer: 'C' },
+        { question: "\"Marcus and Leo found the map. THEY decided to follow IT.\" What does 'IT' reference?", options: [{letter: 'A', text: 'Marcus'}, {letter: 'B', text: 'Leo'}, {letter: 'C', text: 'The map'}, {letter: 'D', text: 'The path'}], answer: 'C' },
+        { question: "\"The sorceress gave HER apprentice the ancient tome.\" 'HER' refers to:", options: [{letter: 'A', text: 'The apprentice'}, {letter: 'B', text: 'The sorceress'}, {letter: 'C', text: 'The tome'}, {letter: 'D', text: 'Another character'}], answer: 'B' },
+        { question: "\"The elves protected THEIR homeland. THIS was their sacred duty.\" 'THIS' means:", options: [{letter: 'A', text: 'Their homeland'}, {letter: 'B', text: 'The elves'}, {letter: 'C', text: 'Protecting their homeland'}, {letter: 'D', text: 'Sacred places'}], answer: 'C' },
+        { question: "\"The curse affected the village. THOSE who touched it fell ill.\" 'THOSE' refers to:", options: [{letter: 'A', text: 'The curses'}, {letter: 'B', text: 'The villages'}, {letter: 'C', text: 'People who touched the curse'}, {letter: 'D', text: 'The illnesses'}], answer: 'C' },
+        { question: "\"Sir Gavin met Lady Rose. HE bowed to HER respectfully.\" Identify both pronouns:", options: [{letter: 'A', text: 'HE=Lady Rose, HER=Sir Gavin'}, {letter: 'B', text: 'HE=Sir Gavin, HER=Lady Rose'}, {letter: 'C', text: 'Both refer to Sir Gavin'}, {letter: 'D', text: 'Both refer to Lady Rose'}], answer: 'B' },
+        { question: "\"The magical creatures fled. SUCH behavior was unusual.\" 'SUCH' refers to:", options: [{letter: 'A', text: 'The creatures'}, {letter: 'B', text: 'The magic'}, {letter: 'C', text: 'The fleeing behavior'}, {letter: 'D', text: 'Unusual things'}], answer: 'C' },
+        { question: "A story about a young wizard who learns that true power comes from friendship, not magic. The theme is:", options: [{letter: 'A', text: 'Magic conquers all'}, {letter: 'B', text: 'Friendship over power'}, {letter: 'C', text: 'Wizards are superior'}, {letter: 'D', text: 'Power corrupts'}], answer: 'B' },
+        { question: "The author describes the villain's castle in dark, cold terms. The author's intent is to:", options: [{letter: 'A', text: 'Show the castle is old'}, {letter: 'B', text: 'Create a threatening atmosphere'}, {letter: 'C', text: 'Describe the weather'}, {letter: 'D', text: 'Explain architecture'}], answer: 'B' },
+        { question: "The hero refuses the king's reward, saying \"My village is reward enough.\" We can infer the hero:", options: [{letter: 'A', text: 'Is wealthy already'}, {letter: 'B', text: 'Dislikes the king'}, {letter: 'C', text: 'Values home over riches'}, {letter: 'D', text: 'Will return later'}], answer: 'C' },
+        { question: "A dragon saves a village despite being feared by all. The story's message is about:", options: [{letter: 'A', text: 'Dragons are dangerous'}, {letter: 'B', text: 'Not judging by appearance'}, {letter: 'C', text: 'Villages need protection'}, {letter: 'D', text: 'Fear is healthy'}], answer: 'B' },
+        { question: "The author uses many nature metaphors when describing the elf kingdom. This suggests:", options: [{letter: 'A', text: 'Elves are farmers'}, {letter: 'B', text: 'The kingdom is outdoors'}, {letter: 'C', text: 'Elves are connected to nature'}, {letter: 'D', text: 'The author likes plants'}], answer: 'C' },
+        { question: "\"The old wizard smiled sadly, knowing this was their final meeting.\" This foreshadows:", options: [{letter: 'A', text: 'A happy reunion'}, {letter: 'B', text: 'The wizard\'s departure or death'}, {letter: 'C', text: 'A new adventure'}, {letter: 'D', text: 'The wizard\'s anger'}], answer: 'B' },
+        { question: "A prince abandons his throne to become a healer. The author wants to show that:", options: [{letter: 'A', text: 'Princes are weak'}, {letter: 'B', text: 'Healing is easy'}, {letter: 'C', text: 'Purpose matters more than status'}, {letter: 'D', text: 'Thrones are uncomfortable'}], answer: 'C' },
+        { question: "The story repeats \"courage is not the absence of fear\" three times. This repetition:", options: [{letter: 'A', text: 'Shows poor writing'}, {letter: 'B', text: 'Emphasizes the theme'}, {letter: 'C', text: 'Fills space'}, {letter: 'D', text: 'Is accidental'}], answer: 'B' },
+        { question: "Despite winning, the hero looks troubled. We can infer:", options: [{letter: 'A', text: 'The hero is tired'}, {letter: 'B', text: 'Victory came at a cost'}, {letter: 'C', text: 'The hero is ungrateful'}, {letter: 'D', text: 'The prize is small'}], answer: 'B' },
+        { question: "The story ends with the hero planting a seed from their journey. This symbolizes:", options: [{letter: 'A', text: 'The hero likes gardening'}, {letter: 'B', text: 'New beginnings from the adventure'}, {letter: 'C', text: 'Seeds are valuable'}, {letter: 'D', text: 'The journey was long'}], answer: 'B' }
+      ];
+    }
+
+    // ===== RENDER FUNCTIONS =====
+    function render() {
+      const app = document.getElementById('app');
+      switch (gameState.screen) {
+        case 'tutorial':
+          app.innerHTML = renderTutorialScreen();
+          break;
+        case 'import':
+          app.innerHTML = renderImportScreen();
+          break;
+        case 'powerups':
+          app.innerHTML = renderPowerUpsScreen();
+          break;
+        case 'setup':
+          app.innerHTML = renderSetupScreen();
+          break;
+        case 'game':
+          app.innerHTML = renderGameScreen();
+          break;
+        case 'victory':
+          app.innerHTML = renderVictoryScreen();
+          break;
+      }
+      
+      attachEventListeners();
+    }
+
+    function renderTutorialScreen() {
+      return `
+        <div class="min-h-full w-full flex flex-col items-center justify-center p-8">
+          <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            ${renderForestBackground()}
+          </div>
+          
+          <div class="relative z-10 max-w-3xl w-full">
+            <h1 class="fantasy-title text-5xl md:text-6xl text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 glowing">
+              🗺️ Welcome to the Quest
+            </h1>
+            
+            <p class="text-center text-purple-200 mb-8 text-lg">
+              Learn how to lead your teams to victory!
+            </p>
+            
+            <div class="space-y-6 mb-8">
+              <div class="bg-purple-900/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30">
+                <h2 class="fantasy-title text-2xl text-gold mb-4 flex items-center gap-2">
+                  <span class="text-3xl">⚙️</span> How The Game Works
+                </h2>
+                <div class="space-y-3 text-purple-200">
+                  <div class="flex gap-4">
+                    <div class="text-3xl flex-shrink-0">🚀</div>
+                    <div>
+                      <div class="font-bold text-white">Answer Questions to Move Forward</div>
+                      <div class="text-sm">Each correct answer moves your team forward on the quest track. First team to reach the castle wins!</div>
+                    </div>
+                  </div>
+                  <div class="flex gap-4">
+                    <div class="text-3xl flex-shrink-0">⚡</div>
+                    <div>
+                      <div class="font-bold text-white">Speed Matters</div>
+                      <div class="text-sm">Answer fastest? You get +2 steps instead of +1. Wrong answers move you back -1 step.</div>
+                    </div>
+                  </div>
+                  <div class="flex gap-4">
+                    <div class="text-3xl flex-shrink-0">🎁</div>
+                    <div>
+                      <div class="font-bold text-white">Earn Power-Ups</div>
+                      <div class="text-sm">Unlock magical abilities by meeting challenges: fastest answers, correct streaks, winning rounds, and more!</div>
+                    </div>
+                  </div>
+                  <div class="flex gap-4">
+                    <div class="text-3xl flex-shrink-0">🏆</div>
+                    <div>
+                      <div class="font-bold text-white">5 Rounds of Challenges</div>
+                      <div class="text-sm">10 questions per round. Teams compete together across all 50 questions. Categories may vary by round.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-purple-900/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30">
+                <h2 class="fantasy-title text-2xl text-emerald-400 mb-4 flex items-center gap-2">
+                  <span class="text-3xl">🎯</span> Getting Started
+                </h2>
+                <div class="space-y-2 text-purple-200">
+                  <div class="flex items-start gap-3">
+                    <span class="font-bold text-emerald-400 text-lg min-w-8">1.</span>
+                    <span><strong class="text-white">Import Questions:</strong> Use your own AIKEN format questions or try our sample quest</span>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="font-bold text-emerald-400 text-lg min-w-8">2.</span>
+                    <span><strong class="text-white">Discover Power-Ups:</strong> See what magical abilities you can unlock during play</span>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="font-bold text-emerald-400 text-lg min-w-8">3.</span>
+                    <span><strong class="text-white">Create Teams:</strong> Name your teams, pick animals 🦊🐺🦅, and choose colors</span>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="font-bold text-emerald-400 text-lg min-w-8">4.</span>
+                    <span><strong class="text-white">Answer & Compete:</strong> Teams buzz in to answer. Fastest correct moves +2 steps!</span>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <span class="font-bold text-emerald-400 text-lg min-w-8">5.</span>
+                    <span><strong class="text-white">Reach the Castle:</strong> First to 20 steps wins and claims victory at the podium</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-purple-900/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/30">
+                <h2 class="fantasy-title text-2xl text-pink-400 mb-4 flex items-center gap-2">
+                  <span class="text-3xl">💡</span> Quick Tips
+                </h2>
+                <ul class="space-y-2 text-purple-200 text-sm">
+                  <li class="flex items-center gap-2">
+                    <span class="text-lg">✓</span>
+                    <span>Wrong answers penalize -1 step, so accuracy helps! But speed can make up for it.</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="text-lg">✓</span>
+                    <span>Up to 3 teams can attempt each question. Once one gets it right, the question ends.</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="text-lg">✓</span>
+                    <span>Customize the timer (10 seconds to 10 minutes) based on your group's needs.</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span class="text-lg">✓</span>
+                    <span>Power-ups activate during the game. Use them strategically to gain an advantage!</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div class="text-center">
+              <button 
+                id="start-tutorial-btn"
+                class="bg-gradient-to-r from-gold to-yellow-500 hover:from-yellow-500 hover:to-orange-500 text-purple-900 font-bold py-4 px-12 rounded-xl text-xl transition-all transform hover:scale-105 shadow-lg pulse-glow"
+              >
+                Begin Your Quest →
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderImportScreen() {
+      return `
+        <div class="min-h-full w-full flex flex-col items-center justify-center p-8">
+          <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            ${renderForestBackground()}
+          </div>
+          
+          <div class="relative z-10 max-w-2xl w-full">
+            <h1 class="fantasy-title text-5xl md:text-6xl text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 glowing">
+              ${config.game_title}
+            </h1>
+            
+            <p class="text-center text-purple-200 mb-8 text-lg">
+              An Epic Quest of Knowledge and Adventure for All Adventurers
+            </p>
+            
+            <div class="bg-purple-900/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30 shadow-2xl">
+              <h2 class="fantasy-title text-2xl text-gold mb-4 flex items-center gap-2">
+                <span class="text-3xl">📜</span> Load Your Questions
+              </h2>
+              
+              <p class="text-purple-200 mb-4 text-sm">
+                Import AIKEN format questions from any subject, or try our sample quest!
+              </p>
+              
+              <div class="space-y-4">
+                <div class="border-2 border-dashed border-purple-500/50 rounded-xl p-6 text-center bg-purple-950/30 hover:bg-purple-950/50 transition-all cursor-pointer" id="file-drop-zone">
+                  <input 
+                    type="file" 
+                    id="file-upload"
+                    accept=".txt,.aiken"
+                    class="hidden"
+                  >
+                  <div class="text-3xl mb-2">📄</div>
+                  <div class="text-purple-200 font-medium mb-1">Drop .txt file here or click to browse</div>
+                  <div class="text-purple-400 text-sm">Supports up to 50 AIKEN format questions</div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                  <div class="flex-1 h-px bg-purple-500/30"></div>
+                  <span class="text-purple-400 text-sm">OR</span>
+                  <div class="flex-1 h-px bg-purple-500/30"></div>
+                </div>
+                
+                <textarea 
+                  id="aiken-input"
+                  class="w-full h-32 bg-purple-950/50 border border-purple-500/50 rounded-xl p-4 text-white placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none scrollbar-fantasy"
+                  placeholder="AIKEN Format Example:
+
+What is the orientation in a narrative?
+A) The problem or conflict
+B) The introduction of setting and characters
+C) The solution to the problem
+D) The ending
+ANSWER: B"
+                ></textarea>
+              </div>
+              
+              <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                <button 
+                  id="use-sample-btn"
+                  class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 shadow-lg"
+                >
+                  <span class="text-xl mr-2">✨</span> Use Sample Quest (50 Questions)
+                </button>
+                
+                <button 
+                  id="import-btn"
+                  class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 shadow-lg"
+                >
+                  <span class="text-xl mr-2">📥</span> Import Questions
+                </button>
+              </div>
+              
+              <div id="import-status" class="mt-4 text-center text-sm hidden"></div>
+            </div>
+            
+            <div class="mt-8 grid grid-cols-5 gap-4 text-center">
+              ${['🎯 Any Topic', '📚 Custom Content', '🧠 Knowledge Test', '🏆 Team Challenge', '⚡ Interactive Fun'].map(round => `
+                <div class="bg-purple-800/30 rounded-lg p-3 border border-purple-500/20">
+                  <div class="text-2xl mb-1">${round.split(' ')[0]}</div>
+                  <div class="text-xs text-purple-300">${round.split(' ').slice(1).join(' ')}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPowerUpsScreen() {
+      return `
+        <div class="min-h-full w-full flex flex-col items-center justify-center p-8">
+          <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            ${renderForestBackground()}
+          </div>
+          
+          <div class="relative z-10 max-w-4xl w-full">
+            <h1 class="fantasy-title text-4xl md:text-5xl text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400">
+              ⚡ Magical Power-Ups ⚡
+            </h1>
+            
+            <p class="text-center text-purple-200 mb-8">
+              Earn these mystical abilities during your quest!
+            </p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+              ${powerUpDefs.map(pu => `
+                <div class="bg-gradient-to-br from-purple-800/60 to-indigo-900/60 backdrop-blur-sm rounded-xl p-5 border border-purple-400/30 transform hover:scale-105 transition-all">
+                  <div class="text-4xl mb-2 floating">${pu.emoji}</div>
+                  <h3 class="fantasy-title text-lg text-gold mb-1">${pu.name}</h3>
+                  <p class="text-purple-200 text-sm mb-2">${pu.desc}</p>
+                  <div class="text-xs text-purple-400 italic">
+                    ${getTriggerDescription(pu.trigger)}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div class="bg-purple-900/40 rounded-xl p-6 border border-purple-500/30 mb-8">
+              <h3 class="fantasy-title text-xl text-emerald-400 mb-3">🎮 Game Mechanics</h3>
+              <div class="grid md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-emerald-900/30 rounded-lg p-3">
+                  <div class="text-emerald-400 font-bold mb-1">⚡ Fastest Correct</div>
+                  <div class="text-purple-200">+2 steps + sparkle animation!</div>
+                </div>
+                <div class="bg-blue-900/30 rounded-lg p-3">
+                  <div class="text-blue-400 font-bold mb-1">✓ Correct Answer</div>
+                  <div class="text-purple-200">+1 step + jump animation</div>
+                </div>
+                <div class="bg-red-900/30 rounded-lg p-3">
+                  <div class="text-red-400 font-bold mb-1">✗ Wrong Answer</div>
+                  <div class="text-purple-200">-1 step + sad fade</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-center">
+              <button 
+                id="continue-to-setup"
+                class="bg-gradient-to-r from-gold to-yellow-500 hover:from-yellow-500 hover:to-orange-500 text-purple-900 font-bold py-4 px-12 rounded-xl text-xl transition-all transform hover:scale-105 shadow-lg pulse-glow"
+              >
+                Continue to Team Setup →
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSetupScreen() {
+      return `
+        <div class="min-h-full w-full flex flex-col p-4 md:p-8">
+          <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            ${renderForestBackground()}
+          </div>
+          
+          <div class="relative z-10 flex-1 flex flex-col">
+            <h1 class="fantasy-title text-3xl md:text-4xl text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+              🛡️ Assemble Your Quest Teams 🛡️
+            </h1>
+            
+            <div class="grid lg:grid-cols-2 gap-6 flex-1">
+              <div class="bg-purple-900/50 backdrop-blur-sm rounded-xl p-5 border border-purple-500/30">
+                <div class="flex flex-wrap items-center gap-4 mb-4">
+                  <label class="text-purple-200">Number of Teams:</label>
+                  <select id="team-count" class="bg-purple-800 border border-purple-500 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    ${[4,5,6,7,8,9,10].map(n => `
+                      <option value="${n}" ${n === gameState.teamCount ? 'selected' : ''}>${n} Teams</option>
+                    `).join('')}
+                  </select>
+                  
+                  <label class="text-purple-200 ml-4">Timer:</label>
+                  <select id="timer-select" class="bg-purple-800 border border-purple-500 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    <option value="10">10 seconds</option>
+                    <option value="15">15 seconds</option>
+                    <option value="20">20 seconds</option>
+                    <option value="30" selected>30 seconds</option>
+                    <option value="45">45 seconds</option>
+                    <option value="60">1 minute</option>
+                    <option value="90">1:30</option>
+                    <option value="120">2 minutes</option>
+                    <option value="180">3 minutes</option>
+                    <option value="300">5 minutes</option>
+                    <option value="600">10 minutes</option>
+                    <option value="custom">Custom...</option>
+                  </select>
+                  <input type="number" id="custom-timer" class="hidden bg-purple-800 border border-purple-500 rounded-lg px-3 py-2 w-20 text-white" placeholder="sec" min="10" max="600">
+                </div>
+                
+                <div id="team-inputs" class="space-y-3 max-h-96 overflow-y-auto scrollbar-fantasy pr-2">
+                  ${Array.from({length: gameState.teamCount}, (_, i) => renderTeamInput(i)).join('')}
+                </div>
+              </div>
+              
+              <div class="bg-purple-900/50 backdrop-blur-sm rounded-xl p-5 border border-purple-500/30">
+                <h3 class="fantasy-title text-xl text-gold mb-4">🗺️ Quest Track Preview</h3>
+                <div id="track-preview" class="relative">
+                  ${renderTrackPreview()}
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+              <button 
+                id="start-quest-btn"
+                class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 px-16 rounded-xl text-xl transition-all transform hover:scale-105 shadow-lg"
+              >
+                🏁 Start Quest! 🏁
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTeamInput(index) {
+      const team = gameState.teams[index] || { name: `Team ${index + 1}`, animal: animals[index % animals.length], color: colors[index % colors.length] };
+      
+      return `
+        <div class="flex items-center gap-3 bg-purple-800/30 rounded-lg p-3 border border-purple-500/20">
+          <span class="text-purple-400 font-bold w-8">#${index + 1}</span>
+          <input 
+            type="text" 
+            class="team-name-input flex-1 bg-purple-950/50 border border-purple-500/50 rounded-lg px-3 py-2 text-white placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            data-index="${index}"
+            value="${team.name}"
+            placeholder="Team name..."
+          >
+          <select class="team-animal-select bg-purple-800 border border-purple-500 rounded-lg px-2 py-2 text-2xl focus:outline-none" data-index="${index}">
+            ${animals.map(a => `<option value="${a}" ${a === team.animal ? 'selected' : ''}>${a}</option>`).join('')}
+          </select>
+          <div class="relative">
+            <input 
+              type="color" 
+              class="team-color-input w-10 h-10 rounded-lg cursor-pointer border-2 border-purple-500"
+              data-index="${index}"
+              value="${team.color}"
+            >
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTrackPreview() {
+      const steps = 20;
+      const stepWidth = 100 / (steps + 1);
+      
+      return `
+        <div class="relative h-48 bg-gradient-to-r from-purple-900/50 via-indigo-900/50 to-purple-900/50 rounded-xl overflow-hidden border border-purple-500/20">
+          <div class="absolute bottom-16 left-4 right-4 h-2 bg-gradient-to-r from-purple-600 via-pink-500 to-gold rounded-full"></div>
+          
+          <div class="absolute bottom-12 left-4 right-4 flex justify-between">
+            ${Array.from({length: steps + 1}, (_, i) => `
+              <div class="flex flex-col items-center">
+                <div class="w-4 h-4 rounded-full ${i === 0 ? 'bg-emerald-400' : i === steps ? 'bg-gold' : 'bg-purple-400/50'} border border-purple-300/50"></div>
+                <span class="text-xs text-purple-300 mt-1">${i}</span>
+              </div>
+            `).join('')}
+          </div>
+          
+          <div class="absolute right-2 top-4 text-4xl">🏰</div>
+          
+          <div class="absolute bottom-20 left-4 right-4">
+            ${gameState.teams.slice(0, gameState.teamCount).map((team, i) => `
+              <div 
+                class="absolute transition-all duration-500"
+                style="left: ${(team.position || 0) * stepWidth}%; transform: translateX(-50%);"
+              >
+                <div class="text-2xl" style="filter: drop-shadow(0 0 5px ${team.color});">${team.animal}</div>
+              </div>
+            `).join('')}
+          </div>
+          
+          <div class="absolute left-8 top-4 text-2xl floating">🌲</div>
+          <div class="absolute left-1/4 top-6 text-xl floating" style="animation-delay: 0.5s;">🍄</div>
+          <div class="absolute left-1/2 top-4 text-2xl floating" style="animation-delay: 1s;">🐉</div>
+          <div class="absolute left-3/4 top-6 text-xl floating" style="animation-delay: 1.5s;">✨</div>
+        </div>
+      `;
+    }
+
+    function renderGameScreen() {
+      const q = gameState.questions[gameState.currentQuestion];
+      if (!q) return '<div class="text-center p-8">No question available</div>';
+      
+      const roundIndex = Math.floor(gameState.currentQuestion / 10);
+      const roundName = gameState.roundNames[roundIndex] || 'Final Round';
+      
+      const canAnswerMore = gameState.answeringTeams.length < 3 && !gameState.questionAnsweredCorrectly;
+      
+      return `
+        <div class="min-h-full w-full flex flex-col p-2 md:p-4">
+          <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-30">
+            ${renderForestBackground()}
+          </div>
+          
+          <div class="relative z-10 flex-1 flex flex-col">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3 bg-purple-900/60 backdrop-blur-sm rounded-xl p-3 border border-purple-500/30">
+              <div class="flex items-center gap-4">
+                <div class="bg-purple-800/50 rounded-lg px-4 py-2">
+                  <span class="text-purple-300 text-sm">Round</span>
+                  <span class="text-gold font-bold text-lg ml-2">${roundIndex + 1}/5</span>
+                </div>
+                <div class="bg-purple-800/50 rounded-lg px-4 py-2">
+                  <span class="text-purple-300 text-sm">Question</span>
+                  <span class="text-emerald-400 font-bold text-lg ml-2">${gameState.currentQuestion + 1}/50</span>
+                </div>
+              </div>
+              
+              <div class="text-center">
+                <div class="text-purple-200 text-sm">${roundName}</div>
+                <div class="text-xs text-purple-400">${getRoundEmoji(roundIndex)} ${getRoundDescription(roundIndex)}</div>
+              </div>
+              
+              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                  <div class="text-4xl">⏱️</div>
+                  <div class="text-3xl font-bold ${gameState.timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-gold'}">
+                    ${formatTime(gameState.timeLeft)}
+                  </div>
+                </div>
+                <button 
+                  id="music-toggle-btn"
+                  class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition-all"
+                  title="Toggle Music"
+                >
+                  ${isMusicPlaying ? '🔊 BGM' : '🔇 BGM'}
+                </button>
+                <button 
+                  id="pause-btn"
+                  class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-all"
+                  title="Pause game"
+                >
+                  ⏸️ Pause
+                </button>
+              </div>
+            </div>
+            
+            <div class="flex-1 grid lg:grid-cols-3 gap-3">
+              <div class="lg:col-span-2 flex flex-col">
+                <div class="bg-purple-900/40 backdrop-blur-sm rounded-xl p-3 mb-3 border border-purple-500/30">
+                  <div class="text-sm text-purple-300 mb-2 text-center">
+                    ${gameState.isPaused ? '⏸️ GAME PAUSED' : '🔔 Click your team to buzz in or use the randomizer! ' + (gameState.questionAnsweredCorrectly ? `(${gameState.answeringTeams.length + 1}/4 teams attempted)` : '')}
+                  </div>
+                  <div class="flex flex-wrap justify-center gap-2 mb-3">
+                    ${gameState.teams.slice(0, gameState.teamCount).map((team, i) => `
+                      <button 
+                        class="team-buzzer flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                          gameState.selectedTeam === i 
+                            ? 'ring-4 ring-gold bg-gold/20' 
+                            : gameState.answeringTeams.includes(i)
+                              ? 'bg-gray-600/50 opacity-50'
+                              : 'bg-purple-700/50 hover:bg-purple-600/50'
+                        }"
+                        data-team="${i}"
+                        ${gameState.answeringTeams.includes(i) || (gameState.questionAnsweredCorrectly && gameState.selectedTeam !== i) || gameState.isPaused ? 'disabled' : ''}
+                      >
+                        <span class="text-xl">${team.animal}</span>
+                        <span class="text-sm font-medium" style="color: ${team.color}">${team.name}</span>
+                      </button>
+                    `).join('')}
+                  </div>
+                  <div class="flex justify-center">
+                    <button 
+                      id="randomize-team-btn"
+                      class="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold py-2 px-6 rounded-lg transition-all transform hover:scale-105 flex items-center gap-2"
+                      ${gameState.questionAnsweredCorrectly || gameState.selectedTeam !== null || gameState.isPaused ? 'disabled opacity-50' : ''}
+                    >
+                      🎲 Random Team
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="flex-1 bg-purple-900/60 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-purple-500/30">
+                  <div class="text-lg md:text-xl text-white mb-6 leading-relaxed">
+                    ${q.question}
+                  </div>
+                  
+                  <div class="grid gap-3">
+                    ${q.options.map((opt, i) => `
+                      <button 
+                        class="option-btn text-left p-4 rounded-xl border-2 transition-all ${
+                          gameState.selectedTeam !== null && !gameState.isPaused
+                            ? 'bg-purple-800/50 border-purple-500/50 hover:border-gold hover:bg-purple-700/50 cursor-pointer' 
+                            : 'bg-purple-900/30 border-purple-700/30 cursor-not-allowed opacity-60'
+                        }"
+                        data-answer="${opt.letter}"
+                        ${gameState.selectedTeam === null || gameState.isPaused ? 'disabled' : ''}
+                      >
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white font-bold mr-3">${opt.letter}</span>
+                        <span class="text-white">${opt.text}</span>
+                      </button>
+                    `).join('')}
+                  </div>
+                  
+                  ${gameState.selectedTeam === null ? `
+                    <div class="mt-4 text-center text-purple-300 animate-pulse">
+                      ${gameState.questionAnsweredCorrectly ? '✓ Correct! Ready for next question.' : '⬆️ Select your team above to answer!'}
+                    </div>
+                  ` : `
+                    <div class="mt-4 text-center text-gold font-bold">
+                      ${gameState.teams[gameState.selectedTeam].animal} ${gameState.teams[gameState.selectedTeam].name} is answering!
+                    </div>
+                  `}
+                </div>
+              </div>
+              
+              <div class="bg-purple-900/60 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30 flex flex-col">
+                <h3 class="fantasy-title text-xl text-gold mb-3 text-center">📊 Scoreboard</h3>
+                <div class="flex-1 overflow-y-auto scrollbar-fantasy space-y-2">
+                  ${[...gameState.teams].slice(0, gameState.teamCount)
+                    .sort((a, b) => (b.position || 0) - (a.position || 0))
+                    .map((team, rank) => `
+                      <div class="flex items-center gap-2 bg-purple-800/40 rounded-lg p-2 border border-purple-500/20">
+                        <span class="text-lg font-bold ${rank === 0 ? 'text-gold' : rank === 1 ? 'text-gray-300' : rank === 2 ? 'text-amber-600' : 'text-purple-400'}">#${rank + 1}</span>
+                        <span class="text-xl">${team.animal}</span>
+                        <span class="flex-1 text-sm font-medium truncate" style="color: ${team.color}">${team.name}</span>
+                        <span class="text-emerald-400 font-bold">${team.position || 0}</span>
+                      </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-3 pt-3 border-t border-purple-500/30">
+                  <div class="text-sm text-purple-300 mb-2">Power-ups (click to use):</div>
+                  ${gameState.selectedTeam !== null ? `
+                    <div class="flex flex-wrap gap-1">
+                      ${powerUpDefs.map(pu => {
+                        const team = gameState.teams[gameState.selectedTeam];
+                        const owned = team.powerUps?.includes(pu.id);
+                        const used = team.usedPowerUps?.includes(pu.id);
+                        return `
+                          <button 
+                            class="power-up w-8 h-8 rounded-lg flex items-center justify-center text-lg ${
+                              used ? 'used' : owned ? 'bg-purple-600/50 hover:bg-purple-500/50' : 'locked'
+                            }"
+                            data-powerup="${pu.id}"
+                            title="${pu.name}: ${pu.desc}"
+                            ${!owned || used ? 'disabled' : ''}
+                          >
+                            ${pu.emoji}
+                          </button>
+                        `;
+                      }).join('')}
+                    </div>
+                  ` : `
+                    <div class="text-xs text-purple-400">Select a team to view power-ups</div>
+                  `}
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-3 bg-purple-900/60 backdrop-blur-sm rounded-xl p-3 border border-purple-500/30">
+              ${renderGameTrack()}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGameTrack() {
+      const steps = 20;
+      const leftEdgePercent = 5; 
+      const rightEdgePercent = 95; 
+      const trackWidth = rightEdgePercent - leftEdgePercent; 
+      
+      return `
+        <div class="relative h-24 overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-r from-emerald-900/30 via-purple-900/30 to-gold/30 rounded-lg"></div>
+          
+          <div class="absolute bottom-10 left-8 right-8 h-3 bg-gradient-to-r from-emerald-500 via-purple-500 to-gold rounded-full shadow-lg"></div>
+          
+          <div class="absolute bottom-6 left-8 right-8 flex justify-between">
+            ${Array.from({length: steps + 1}, (_, i) => `
+              <div class="relative flex flex-col items-center">
+                <div class="w-3 h-3 rounded-full ${
+                  i === 0 ? 'bg-emerald-400 ring-2 ring-emerald-300' : 
+                  i === steps ? 'bg-gold ring-2 ring-yellow-300 pulse-glow' : 
+                  i % 5 === 0 ? 'bg-purple-400' : 'bg-purple-600/50'
+                }"></div>
+                ${i % 5 === 0 ? `<span class="absolute -bottom-4 text-xs text-purple-300">${i}</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+          
+          <div class="absolute left-2 bottom-8 text-2xl">🏁</div>
+          <div class="absolute right-2 bottom-8 text-2xl">🏰</div>
+          
+          ${gameState.teams.slice(0, gameState.teamCount).map((team, i) => {
+            const pos = Math.max(0, Math.min(team.position || 0, steps));
+            const leftPercent = leftEdgePercent + (pos / steps) * trackWidth;
+            const yOffset = (i % 3) * 8 - 8; 
+            return `
+              <div 
+                class="absolute transition-all duration-700 ease-out team-marker"
+                style="left: ${leftPercent}%; bottom: ${16 + yOffset}px; transform: translateX(-50%);"
+                data-team="${i}"
+              >
+                <div class="text-2xl" style="filter: drop-shadow(0 0 8px ${team.color});">${team.animal}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderVictoryScreen() {
+      const sortedTeams = [...gameState.teams]
+        .slice(0, gameState.teamCount)
+        .sort((a, b) => (b.position || 0) - (a.position || 0));
+      
+      const winner = sortedTeams[0];
+      const badges = generateBadges();
+      
+      return `
+        <div class="min-h-full w-full flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            ${renderForestBackground()}
+          </div>
+          
+          <div id="confetti-container" class="fixed inset-0 pointer-events-none z-50"></div>
+          
+          <div class="relative z-10 max-w-4xl w-full">
+            <h1 class="fantasy-title text-4xl md:text-6xl text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-300 to-gold animate-pulse">
+              🏆 Quest Complete! 🏆
+            </h1>
+            
+            <div class="flex justify-center items-end gap-2 md:gap-4 mb-8 h-64">
+              ${sortedTeams[1] ? `
+                <div class="flex flex-col items-center">
+                  <div class="text-4xl mb-2 floating">${sortedTeams[1].animal}</div>
+                  <div class="text-sm font-bold text-gray-300">${sortedTeams[1].name}</div>
+                  <div class="text-lg text-emerald-400">${sortedTeams[1].position} steps</div>
+                  <div class="w-24 h-32 bg-gradient-to-t from-gray-600 to-gray-400 rounded-t-lg flex items-center justify-center mt-2">
+                    <span class="text-5xl font-bold text-gray-800">2</span>
+                  </div>
+                </div>
+              ` : ''}
+              
+              <div class="flex flex-col items-center">
+                <div class="text-6xl mb-2 floating bounce-in">👑</div>
+                <div class="text-5xl mb-2 floating">${winner.animal}</div>
+                <div class="text-lg font-bold" style="color: ${winner.color}">${winner.name}</div>
+                <div class="text-xl text-emerald-400 font-bold">${winner.position} steps</div>
+                <div class="w-28 h-44 bg-gradient-to-t from-yellow-600 to-gold rounded-t-lg flex items-center justify-center mt-2">
+                  <span class="text-6xl font-bold text-yellow-800">1</span>
+                </div>
+              </div>
+              
+              ${sortedTeams[2] ? `
+                <div class="flex flex-col items-center">
+                  <div class="text-4xl mb-2 floating">${sortedTeams[2].animal}</div>
+                  <div class="text-sm font-bold text-amber-600">${sortedTeams[2].name}</div>
+                  <div class="text-lg text-emerald-400">${sortedTeams[2].position} steps</div>
+                  <div class="w-24 h-24 bg-gradient-to-t from-amber-700 to-amber-500 rounded-t-lg flex items-center justify-center mt-2">
+                    <span class="text-5xl font-bold text-amber-900">3</span>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+            
+            <div class="bg-purple-900/60 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30 mb-8">
+              <h3 class="fantasy-title text-2xl text-gold mb-4 text-center">🎖️ Achievement Badges</h3>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                ${badges.map(badge => `
+                  <div class="bg-purple-800/40 rounded-lg p-3 border border-purple-500/20 flex items-center gap-3">
+                    <span class="text-3xl">${badge.emoji}</span>
+                    <div>
+                      <div class="font-bold text-sm" style="color: ${badge.team.color}">${badge.team.name}</div>
+                      <div class="text-xs text-purple-300">${badge.title}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            
+            <div class="bg-purple-900/60 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30 mb-8">
+              <h3 class="fantasy-title text-xl text-gold mb-4">📜 Final Rankings</h3>
+              <div class="space-y-2">
+                ${sortedTeams.map((team, i) => `
+                  <div class="flex items-center gap-3 bg-purple-800/30 rounded-lg p-3">
+                    <span class="text-lg font-bold ${i === 0 ? 'text-gold' : i === 1 ? 'text-gray-300' : i === 2 ? 'text-amber-600' : 'text-purple-400'}">#${i + 1}</span>
+                    <span class="text-2xl">${team.animal}</span>
+                    <span class="flex-1 font-medium" style="color: ${team.color}">${team.name}</span>
+                    <span class="text-emerald-400 font-bold">${team.position} steps</span>
+                    <span class="text-purple-300 text-sm">${team.correctAnswers || 0} correct</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-800/50 to-indigo-800/50 rounded-xl p-6 border border-purple-400/30 text-center">
+              <h3 class="fantasy-title text-xl text-gold mb-3">💭 Quest Reflection</h3>
+              <p class="text-purple-200 text-lg italic">"What fantasy strategy helped your team succeed?"</p>
+              <p class="text-purple-300 text-sm mt-2">Discuss with your fellow adventurers!</p>
+            </div>
+            
+            <div class="mt-8 text-center">
+              <button 
+                id="play-again-btn"
+                class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 px-12 rounded-xl text-xl transition-all transform hover:scale-105 shadow-lg"
+              >
+                🔄 Begin New Quest
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderForestBackground() {
+      return `
+        <svg class="w-full h-full" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" style="stop-color:#A855F7;stop-opacity:0.3" />
+              <stop offset="100%" style="stop-color:#A855F7;stop-opacity:0" />
+            </radialGradient>
+            <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" style="stop-color:#6BCB77;stop-opacity:0.3" />
+              <stop offset="100%" style="stop-color:#6BCB77;stop-opacity:0" />
+            </radialGradient>
+          </defs>
+          
+          <g fill="#1a472a" opacity="0.6">
+            <path d="M50,600 L80,500 L30,520 L60,420 L20,440 L50,350 L80,440 L40,420 L70,520 L20,500 Z"/>
+            <path d="M150,600 L180,480 L130,510 L160,390 L110,420 L150,300 L190,420 L140,390 L170,510 L120,480 Z"/>
+            <path d="M700,600 L730,500 L680,520 L710,420 L660,440 L700,350 L740,440 L690,420 L720,520 L670,500 Z"/>
+            <path d="M780,600 L810,520 L760,540 L790,460 L740,480 L780,400 L820,480 L770,460 L800,540 L750,520 Z"/>
+          </g>
+          
+          <g class="mushroom" style="animation-delay: 0s;">
+            <circle cx="100" cy="550" r="30" fill="url(#glow1)"/>
+            <ellipse cx="100" cy="560" rx="15" ry="8" fill="#A855F7"/>
+            <rect x="97" y="560" width="6" height="15" fill="#8B5CF6"/>
+          </g>
+          <g class="mushroom" style="animation-delay: 0.5s;">
+            <circle cx="250" cy="570" r="25" fill="url(#glow2)"/>
+            <ellipse cx="250" cy="580" rx="12" ry="6" fill="#6BCB77"/>
+            <rect x="247" y="580" width="5" height="12" fill="#4ade80"/>
+          </g>
+          <g class="mushroom" style="animation-delay: 1s;">
+            <circle cx="600" cy="560" r="28" fill="url(#glow1)"/>
+            <ellipse cx="600" cy="570" rx="14" ry="7" fill="#EC4899"/>
+            <rect x="597" y="570" width="6" height="14" fill="#db2777"/>
+          </g>
+          <g class="mushroom" style="animation-delay: 1.5s;">
+            <circle cx="720" cy="540" r="22" fill="url(#glow2)"/>
+            <ellipse cx="720" cy="548" rx="10" ry="5" fill="#FFD93D"/>
+            <rect x="717" y="548" width="5" height="10" fill="#fbbf24"/>
+          </g>
+          
+          <g fill="#FFD93D">
+            <circle cx="200" cy="100" r="2" class="glowing"/>
+            <circle cx="400" cy="150" r="3" class="glowing" style="animation-delay: 0.3s;"/>
+            <circle cx="600" cy="80" r="2" class="glowing" style="animation-delay: 0.6s;"/>
+            <circle cx="300" cy="200" r="2" class="glowing" style="animation-delay: 0.9s;"/>
+            <circle cx="500" cy="120" r="3" class="glowing" style="animation-delay: 1.2s;"/>
+          </g>
+          
+          <g fill="#1a1a2e" opacity="0.4">
+            <rect x="350" y="50" width="100" height="150"/>
+            <polygon points="350,50 400,10 450,50"/>
+            <rect x="360" y="120" width="20" height="30" fill="#FFD93D" opacity="0.5"/>
+            <rect x="420" y="120" width="20" height="30" fill="#FFD93D" opacity="0.5"/>
+          </g>
+        </svg>
+      `;
+    }
+
+    function getTriggerDescription(trigger) {
+      const descriptions = {
+        'fastest3': 'Answer fastest 3 times',
+        'streak3': 'Get 3 correct in a row',
+        'correct5': 'Get 5 total correct',
+        'winRound': 'Win a round (most correct)',
+        'hard3': 'Answer 3 hard questions',
+        'fastest5': 'Answer fastest 5 times'
+      };
+      return descriptions[trigger] || trigger;
+    }
+
+    function getRoundEmoji(index) {
+      return ['🏰', '💬', '🌟', '🔗', '📖'][index] || '❓';
+    }
+
+    function getRoundDescription(index) {
+      const descs = [
+        `Questions 1-10`,
+        `Questions 11-20`,
+        `Questions 21-30`,
+        `Questions 31-40`,
+        `Questions 41-50`
+      ];
+      return descs[index] || '';
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+    }
+
+    function generateBadges() {
+      const badges = [];
+      const teams = gameState.teams.slice(0, gameState.teamCount);
+      
+      const speedDemon = teams.reduce((best, t) => 
+        (t.fastestCount || 0) > (best?.fastestCount || 0) ? t : best, null);
+      if (speedDemon && speedDemon.fastestCount > 0) {
+        badges.push({ team: speedDemon, title: 'Speed Demon ⚡', emoji: '⚡' });
+      }
+      
+      const round1Champ = teams.reduce((best, t) => 
+        (t.roundScores?.[0] || 0) > (best?.roundScores?.[0] || 0) ? t : best, null);
+      if (round1Champ && (round1Champ.roundScores?.[0] || 0) > 0) {
+        badges.push({ team: round1Champ, title: 'Round 1 Champion 🥇', emoji: '🥇' });
+      }
+      
+      const round2Champ = teams.reduce((best, t) => 
+        (t.roundScores?.[1] || 0) > (best?.roundScores?.[1] || 0) ? t : best, null);
+      if (round2Champ && (round2Champ.roundScores?.[1] || 0) > 0) {
+        badges.push({ team: round2Champ, title: 'Round 2 Champion 🥇', emoji: '🥇' });
+      }
+      
+      const round3Champ = teams.reduce((best, t) => 
+        (t.roundScores?.[2] || 0) > (best?.roundScores?.[2] || 0) ? t : best, null);
+      if (round3Champ && (round3Champ.roundScores?.[2] || 0) > 0) {
+        badges.push({ team: round3Champ, title: 'Round 3 Champion 🥇', emoji: '🥇' });
+      }
+      
+      const powerPlayer = teams.reduce((best, t) => 
+        (t.powerUps?.length || 0) > (best?.powerUps?.length || 0) ? t : best, null);
+      if (powerPlayer && (powerPlayer.powerUps?.length || 0) > 0) {
+        badges.push({ team: powerPlayer, title: 'Power Player 💪', emoji: '💪' });
+      }
+      
+      const comebackKid = teams.find(t => t.hadNegative && (t.position || 0) > 5);
+      if (comebackKid) {
+        badges.push({ team: comebackKid, title: 'Comeback Champion 🔥', emoji: '🔥' });
+      }
+      
+      return badges;
+    }
+
+    function spawnConfetti() {
+      const container = document.getElementById('confetti-container');
+      if (!container) return;
+      
+      const colors = ['#A855F7', '#6BCB77', '#FFD93D', '#EC4899', '#3B82F6'];
+      
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDelay = Math.random() * 2 + 's';
+          container.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 3000);
+        }, i * 30);
+      }
+    }
+
+    function animateTeamMove(teamIndex, steps, isCorrect, isFastest) {
+      const marker = document.querySelector(`.team-marker[data-team="${teamIndex}"]`);
+      if (!marker) return;
+      
+      if (isFastest) {
+        marker.classList.add('sparkle-burst');
+        setTimeout(() => marker.classList.remove('sparkle-burst'), 500);
+      } else if (isCorrect) {
+        marker.classList.add('bounce-in');
+        setTimeout(() => marker.classList.remove('bounce-in'), 500);
+      } else {
+        marker.classList.add('sad-fade');
+        setTimeout(() => marker.classList.remove('sad-fade'), 500);
+      }
+    }
+
+    function selectRandomTeam() {
+      const availableTeams = gameState.teams.slice(0, gameState.teamCount)
+        .map((team, i) => ({ index: i, team, answerCount: gameState.teamAnswerCount[i] || 0 }))
+        .filter(t => !gameState.answeringTeams.includes(t.index))
+        .sort((a, b) => a.answerCount - b.answerCount); 
+      
+      if (availableTeams.length === 0) return; 
+      
+      const minAnswerCount = availableTeams[0].answerCount;
+      const teamsWithMinAnswers = availableTeams.filter(t => t.answerCount === minAnswerCount);
+      
+      const randomTeam = teamsWithMinAnswers[Math.floor(Math.random() * teamsWithMinAnswers.length)];
+      gameState.selectedTeam = randomTeam.index;
+      
+      gameState.teamAnswerCount[randomTeam.index] = (gameState.teamAnswerCount[randomTeam.index] || 0) + 1;
+      
+      render();
+    }
+
+    // ===== GAME LOGIC =====
+    function initializeTeams() {
+      gameState.teams = Array.from({length: 10}, (_, i) => ({
+        name: `Team ${i + 1}`,
+        animal: animals[i % animals.length],
+        color: colors[i % colors.length],
+        position: 0,
+        powerUps: [],
+        usedPowerUps: [],
+        activeEffects: [],
+        correctAnswers: 0,
+        wrongAnswers: 0,
+        fastestCount: 0,
+        streak: 0,
+        roundScores: [0, 0, 0, 0, 0],
+        hadNegative: false,
+        hardCorrect: 0
+      }));
+    }
+
+    function startTimer(isResuming = false) {
+      clearInterval(gameState.timer);
+      
+      if (!isResuming) {
+        gameState.timeLeft = gameState.timerDuration;
+        
+        if (gameState.selectedTeam !== null) {
+          const team = gameState.teams[gameState.selectedTeam];
+          if (team.activeTimeSpell) {
+            gameState.timeLeft += 10;
+            team.activeTimeSpell = false;
+          }
+        }
+      }
+      
+      gameState.timer = setInterval(() => {
+        gameState.timeLeft--;
+        
+        const timerEl = document.querySelector('.text-3xl.font-bold');
+        if (timerEl) {
+          timerEl.textContent = formatTime(gameState.timeLeft);
+          timerEl.className = `text-3xl font-bold ${gameState.timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-gold'}`;
+        }
+        
+        if (gameState.timeLeft <= 0) {
+          clearInterval(gameState.timer);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function handleTimeout() {
+      if (gameState.selectedTeam !== null) {
+        handleWrongAnswer(gameState.selectedTeam);
+      }
+      nextQuestion();
+    }
+
+    function handleAnswer(teamIndex, answer) {
+      const q = gameState.questions[gameState.currentQuestion];
+      const team = gameState.teams[teamIndex];
+      const isCorrect = answer === q.answer;
+      const isFastest = !gameState.answeringTeams.length;
+      const roundIndex = Math.floor(gameState.currentQuestion / 10);
+      
+      if (isCorrect) {
+        let steps = isFastest ? 2 : 1;
+        
+        if (isFastest && team.activeEffects?.includes('boost')) {
+          steps += 1;
+          team.activeEffects = team.activeEffects.filter(e => e !== 'boost');
+          showPowerUpUsed(team, powerUpDefs.find(p => p.id === 'boost'), 'Langkah ekstra ditambahkan!');
+        }
+        
+        team.position = Math.min((team.position || 0) + steps, 20);
+        team.correctAnswers = (team.correctAnswers || 0) + 1;
+        team.streak = (team.streak || 0) + 1;
+        team.roundScores[roundIndex] = (team.roundScores[roundIndex] || 0) + steps;
+        
+        if (isFastest) team.fastestCount = (team.fastestCount || 0) + 1;
+        
+        checkPowerUpTriggers(team);
+        animateTeamMove(teamIndex, steps, true, isFastest);
+        showAnswerFeedback(teamIndex, true, isFastest, steps);
+        
+        gameState.questionAnsweredCorrectly = true;
+      } else {
+        handleWrongAnswer(teamIndex);
+      }
+      
+      gameState.answeringTeams.push(teamIndex);
+      gameState.selectedTeam = null;
+      render();
+      
+      if (isCorrect || gameState.answeringTeams.length >= 3) {
+        setTimeout(nextQuestion, 2000);
+      }
+    }
+
+    function handleWrongAnswer(teamIndex) {
+      const team = gameState.teams[teamIndex];
+      const roundIndex = Math.floor(gameState.currentQuestion / 10);
+      
+      if (team.activeEffects?.includes('shield')) {
+        team.activeEffects = team.activeEffects.filter(e => e !== 'shield');
+        showAnswerFeedback(teamIndex, false, false, 0, true);
+      } else if (team.activeEffects?.includes('phoenix')) {
+        team.activeEffects = team.activeEffects.filter(e => e !== 'phoenix');
+        showAnswerFeedback(teamIndex, false, false, 0, true);
+      } else {
+        team.position = Math.max((team.position || 0) - 1, 0);
+        team.roundScores[roundIndex] = (team.roundScores[roundIndex] || 0) - 1;
+        
+        if (team.position < 0) team.hadNegative = true;
+        team.wrongAnswers = (team.wrongAnswers || 0) + 1;
+        team.streak = 0;
+        
+        animateTeamMove(teamIndex, -1, false, false);
+        showAnswerFeedback(teamIndex, false, false, -1);
+      }
+    }
+
+    function showAnswerFeedback(teamIndex, isCorrect, isFastest, steps, shielded = false) {
+      const team = gameState.teams[teamIndex];
+      const q = gameState.questions[gameState.currentQuestion];
+      
+      const options = document.querySelectorAll('.option-btn');
+      options.forEach(opt => {
+        const letter = opt.dataset.answer;
+        if (letter === q.answer) {
+          opt.classList.add('border-emerald-400', 'bg-emerald-900/50');
+          opt.classList.remove('border-purple-500/50');
+        }
+      });
+      
+      let message = '';
+      let bgColor = '';
+      
+      if (shielded) {
+        message = `🛡️ ${team.animal} ${team.name} - Efek pelindung aktif!`;
+        bgColor = 'bg-blue-600';
+      } else if (isCorrect && isFastest) {
+        message = `⚡ ${team.animal} ${team.name} - FASTEST! +${steps} steps!`;
+        bgColor = 'bg-emerald-600';
+      } else if (isCorrect) {
+        message = `✓ ${team.animal} ${team.name} - Correct! +${steps} step`;
+        bgColor = 'bg-emerald-600';
+      } else {
+        message = `✗ ${team.animal} ${team.name} - Wrong! ${steps} step`;
+        bgColor = 'bg-red-600';
+      }
+      
+      const toast = document.createElement('div');
+      toast.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${bgColor} text-white px-8 py-4 rounded-xl text-xl font-bold shadow-2xl z-50 bounce-in`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => toast.remove(), 1800);
+    }
+
+    function checkPowerUpTriggers(team) {
+      if (team.fastestCount >= 3 && !team.powerUps?.includes('boost')) {
+        team.powerUps = team.powerUps || [];
+        team.powerUps.push('boost');
+        showPowerUpEarned(team, 'boost');
+      }
+      
+      if (team.streak >= 3 && !team.powerUps?.includes('shield')) {
+        team.powerUps = team.powerUps || [];
+        team.powerUps.push('shield');
+        showPowerUpEarned(team, 'shield');
+      }
+      
+      if (team.correctAnswers >= 5 && !team.powerUps?.includes('portal')) {
+        team.powerUps = team.powerUps || [];
+        team.powerUps.push('portal');
+        showPowerUpEarned(team, 'portal');
+      }
+      
+      if (team.fastestCount >= 5 && !team.powerUps?.includes('time')) {
+        team.powerUps = team.powerUps || [];
+        team.powerUps.push('time');
+        showPowerUpEarned(team, 'time');
+      }
+      
+      const roundIndex = Math.floor(gameState.currentQuestion / 10);
+      if (roundIndex >= 2) {
+        team.hardCorrect = (team.hardCorrect || 0) + 1;
+        if (team.hardCorrect >= 3 && !team.powerUps?.includes('phoenix')) {
+          team.powerUps = team.powerUps || [];
+          team.powerUps.push('phoenix');
+          showPowerUpEarned(team, 'phoenix');
+        }
+      }
+    }
+
+    function showPowerUpEarned(team, powerUpId) {
+      const pu = powerUpDefs.find(p => p.id === powerUpId);
+      if (!pu) return;
+      
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl shadow-2xl z-50 bounce-in flex items-center gap-3';
+      toast.innerHTML = `
+        <span class="text-3xl">${pu.emoji}</span>
+        <div>
+          <div class="font-bold">${team.animal} earned ${pu.name}!</div>
+          <div class="text-sm text-purple-200">${pu.desc}</div>
+        </div>
+      `;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => toast.remove(), 2500);
+    }
+
+    function usePowerUp(teamIndex, powerUpId) {
+      const team = gameState.teams[teamIndex];
+      if (!team.powerUps?.includes(powerUpId)) return;
+      if (team.usedPowerUps?.includes(powerUpId)) return;
+      
+      team.usedPowerUps = team.usedPowerUps || [];
+      team.activeEffects = team.activeEffects || [];
+      
+      const pu = powerUpDefs.find(p => p.id === powerUpId);
+      
+      switch(powerUpId) {
+        case 'boost':
+          team.usedPowerUps.push('boost');
+          team.activeEffects.push('boost');
+          showPowerUpUsed(team, pu, 'Aktif untuk jawaban tercepatmu berikutnya!');
+          break;
+          
+        case 'shield':
+          team.usedPowerUps.push('shield');
+          team.activeEffects.push('shield');
+          showPowerUpUsed(team, pu, 'Shield siap menahan pengurangan poin!');
+          break;
+          
+        case 'portal':
+          team.usedPowerUps.push('portal');
+          showPowerUpUsed(team, pu, 'Pertanyaan dilewati!');
+          setTimeout(() => nextQuestion(), 1000);
+          break;
+          
+        case 'dragon':
+          showDragonTargetSelection(teamIndex);
+          team.usedPowerUps.push('dragon');
+          break;
+          
+        case 'phoenix':
+          team.usedPowerUps.push('phoenix');
+          team.activeEffects.push('phoenix');
+          showPowerUpUsed(team, pu, 'Siap melindungi jawaban salahmu berikutnya!');
+          break;
+          
+        case 'time':
+          gameState.timeLeft += 10;
+          team.usedPowerUps.push('time');
+          showPowerUpUsed(team, pu, '+10 detik ditambahkan!');
+          break;
+      }
+      render();
+    }
+
+    function showDragonTargetSelection(attackerIndex) {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-50';
+      modal.innerHTML = `
+        <div class="bg-purple-900 rounded-xl p-6 border-2 border-red-500 max-w-md w-full mx-4">
+          <h3 class="fantasy-title text-xl text-red-400 mb-4 text-center">💥 Dragon Fire - Choose Target!</h3>
+          <div class="space-y-2">
+            ${gameState.teams.slice(0, gameState.teamCount)
+              .filter((_, i) => i !== attackerIndex)
+              .map((team, i) => {
+                const actualIndex = i >= attackerIndex ? i + 1 : i;
+                return `
+                  <button class="dragon-target w-full flex items-center gap-3 bg-purple-800/50 hover:bg-red-900/50 rounded-lg p-3 transition-all" data-target="${actualIndex}">
+                    <span class="text-2xl">${team.animal}</span>
+                    <span class="flex-1" style="color: ${team.color}">${team.name}</span>
+                    <span class="text-emerald-400">${team.position || 0} steps</span>
+                  </button>
+                `;
+              }).join('')}
+          </div>
+          <button class="cancel-dragon mt-4 w-full bg-gray-600 hover:bg-gray-500 rounded-lg py-2 text-white">Cancel</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      
+      modal.querySelectorAll('.dragon-target').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetIndex = parseInt(btn.dataset.target);
+          const targetTeam = gameState.teams[targetIndex];
+          
+          targetTeam.position = Math.max((targetTeam.position || 0) - 2, 0);
+          targetTeam.roundScores[Math.floor(gameState.currentQuestion / 10)] -= 2;
+          
+          modal.remove();
+          
+          const toast = document.createElement('div');
+          toast.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-600 text-white px-8 py-4 rounded-xl text-xl font-bold shadow-2xl z-50 bounce-in';
+          toast.textContent = `💥 ${targetTeam.animal} ${targetTeam.name} hit by Dragon Fire! -2 steps!`;
+          document.body.appendChild(toast);
+          setTimeout(() => toast.remove(), 2000);
+          
+          render();
+        });
+      });
+      
+      modal.querySelector('.cancel-dragon').addEventListener('click', () => modal.remove());
+    }
+
+    function showPowerUpUsed(team, pu, message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-gold to-yellow-500 text-purple-900 px-6 py-3 rounded-xl shadow-2xl z-50 bounce-in flex items-center gap-3';
+      toast.innerHTML = `
+        <span class="text-3xl">${pu.emoji}</span>
+        <div>
+          <div class="font-bold">${team.animal} used ${pu.name}!</div>
+          <div class="text-sm">${message}</div>
+        </div>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+
+    function nextQuestion() {
+      clearInterval(gameState.timer);
+      gameState.selectedTeam = null;
+      gameState.answeringTeams = [];
+      gameState.questionAnsweredCorrectly = false;
+      
+      const currentRound = Math.floor(gameState.currentQuestion / 10);
+      const nextRound = Math.floor((gameState.currentQuestion + 1) / 10);
+      
+      if (nextRound > currentRound && gameState.currentQuestion < 49) {
+        showRoundRecap(currentRound);
+        
+        const roundScores = gameState.teams.slice(0, gameState.teamCount).map((t, i) => ({
+          index: i,
+          score: t.roundScores?.[currentRound] || 0
+        }));
+        roundScores.sort((a, b) => b.score - a.score);
+        
+        if (roundScores[0].score > 0) {
+          const winner = gameState.teams[roundScores[0].index];
+          if (!winner.powerUps?.includes('dragon')) {
+            winner.powerUps = winner.powerUps || [];
+            winner.powerUps.push('dragon');
+            showPowerUpEarned(winner, 'dragon');
+          }
+        }
+        
+        return; 
+      }
+      
+      gameState.currentQuestion++;
+      
+      if (gameState.currentQuestion >= 50 || gameState.teams.some(t => (t.position || 0) >= 20)) {
+        gameState.screen = 'victory';
+        render();
+        setTimeout(spawnConfetti, 500);
+        return;
+      }
+      
+      gameState.currentRound = Math.floor(gameState.currentQuestion / 10) + 1;
+      render();
+      startTimer();
+    }
+
+    function showRoundRecap(roundIndex) {
+      const roundScores = gameState.teams.slice(0, gameState.teamCount)
+        .map((t, i) => ({
+          index: i,
+          team: t,
+          score: t.roundScores?.[roundIndex] || 0,
+          position: t.position || 0
+        }))
+        .sort((a, b) => b.score - a.score);
+      
+      const roundName = gameState.roundNames[roundIndex];
+      
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50';
+      modal.innerHTML = `
+        <div class="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-2xl p-8 border-2 border-gold max-w-2xl w-full mx-4 shadow-2xl">
+          <h2 class="fantasy-title text-4xl text-center text-gold mb-2">${roundName} Recap</h2>
+          <p class="text-center text-purple-300 mb-6">${getRoundEmoji(roundIndex)} ${getRoundDescription(roundIndex)}</p>
+          
+          <div class="space-y-2 mb-6">
+            ${roundScores.map((entry, rank) => `
+              <div class="flex items-center gap-4 bg-purple-800/50 rounded-lg p-3 border border-purple-500/30">
+                <span class="text-2xl font-bold ${rank === 0 ? 'text-gold' : rank === 1 ? 'text-gray-300' : 'text-amber-600'}">#${rank + 1}</span>
+                <span class="text-2xl">${entry.team.animal}</span>
+                <span class="flex-1" style="color: ${entry.team.color}">
+                  <span class="font-bold">${entry.team.name}</span>
+                  <span class="text-purple-300 text-sm ml-2">${entry.score} points</span>
+                </span>
+                <span class="text-emerald-400 font-bold">Position: ${entry.position}</span>
+              </div>
+            `).join('')}
+          </div>
+          
+          <button 
+            id="continue-recap-btn"
+            class="w-full bg-gradient-to-r from-gold to-yellow-500 hover:from-yellow-500 hover:to-orange-500 text-purple-900 font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105"
+          >
+            Continue to Next Round →
+          </button>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      modal.querySelector('#continue-recap-btn').addEventListener('click', () => {
+        modal.remove();
+        gameState.currentQuestion++;
+        
+        if (gameState.currentQuestion >= 50 || gameState.teams.some(t => (t.position || 0) >= 20)) {
+          gameState.screen = 'victory';
+          render();
+          setTimeout(spawnConfetti, 500);
+          return;
+        }
+        
+        gameState.currentRound = Math.floor(gameState.currentQuestion / 10) + 1;
+        render();
+        startTimer();
+      });
+    }
+
+    function togglePause() {
+      if (gameState.isPaused) {
+        gameState.isPaused = false;
+        startTimer(true);
+      } else {
+        gameState.isPaused = true;
+        clearInterval(gameState.timer);
+      }
+      render();
+    }
+
+    // ===== EVENT LISTENERS =====
+    function attachEventListeners() {
+      document.getElementById('start-tutorial-btn')?.addEventListener('click', () => {
+        gameState.screen = 'import';
+        render();
+      });
+      
+      document.getElementById('use-sample-btn')?.addEventListener('click', () => {
+        gameState.questions = getSampleQuestions();
+        document.getElementById('import-status').textContent = `✓ Loaded 50 sample questions!`;
+        document.getElementById('import-status').className = 'mt-4 text-center text-sm text-emerald-400';
+        document.getElementById('import-status').classList.remove('hidden');
+        
+        setTimeout(() => {
+          gameState.screen = 'powerups';
+          render();
+        }, 1000);
+      });
+      
+      document.getElementById('import-btn')?.addEventListener('click', () => {
+        const input = document.getElementById('aiken-input').value;
+        const questions = parseAIKEN(input);
+        
+        if (questions.length < 10) {
+          document.getElementById('import-status').textContent = `⚠️ Need at least 10 questions. Found: ${questions.length}`;
+          document.getElementById('import-status').className = 'mt-4 text-center text-sm text-red-400';
+          document.getElementById('import-status').classList.remove('hidden');
+          return;
+        }
+        
+        gameState.questions = questions.slice(0, 50);
+        document.getElementById('import-status').textContent = `✓ Imported ${gameState.questions.length} questions!`;
+        document.getElementById('import-status').className = 'mt-4 text-center text-sm text-emerald-400';
+        document.getElementById('import-status').classList.remove('hidden');
+        
+        setTimeout(() => {
+          gameState.screen = 'powerups';
+          render();
+        }, 1000);
+      });
+      
+      const fileDropZone = document.getElementById('file-drop-zone');
+      const fileInput = document.getElementById('file-upload');
+      
+      if (fileDropZone && fileInput) {
+        fileDropZone.addEventListener('click', () => fileInput.click());
+        
+        fileDropZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          fileDropZone.classList.add('bg-purple-900/70', 'border-purple-400');
+        });
+        
+        fileDropZone.addEventListener('dragleave', () => {
+          fileDropZone.classList.remove('bg-purple-900/70', 'border-purple-400');
+        });
+        
+        fileDropZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          fileDropZone.classList.remove('bg-purple-900/70', 'border-purple-400');
+          
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            handleFileUpload(files[0]);
+          }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+          if (e.target.files.length > 0) {
+            handleFileUpload(e.target.files[0]);
+          }
+        });
+      }
+      
+      function handleFileUpload(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target.result;
+          document.getElementById('aiken-input').value = content;
+          
+          const questions = parseAIKEN(content);
+          
+          if (questions.length < 10) {
+            document.getElementById('import-status').textContent = `⚠️ Need at least 10 questions. Found: ${questions.length}`;
+            document.getElementById('import-status').className = 'mt-4 text-center text-sm text-red-400';
+            document.getElementById('import-status').classList.remove('hidden');
+            return;
+          }
+          
+          gameState.questions = questions.slice(0, 50);
+          document.getElementById('import-status').textContent = `✓ Loaded ${gameState.questions.length} questions from file!`;
+          document.getElementById('import-status').className = 'mt-4 text-center text-sm text-emerald-400';
+          document.getElementById('import-status').classList.remove('hidden');
+          
+          setTimeout(() => {
+            gameState.screen = 'powerups';
+            render();
+          }, 1000);
+        };
+        reader.readAsText(file);
+      }
+      
+      document.getElementById('continue-to-setup')?.addEventListener('click', () => {
+        gameState.screen = 'setup';
+        initializeTeams();
+        render();
+      });
+      
+      document.getElementById('team-count')?.addEventListener('change', (e) => {
+        gameState.teamCount = parseInt(e.target.value);
+        document.getElementById('team-inputs').innerHTML = 
+          Array.from({length: gameState.teamCount}, (_, i) => renderTeamInput(i)).join('');
+        document.getElementById('track-preview').innerHTML = renderTrackPreview();
+        attachTeamInputListeners();
+      });
+      
+      document.getElementById('timer-select')?.addEventListener('change', (e) => {
+        const customInput = document.getElementById('custom-timer');
+        if (e.target.value === 'custom') {
+          customInput.classList.remove('hidden');
+        } else {
+          customInput.classList.add('hidden');
+          gameState.timerDuration = parseInt(e.target.value);
+        }
+      });
+      
+      document.getElementById('custom-timer')?.addEventListener('change', (e) => {
+        gameState.timerDuration = Math.min(Math.max(parseInt(e.target.value) || 30, 10), 600);
+      });
+      
+      document.getElementById('start-quest-btn')?.addEventListener('click', () => {
+        const teamInputs = document.querySelectorAll('.team-name-input');
+        teamInputs.forEach((input, i) => {
+          gameState.teams[i].name = input.value || `Team ${i + 1}`;
+        });
+        
+        gameState.currentQuestion = 0;
+        gameState.currentRound = 1;
+        gameState.selectedTeam = null;
+        gameState.answeringTeams = [];
+        gameState.teamAnswerCount = {}; 
+        gameState.teams.forEach(t => {
+          t.position = 0;
+          t.correctAnswers = 0;
+          t.wrongAnswers = 0;
+          t.fastestCount = 0;
+          t.streak = 0;
+          t.powerUps = [];
+          t.usedPowerUps = [];
+          t.activeEffects = [];
+          t.roundScores = [0, 0, 0, 0, 0];
+          t.hadNegative = false;
+          t.hardCorrect = 0;
+        });
+        
+        if (!isMusicPlaying) toggleMusic();
+        
+        gameState.screen = 'game';
+        render();
+        startTimer();
+      });
+      
+      attachTeamInputListeners();
+      
+      document.querySelectorAll('.team-buzzer').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const teamIndex = parseInt(btn.dataset.team);
+          if (!gameState.answeringTeams.includes(teamIndex)) {
+            gameState.selectedTeam = teamIndex;
+            gameState.teamAnswerCount[teamIndex] = (gameState.teamAnswerCount[teamIndex] || 0) + 1;
+            render();
+          }
+        });
+      });
+      
+      document.getElementById('randomize-team-btn')?.addEventListener('click', selectRandomTeam);
+      
+      document.getElementById('pause-btn')?.addEventListener('click', togglePause);
+      document.getElementById('music-toggle-btn')?.addEventListener('click', toggleMusic);
+      
+      document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (gameState.selectedTeam !== null) {
+            handleAnswer(gameState.selectedTeam, btn.dataset.answer);
+          }
+        });
+      });
+      
+      document.getElementById('continue-quest-btn')?.addEventListener('click', () => {
+        nextQuestion();
+      });
+      
+      document.querySelectorAll('.power-up:not(.locked):not(.used)').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (gameState.selectedTeam !== null) {
+            usePowerUp(gameState.selectedTeam, btn.dataset.powerup);
+          }
+        });
+      });
+      
+      document.getElementById('play-again-btn')?.addEventListener('click', () => {
+        gameState.screen = 'import';
+        gameState.questions = [];
+        initializeTeams();
+        render();
+      });
+    }
+
+    function attachTeamInputListeners() {
+      document.querySelectorAll('.team-name-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const index = parseInt(e.target.dataset.index);
+          gameState.teams[index].name = e.target.value;
+        });
+      });
+      
+      document.querySelectorAll('.team-animal-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+          const index = parseInt(e.target.dataset.index);
+          gameState.teams[index].animal = e.target.value;
+          document.getElementById('track-preview').innerHTML = renderTrackPreview();
+        });
+      });
+      
+      document.querySelectorAll('.team-color-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const index = parseInt(e.target.dataset.index);
+          gameState.teams[index].color = e.target.value;
+          document.getElementById('track-preview').innerHTML = renderTrackPreview();
+        });
+      });
+    }
+
+    // ===== ELEMENT SDK =====
+    window.elementSdk?.init({
+      defaultConfig,
+      onConfigChange: async (newConfig) => {
+        config = { ...defaultConfig, ...newConfig };
+        const titleEl = document.querySelector('.fantasy-title.text-5xl');
+        if (titleEl) {
+          titleEl.textContent = config.game_title;
+        }
+      },
+      mapToCapabilities: (config) => ({
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ['game_title', config.game_title || defaultConfig.game_title]
+      ])
+    });
+
+    // ===== INITIALIZE =====
+    initializeTeams();
+    render();
+  </script>
+ </body>
+</html>
