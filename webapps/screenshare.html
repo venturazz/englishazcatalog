@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Screen Share</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <style>
+        body { background-color: #f4f7f6; padding-top: 30px; }
+        .video-box { border: 2px solid #ccc; background: #222; border-radius: 8px; width: 100%; min-height: 250px; }
+        .card-custom { box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card card-custom p-4">
+                <h2 class="text-center text-primary mb-4">Aplikasi Screen Share P2P</h2>
+
+                <div class="text-center mb-4">
+                    <p class="fs-4"><strong>ID Anda:</strong> <span id="my-id" class="text-success fw-bold">Sedang membuat ID...</span></p>
+                </div>
+
+                <div class="row align-items-center mb-4">
+                    <div class="col-md-6 mb-4 mb-md-0 text-center border-end">
+                        <h5 class="mb-3">Sebagai Host</h5>
+                        <p class="text-muted small">Bagikan layar Anda ke orang lain.</p>
+                        <button id="shareBtn" class="btn btn-primary px-4 w-75" onclick="mulaiShareScreen()">Mulai Share Screen</button>
+                    </div>
+
+                    <div class="col-md-6 text-center">
+                        <h5 class="mb-3">Sebagai Penonton</h5>
+                        <p class="text-muted small">Tonton layar menggunakan ID Host.</p>
+                        <div class="d-flex justify-content-center">
+                            <input type="text" id="target-id" class="form-control me-2 w-50" placeholder="Masukkan ID Host">
+                            <button id="tontonBtn" class="btn btn-secondary px-3" onclick="tontonLayar()">Tonton</button>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="mb-4">
+
+                <div class="row">
+                    <div class="col-md-6 text-center mb-4 mb-md-0">
+                        <h5 class="fw-bold">Layar yang Anda Bagikan</h5>
+                        <video id="localVideo" autoplay playsinline muted class="video-box"></video>
+                        <button class="btn btn-sm btn-outline-dark mt-2" onclick="bukaFullscreen('localVideo')">
+                            Fullscreen Layar Saya
+                        </button>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <h5 class="fw-bold">Layar Host (Tontonan)</h5>
+                        <video id="remoteVideo" autoplay playsinline class="video-box"></video>
+                        <button class="btn btn-sm btn-outline-dark mt-2" onclick="bukaFullscreen('remoteVideo')">
+                            Fullscreen Layar Host
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Membuat ID Kustom (4 Angka Acak)
+    const myCustomId = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    // 2. Inisialisasi PeerJS dengan STUN Server (Agar lebih stabil di jaringan seluler/HP)
+    const peer = new Peer(myCustomId, {
+        config: {
+            'iceServers': [
+                { url: 'stun:stun.l.google.com:19302' },
+                { url: 'stun:stun1.l.google.com:19302' }
+            ]
+        }
+    });
+
+    let myStream = null;
+
+    // Menampilkan ID setelah terhubung ke server
+    peer.on('open', (id) => {
+        document.getElementById('my-id').textContent = id;
+    });
+
+    // ==========================================
+    // LOGIKA HOST
+    // ==========================================
+    peer.on('connection', (conn) => {
+        conn.on('data', (data) => {
+            if (data === 'MINTA_STREAM' && myStream) {
+                peer.call(conn.peer, myStream);
+            }
+        });
+    });
+
+    // ==========================================
+    // LOGIKA PENONTON
+    // ==========================================
+    peer.on('call', (call) => {
+        call.answer(); 
+        call.on('stream', (remoteStream) => {
+            document.getElementById('remoteVideo').srcObject = remoteStream;
+        });
+    });
+
+    // ==========================================
+    // FUNGSI TOMBOL
+    // ==========================================
+    async function mulaiShareScreen() {
+        const shareBtn = document.getElementById('shareBtn');
+        try {
+            myStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            document.getElementById('localVideo').srcObject = myStream;
+
+            shareBtn.textContent = "Layar Sedang Dibagikan";
+            shareBtn.classList.replace('btn-primary', 'btn-success');
+            shareBtn.disabled = true;
+
+            myStream.getVideoTracks()[0].onended = () => {
+                myStream = null;
+                document.getElementById('localVideo').srcObject = null;
+                shareBtn.textContent = "Mulai Share Screen";
+                shareBtn.classList.replace('btn-success', 'btn-primary');
+                shareBtn.disabled = false;
+            };
+        } catch (error) {
+            console.error("Gagal membagikan layar:", error);
+            alert("Akses layar ditolak atau tidak didukung di perangkat ini.");
+        }
+    }
+
+    function tontonLayar() {
+        const targetId = document.getElementById('target-id').value;
+        const tontonBtn = document.getElementById('tontonBtn');
+
+        if (!targetId) {
+            alert("Silakan masukkan ID Host terlebih dahulu!");
+            return;
+        }
+
+        const conn = peer.connect(targetId);
+        conn.on('open', () => {
+            conn.send('MINTA_STREAM');
+            tontonBtn.textContent = "Memuat...";
+            setTimeout(() => { tontonBtn.textContent = "Tonton"; }, 3000);
+        });
+    }
+
+    function bukaFullscreen(elemenId) {
+        const elemen = document.getElementById(elemenId);
+        if (elemen.requestFullscreen) {
+            elemen.requestFullscreen();
+        } else if (elemen.webkitRequestFullscreen) { /* Safari */
+            elemen.webkitRequestFullscreen();
+        } else if (elemen.msRequestFullscreen) { /* IE11 */
+            elemen.msRequestFullscreen();
+        }
+    }
+</script>
+
+</body>
+</html>
