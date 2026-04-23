@@ -7,16 +7,11 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <link rel="stylesheet" href="css/templatemo-style.css">
-<!--
     
-TemplateMo 556 Catalog-Z
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
 
-https://templatemo.com/tm-556-catalog-z
-
--->
 </head>
 <body>
-    <!-- Page Loader -->
     <div id="loader-wrapper">
         <div id="loader"></div>
 
@@ -59,6 +54,40 @@ https://templatemo.com/tm-556-catalog-z
     </div>
 
     <div class="container-fluid tm-container-content tm-mt-60">
+        <div class="row mb-4">
+            <h2 class="col-12 tm-text-primary">
+                <i class="fas fa-desktop mr-2"></i> Peer-to-Peer Screen Share
+            </h2>
+        </div>
+        
+        <div class="row mb-5">
+            <div class="col-12 p-4" style="background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                <div class="row align-items-center mb-4">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <p class="mb-2" style="font-size: 1.1rem;"><strong>ID Anda:</strong> <span id="my-id" style="color: #009999; font-weight: bold;">Sedang membuat ID...</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex">
+                            <input type="text" id="target-id" class="form-control mr-2" placeholder="Masukkan ID Teman">
+                            <button id="shareBtn" class="btn btn-primary px-4" style="background-color: #009999; border-color: #009999;" onclick="mulaiShareScreen()">Bagikan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 text-center mb-3 mb-md-0">
+                        <h5 class="tm-text-gray-bold">Layar Anda</h5>
+                        <video id="localVideo" autoplay playsinline muted class="w-100" style="border: 2px solid #ccc; background: #222; border-radius: 5px; min-height: 200px;"></video>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <h5 class="tm-text-gray-bold">Layar Teman</h5>
+                        <video id="remoteVideo" autoplay playsinline class="w-100" style="border: 2px solid #ccc; background: #222; border-radius: 5px; min-height: 200px;"></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid tm-container-content">
         <div class="row mb-4">
             <h2 class="col-6 tm-text-primary">
                 Latest Resource
@@ -157,7 +186,7 @@ https://templatemo.com/tm-556-catalog-z
                     <span>4,860 views</span>
                 </div>
             </div>
-	    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> <!-- COPY HERE TO THERE -->
+	    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5"> 
                 <figure class="effect-ming tm-video-item">
                     <img src="img/crossword.svg" alt="Image" class="img-fluid">
                     <figcaption class="d-flex align-items-center justify-content-center">
@@ -169,11 +198,8 @@ https://templatemo.com/tm-556-catalog-z
                     <span class="tm-text-gray-bold">Crossword</span>
                     <span>16,100 views</span>
                 </div>
-		</div>     <!-- COPY THERE TO HERE -->  			
-        </div> <!-- row -->
-    </div> <!-- container-fluid, tm-container-content -->
-
-    <footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer">
+		</div>    			
+        </div> </div> <footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer">
         <div class="container-fluid tm-container-small">
             <div class="row">
                 <div class="col-lg-6 col-md-12 col-12 px-5 mb-5">
@@ -207,6 +233,60 @@ https://templatemo.com/tm-556-catalog-z
         $(window).on("load", function() {
             $('body').addClass('loaded');
         });
+
+        // ==========================================
+        // TAMBAHAN: SCRIPT LOGIKA SCREEN SHARE
+        // ==========================================
+        const peer = new Peer();
+
+        // Saat berhasil connect ke server PeerJS, tampilkan ID
+        peer.on('open', (id) => {
+            document.getElementById('my-id').textContent = id;
+        });
+
+        // Saat menerima panggilan (video) dari orang lain
+        peer.on('call', (call) => {
+            call.answer(); // Langsung jawab
+            call.on('stream', (remoteStream) => {
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+            });
+        });
+
+        // Fungsi ketika tombol "Bagikan" diklik
+        async function mulaiShareScreen() {
+            const targetId = document.getElementById('target-id').value;
+            const shareBtn = document.getElementById('shareBtn');
+            
+            if (!targetId) {
+                alert("Silakan masukkan ID teman terlebih dahulu!");
+                return;
+            }
+
+            try {
+                // Minta akses screen
+                const mediaStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                document.getElementById('localVideo').srcObject = mediaStream;
+
+                // Telepon target ID
+                const call = peer.call(targetId, mediaStream);
+
+                // Ubah status tombol
+                shareBtn.textContent = "Membagikan...";
+                shareBtn.disabled = true;
+
+                // Jika user menekan tombol "Stop sharing" dari UI browser
+                mediaStream.getVideoTracks()[0].onended = () => {
+                    call.close();
+                    document.getElementById('localVideo').srcObject = null;
+                    shareBtn.textContent = "Bagikan";
+                    shareBtn.disabled = false;
+                };
+
+            } catch (error) {
+                console.error("Gagal membagikan layar:", error);
+                alert("Gagal membagikan layar. Pastikan Anda memberikan izin.");
+            }
+        }
     </script>
 </body>
 </html>
