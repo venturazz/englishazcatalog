@@ -26,7 +26,7 @@
         
         /* Chatbox Styles */
         .chat-container { height: 350px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); scrollbar-width: thin; }
-        .chat-bubble { background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; width: fit-content; max-width: 90%; }
+        .chat-bubble { background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; width: fit-content; max-width: 90%; word-break: break-word; }
         .chat-bubble.me { background: rgba(16, 185, 129, 0.3); margin-left: auto; border: 1px solid rgba(16, 185, 129, 0.5); }
     </style>
 </head>
@@ -66,11 +66,39 @@
             <div class="col-lg-4">
                 <div class="glass-card p-4 h-100 d-flex flex-column">
                     
-                    <div id="join-section" class="mb-4">
-                        <h5 class="fw-bold mb-3"><i class="fas fa-door-open me-2 text-success"></i>Join Room</h5>
-                        <input type="text" id="viewer-name" class="form-control form-control-custom mb-2" placeholder="Your Name (e.g., John)">
-                        <input type="text" id="target-id" class="form-control form-control-custom mb-3" placeholder="Host ID (e.g., 4921)">
-                        <button id="watchBtn" class="btn btn-success-custom w-100" onclick="joinAndWatch()">Join & Watch</button>
+                    <div id="join-section" class="mb-4 p-4 rounded-4" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <h5 class="fw-bold mb-4 text-center"><i class="fas fa-door-open me-2 text-success"></i>Join a Room</h5>
+
+                        <div class="mb-4 text-start">
+                            <label for="viewer-name" class="form-label text-light fw-bold mb-2" style="font-size: 0.9rem;">
+                                <span class="badge bg-secondary me-1">1</span> What is your name?
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-transparent border-end-0" style="border-color: rgba(255,255,255,0.1);">
+                                    <i class="fas fa-user text-secondary"></i>
+                                </span>
+                                <input type="text" id="viewer-name" class="form-control form-control-custom border-start-0 fs-6" placeholder="e.g., Jane Doe">
+                            </div>
+                        </div>
+
+                        <div class="mb-4 text-start">
+                            <label for="target-id" class="form-label text-light fw-bold mb-2" style="font-size: 0.9rem;">
+                                <span class="badge bg-secondary me-1">2</span> Enter Host ID
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-transparent border-end-0" style="border-color: rgba(255,255,255,0.1);">
+                                    <i class="fas fa-hashtag text-secondary"></i>
+                                </span>
+                                <input type="text" id="target-id" class="form-control form-control-custom border-start-0 fs-6" placeholder="e.g., 4921">
+                            </div>
+                            <div class="form-text mt-2" style="color: #94a3b8; font-size: 0.8rem;">
+                                <i class="fas fa-info-circle me-1"></i> Ask the Host for their 4-digit code.
+                            </div>
+                        </div>
+
+                        <button id="watchBtn" class="btn btn-success-custom btn-lg w-100 mt-2" onclick="joinAndWatch()">
+                            <i class="fas fa-sign-in-alt me-2"></i> Connect to Host
+                        </button>
                     </div>
 
                     <hr class="border-secondary opacity-25">
@@ -129,32 +157,24 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Connecting...';
             btn.disabled = true;
 
-            // Start data connection to Host
             hostConn = peer.connect(targetId);
             
             hostConn.on('open', () => {
                 btn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Connected';
                 
-                // 1. Send REQUEST_STREAM data with NAME
                 hostConn.send({ type: 'REQUEST_STREAM', name: myName });
 
-                // 2. Enable chatbox
                 document.getElementById('chat-input').disabled = false;
                 document.getElementById('chat-btn').disabled = false;
                 document.getElementById('chat-box').innerHTML = '<div class="text-center text-success small mt-2">You are connected to the chat.</div>';
 
-                // Disable inputs
                 document.getElementById('viewer-name').disabled = true;
                 document.getElementById('target-id').disabled = true;
             });
 
-            // 3. Receive Chat broadcast from Host
             hostConn.on('data', (data) => {
-                if (data.type === 'CHAT') {
-                    // Ignore our own message (already printed locally)
-                    if (data.sender !== myName) {
-                        printMessage(data.sender, data.text, data.sender === 'Host (You)' || data.sender === 'Host (Anda)');
-                    }
+                if (data.type === 'CHAT' && data.sender !== myName) {
+                    printMessage(data.sender, data.text, data.sender === 'Host (You)' || data.sender === 'Host (Anda)');
                 }
             });
         }
@@ -169,34 +189,39 @@
             
             if (!text || !hostConn) return;
 
-            // 1. Send message to Host
             hostConn.send({ type: 'CHAT', sender: myName, text: text });
-            
-            // 2. Print locally
             printMessage('You', text, false, true);
-            
             input.value = '';
         }
 
         // =====================================
-        // UI UTILITIES
+        // SECURE UI UTILITIES (XSS Prevention)
         // =====================================
         function printMessage(sender, text, isFromHost = false, isMe = false) {
             const box = document.getElementById('chat-box');
-            let className = 'chat-bubble';
-            if (isMe) className += ' me';
             
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            if (isMe) bubble.classList.add('me');
+            if (isFromHost && !isMe) bubble.classList.add('host');
+
             let nameColor = 'text-info';
             if (isFromHost) nameColor = 'text-warning';
             if (isMe) nameColor = 'text-light';
 
             const displayName = isFromHost ? 'Host' : sender;
 
-            box.innerHTML += `
-                <div class="${className}">
-                    <strong class="${nameColor} d-block" style="font-size: 0.75rem;">${displayName}</strong>
-                    ${text}
-                </div>`;
+            const nameStr = document.createElement('strong');
+            nameStr.className = `${nameColor} d-block`;
+            nameStr.style.fontSize = '0.75rem';
+            nameStr.textContent = displayName;
+
+            const textNode = document.createTextNode(" " + text);
+
+            bubble.appendChild(nameStr);
+            bubble.appendChild(textNode);
+            box.appendChild(bubble);
+
             box.scrollTop = box.scrollHeight;
         }
 
