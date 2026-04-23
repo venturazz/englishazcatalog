@@ -1,95 +1,210 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viewer - Screen Share</title>
+    <title>Viewer Dashboard - ProShare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+
     <style>
-        body { background-color: #2c3e50; padding-top: 30px; color: white; }
-        .video-box { border: 2px solid #34495e; background: #000; border-radius: 8px; width: 100%; min-height: 300px; }
-        .card-custom { background-color: #34495e; border: none; }
+        body {
+            font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh;
+            background-image: radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .form-control-custom { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 10px; }
+        .form-control-custom:focus { background: rgba(15, 23, 42, 0.8); border-color: #10b981; color: white; box-shadow: none; }
+        .btn-success-custom { background: #10b981; color: white; border: none; border-radius: 10px; font-weight: 600; transition: 0.3s; }
+        .btn-success-custom:hover { background: #059669; color: white; transform: scale(1.02); }
+        
+        .video-wrapper { position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .video-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
+        
+        /* Chatbox Styles */
+        .chat-container { height: 350px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); scrollbar-width: thin; }
+        .chat-bubble { background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; width: fit-content; max-width: 90%; }
+        .chat-bubble.me { background: rgba(16, 185, 129, 0.3); margin-left: auto; border: 1px solid rgba(16, 185, 129, 0.5); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 text-center">
-            <h2 class="mb-4">Tonton Layar Host</h2>
+    <nav class="navbar navbar-dark pt-3 pb-3 mb-4 border-bottom border-secondary border-opacity-25">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="fas fa-satellite-dish fs-4 me-3" style="color: #10b981;"></i>
+                <span class="fs-5 fw-bold tracking-wide">ProShare <span class="text-secondary fw-normal">| Viewer Panel</span></span>
+            </a>
+        </div>
+    </nav>
 
-            <div class="card card-custom p-4 shadow mb-4">
-                <div class="d-flex justify-content-center">
-                    <input type="text" id="target-id" class="form-control form-control-lg me-2 w-50" placeholder="Masukkan ID Host (Misal: 1234)">
-                    <button id="tontonBtn" class="btn btn-success btn-lg px-4" onclick="tontonLayar()">Tonton</button>
+    <div class="container-fluid px-4 pb-5">
+        <div class="row g-4 flex-column-reverse flex-lg-row">
+            
+            <div class="col-lg-8">
+                <div class="glass-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-secondary"><i class="fas fa-desktop me-2"></i>Host Screen</h5>
+                        <button class="btn btn-sm btn-outline-light" onclick="toggleFullscreen('remoteVideo')">
+                            <i class="fas fa-expand me-1"></i> Fullscreen
+                        </button>
+                    </div>
+
+                    <div class="video-wrapper">
+                        <div id="playOverlay" class="position-absolute top-50 start-50 translate-middle text-center d-none" style="z-index: 10;">
+                            <i class="fas fa-play-circle text-white mb-2" style="font-size: 4rem; cursor: pointer;"></i>
+                            <p class="fs-5 text-white m-0 fw-bold">Tap to Play</p>
+                        </div>
+                        <video id="remoteVideo" autoplay playsinline></video>
+                    </div>
                 </div>
-                <small class="text-warning mt-2 d-none" id="mobileWarning">Jika layar hitam, klik tombol PLAY (►) di dalam kotak video.</small>
             </div>
 
-            <video id="remoteVideo" autoplay playsinline class="video-box mb-3"></video>
-            
-            <button class="btn btn-outline-light w-100" onclick="bukaFullscreen('remoteVideo')">
-                <i class="fas fa-expand"></i> Layar Penuh (Fullscreen)
-            </button>
+            <div class="col-lg-4">
+                <div class="glass-card p-4 h-100 d-flex flex-column">
+                    
+                    <div id="join-section" class="mb-4">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-door-open me-2 text-success"></i>Join Room</h5>
+                        <input type="text" id="viewer-name" class="form-control form-control-custom mb-2" placeholder="Your Name (e.g., John)">
+                        <input type="text" id="target-id" class="form-control form-control-custom mb-3" placeholder="Host ID (e.g., 4921)">
+                        <button id="watchBtn" class="btn btn-success-custom w-100" onclick="joinAndWatch()">Join & Watch</button>
+                    </div>
+
+                    <hr class="border-secondary opacity-25">
+
+                    <h5 class="fw-bold mb-3"><i class="fas fa-comments me-2 text-warning"></i>Live Chat</h5>
+                    <div class="chat-container mb-3 flex-grow-1" id="chat-box">
+                        <div class="text-center text-muted small mt-2">Please join the room first...</div>
+                    </div>
+                    
+                    <form id="chat-form" onsubmit="sendViewerMessage(event)">
+                        <div class="input-group">
+                            <input type="text" id="chat-input" class="form-control form-control-custom" placeholder="Type a message..." autocomplete="off" disabled>
+                            <button class="btn btn-success" type="submit" id="chat-btn" disabled><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
 
-<script>
-    // Penonton tidak butuh ID khusus, cukup buat koneksi Peer biasa
-    const peer = new Peer({
-        config: {
-            'iceServers': [
-                { url: 'stun:stun.l.google.com:19302' },
-                { url: 'stun:stun1.l.google.com:19302' }
-            ]
-        }
-    });
-
-    // Menerima panggilan video dari Host
-    peer.on('call', (call) => {
-        call.answer(); // Langsung jawab
+    <script>
+        const peer = new Peer({ config: { 'iceServers': [{ url: 'stun:stun.l.google.com:19302' }] }});
         
-        call.on('stream', (remoteStream) => {
-            const videoRemote = document.getElementById('remoteVideo');
-            videoRemote.srcObject = remoteStream;
-            
-            // Penanganan khusus untuk browser HP (Android/iOS)
-            videoRemote.play().catch((error) => {
-                console.warn("Autoplay diblokir:", error);
-                videoRemote.controls = true; // Munculkan tombol play
-                document.getElementById('mobileWarning').classList.remove('d-none');
+        let hostConn = null; 
+        let myName = "";
+
+        // =====================================
+        // RECEIVING VIDEO FROM HOST
+        // =====================================
+        peer.on('call', (call) => {
+            call.answer(); 
+            call.on('stream', (remoteStream) => {
+                const videoRemote = document.getElementById('remoteVideo');
+                videoRemote.srcObject = remoteStream;
+                
+                videoRemote.play().catch((error) => {
+                    videoRemote.controls = true;
+                    document.getElementById('playOverlay').classList.remove('d-none');
+                });
             });
         });
-    });
 
-    function tontonLayar() {
-        const targetId = document.getElementById('target-id').value.trim();
-        const tontonBtn = document.getElementById('tontonBtn');
+        // =====================================
+        // JOIN ROOM FUNCTION
+        // =====================================
+        function joinAndWatch() {
+            const targetId = document.getElementById('target-id').value.trim();
+            myName = document.getElementById('viewer-name').value.trim();
+            const btn = document.getElementById('watchBtn');
 
-        if (!targetId) {
-            alert("Silakan masukkan ID Host!");
-            return;
+            if (!myName) return alert("Please enter your Name!");
+            if (!targetId) return alert("Please enter the Host ID!");
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Connecting...';
+            btn.disabled = true;
+
+            // Start data connection to Host
+            hostConn = peer.connect(targetId);
+            
+            hostConn.on('open', () => {
+                btn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Connected';
+                
+                // 1. Send REQUEST_STREAM data with NAME
+                hostConn.send({ type: 'REQUEST_STREAM', name: myName });
+
+                // 2. Enable chatbox
+                document.getElementById('chat-input').disabled = false;
+                document.getElementById('chat-btn').disabled = false;
+                document.getElementById('chat-box').innerHTML = '<div class="text-center text-success small mt-2">You are connected to the chat.</div>';
+
+                // Disable inputs
+                document.getElementById('viewer-name').disabled = true;
+                document.getElementById('target-id').disabled = true;
+            });
+
+            // 3. Receive Chat broadcast from Host
+            hostConn.on('data', (data) => {
+                if (data.type === 'CHAT') {
+                    // Ignore our own message (already printed locally)
+                    if (data.sender !== myName) {
+                        printMessage(data.sender, data.text, data.sender === 'Host (You)' || data.sender === 'Host (Anda)');
+                    }
+                }
+            });
         }
 
-        // Hubungkan ke Host
-        const conn = peer.connect(targetId);
-        
-        conn.on('open', () => {
-            // Minta Host untuk mengirimkan video
-            conn.send('MINTA_STREAM');
+        // =====================================
+        // SENDING MESSAGE (VIEWER)
+        // =====================================
+        function sendViewerMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
             
-            tontonBtn.textContent = "Menghubungkan...";
-            setTimeout(() => { tontonBtn.textContent = "Tonton"; }, 3000);
-        });
-    }
+            if (!text || !hostConn) return;
 
-    function bukaFullscreen(elemenId) {
-        const elemen = document.getElementById(elemenId);
-        if (elemen.requestFullscreen) elemen.requestFullscreen();
-        else if (elemen.webkitRequestFullscreen) elemen.webkitRequestFullscreen();
-    }
-</script>
+            // 1. Send message to Host
+            hostConn.send({ type: 'CHAT', sender: myName, text: text });
+            
+            // 2. Print locally
+            printMessage('You', text, false, true);
+            
+            input.value = '';
+        }
+
+        // =====================================
+        // UI UTILITIES
+        // =====================================
+        function printMessage(sender, text, isFromHost = false, isMe = false) {
+            const box = document.getElementById('chat-box');
+            let className = 'chat-bubble';
+            if (isMe) className += ' me';
+            
+            let nameColor = 'text-info';
+            if (isFromHost) nameColor = 'text-warning';
+            if (isMe) nameColor = 'text-light';
+
+            const displayName = isFromHost ? 'Host' : sender;
+
+            box.innerHTML += `
+                <div class="${className}">
+                    <strong class="${nameColor} d-block" style="font-size: 0.75rem;">${displayName}</strong>
+                    ${text}
+                </div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function toggleFullscreen(elementId) {
+            const el = document.getElementById(elementId);
+            if (el.requestFullscreen) el.requestFullscreen();
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        }
+    </script>
 </body>
 </html>

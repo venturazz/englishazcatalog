@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host - Screen Share</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <style>
+        body { background-color: #f4f7f6; padding-top: 50px; }
+        .video-box { border: 2px solid #ccc; background: #222; border-radius: 8px; width: 100%; min-height: 300px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <div class="card shadow-sm p-4">
+                <h2 class="text-primary mb-3">Panel Host (Pembicara)</h2>
+                
+                <div class="alert alert-info">
+                    <h4 class="mb-0">ID Ruangan Anda: <span id="my-id" class="fw-bold text-success">Memuat...</span></h4>
+                    <small>Bagikan ID ini kepada penonton Anda.</small>
+                </div>
+
+                <div class="mb-4">
+                    <button id="shareBtn" class="btn btn-primary btn-lg px-5" onclick="mulaiShareScreen()">
+                        1. Mulai Bagikan Layar
+                    </button>
+                </div>
+
+                <h5 class="fw-bold text-start">Pratinjau Layar Anda:</h5>
+                <video id="localVideo" autoplay playsinline muted class="video-box mb-2"></video>
+                
+                <button class="btn btn-outline-dark w-100" onclick="bukaFullscreen('localVideo')">
+                    Fullscreen Pratinjau
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Membuat ID Host 4 Angka Acak
+    const hostId = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    // Inisialisasi PeerJS dengan STUN Server
+    const peer = new Peer(hostId, {
+        config: {
+            'iceServers': [
+                { url: 'stun:stun.l.google.com:19302' },
+                { url: 'stun:stun1.l.google.com:19302' }
+            ]
+        }
+    });
+
+    let myStream = null;
+
+    peer.on('open', (id) => {
+        document.getElementById('my-id').textContent = id;
+    });
+
+    // Menunggu permintaan dari penonton
+    peer.on('connection', (conn) => {
+        conn.on('data', (data) => {
+            if (data === 'MINTA_STREAM' && myStream) {
+                // Berikan stream video ke penonton yang meminta
+                peer.call(conn.peer, myStream);
+            }
+        });
+    });
+
+    async function mulaiShareScreen() {
+        const shareBtn = document.getElementById('shareBtn');
+        try {
+            myStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            document.getElementById('localVideo').srcObject = myStream;
+
+            shareBtn.textContent = "Layar Sedang Disiarkan";
+            shareBtn.classList.replace('btn-primary', 'btn-success');
+            shareBtn.disabled = true;
+
+            // Jika tombol Stop ditekan dari UI browser
+            myStream.getVideoTracks()[0].onended = () => {
+                myStream = null;
+                document.getElementById('localVideo').srcObject = null;
+                shareBtn.textContent = "1. Mulai Bagikan Layar";
+                shareBtn.classList.replace('btn-success', 'btn-primary');
+                shareBtn.disabled = false;
+            };
+        } catch (error) {
+            alert("Gagal membagikan layar. Pastikan Anda memberi izin.");
+        }
+    }
+
+    function bukaFullscreen(elemenId) {
+        const elemen = document.getElementById(elemenId);
+        if (elemen.requestFullscreen) elemen.requestFullscreen();
+        else if (elemen.webkitRequestFullscreen) elemen.webkitRequestFullscreen();
+    }
+</script>
+</body>
+</html>

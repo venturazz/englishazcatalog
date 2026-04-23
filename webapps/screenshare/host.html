@@ -1,104 +1,233 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Host - Screen Share</title>
+    <title>Host Dashboard - ProShare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+
     <style>
-        body { background-color: #f4f7f6; padding-top: 50px; }
-        .video-box { border: 2px solid #ccc; background: #222; border-radius: 8px; width: 100%; min-height: 300px; }
+        body {
+            font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh;
+            background-image: radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .btn-gradient-primary {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease;
+        }
+        .btn-gradient-primary:hover { transform: scale(1.02); box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.7); color: white; }
+        .video-wrapper {
+            position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .video-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
+        .neon-text { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); letter-spacing: 2px; font-size: 2rem; }
+        
+        /* Chatbox & List Styles */
+        .chat-container { height: 250px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); scrollbar-width: thin; }
+        .chat-bubble { background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; width: fit-content; max-width: 90%; }
+        .chat-bubble.host { background: rgba(14, 165, 233, 0.3); margin-left: auto; border: 1px solid rgba(14, 165, 233, 0.5); }
+        .form-control-custom { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 10px; }
+        .form-control-custom:focus { background: rgba(15, 23, 42, 0.8); border-color: #0ea5e9; color: white; box-shadow: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 text-center">
-            <div class="card shadow-sm p-4">
-                <h2 class="text-primary mb-3">Panel Host (Pembicara)</h2>
-                
-                <div class="alert alert-info">
-                    <h4 class="mb-0">ID Ruangan Anda: <span id="my-id" class="fw-bold text-success">Memuat...</span></h4>
-                    <small>Bagikan ID ini kepada penonton Anda.</small>
-                </div>
+    <nav class="navbar navbar-dark pt-3 pb-3 mb-4 border-bottom border-secondary border-opacity-25">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="fas fa-satellite-dish fs-4 me-3" style="color: #0ea5e9;"></i>
+                <span class="fs-5 fw-bold tracking-wide">ProShare <span class="text-secondary fw-normal">| Host Panel</span></span>
+            </a>
+            <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2 rounded-pill">
+                <span class="spinner-grow spinner-grow-sm me-2" style="width: 8px; height: 8px;"></span> P2P Server Active
+            </span>
+        </div>
+    </nav>
 
-                <div class="mb-4">
-                    <button id="shareBtn" class="btn btn-primary btn-lg px-5" onclick="mulaiShareScreen()">
-                        1. Mulai Bagikan Layar
+    <div class="container-fluid px-4 pb-5">
+        <div class="row g-4">
+            
+            <div class="col-lg-8">
+                <div class="glass-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-25 p-3 rounded-circle me-3"><i class="fas fa-desktop fs-4 text-primary"></i></div>
+                            <h3 class="fw-bold mb-0">Presentation Screen</h3>
+                        </div>
+                        <div class="text-end">
+                            <p class="text-secondary mb-0 fs-6">Your Room ID</p>
+                            <div class="neon-text fw-bold" id="my-id" style="font-size: 1.5rem;">Loading...</div>
+                        </div>
+                    </div>
+
+                    <button id="shareBtn" class="btn btn-gradient-primary btn-lg w-100 mb-4" onclick="startScreenShare()">
+                        <i class="fas fa-play me-2"></i> Start Sharing Screen
                     </button>
-                </div>
 
-                <h5 class="fw-bold text-start">Pratinjau Layar Anda:</h5>
-                <video id="localVideo" autoplay playsinline muted class="video-box mb-2"></video>
-                
-                <button class="btn btn-outline-dark w-100" onclick="bukaFullscreen('localVideo')">
-                    Fullscreen Pratinjau
-                </button>
+                    <div class="video-wrapper">
+                        <video id="localVideo" autoplay playsinline muted></video>
+                    </div>
+                </div>
             </div>
+
+            <div class="col-lg-4">
+                <div class="glass-card p-4 h-100 d-flex flex-column">
+                    
+                    <h5 class="fw-bold mb-3"><i class="fas fa-users me-2 text-info"></i>Viewers (<span id="viewer-count">0</span>)</h5>
+                    <div class="p-3 rounded-3 mb-4" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); max-height: 150px; overflow-y: auto;">
+                        <ul id="viewer-list" class="list-unstyled mb-0 text-secondary" style="font-size: 0.9rem;">
+                            <li class="fst-italic text-muted" id="empty-viewer-msg">No one has joined yet...</li>
+                        </ul>
+                    </div>
+
+                    <h5 class="fw-bold mb-3 mt-2"><i class="fas fa-comments me-2 text-warning"></i>Room Chat</h5>
+                    <div class="chat-container mb-3 flex-grow-1" id="chat-box">
+                        <div class="text-center text-muted small mt-2">-- P2P Chat Started --</div>
+                    </div>
+                    
+                    <form id="chat-form" onsubmit="sendHostMessage(event)">
+                        <div class="input-group">
+                            <input type="text" id="chat-input" class="form-control form-control-custom" placeholder="Type a message..." autocomplete="off" disabled>
+                            <button class="btn btn-primary" type="submit" id="chat-btn" disabled><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
 
-<script>
-    // Membuat ID Host 4 Angka Acak
-    const hostId = Math.floor(1000 + Math.random() * 9000).toString();
-    
-    // Inisialisasi PeerJS dengan STUN Server
-    const peer = new Peer(hostId, {
-        config: {
-            'iceServers': [
-                { url: 'stun:stun.l.google.com:19302' },
-                { url: 'stun:stun1.l.google.com:19302' }
-            ]
-        }
-    });
+    <script>
+        const hostId = Math.floor(1000 + Math.random() * 9000).toString();
+        const peer = new Peer(hostId, { config: { 'iceServers': [{ url: 'stun:stun.l.google.com:19302' }] }});
 
-    let myStream = null;
+        let myStream = null;
+        let activeConnections = {}; 
+        let activeViewers = {}; 
 
-    peer.on('open', (id) => {
-        document.getElementById('my-id').textContent = id;
-    });
+        peer.on('open', (id) => { document.getElementById('my-id').textContent = id; });
 
-    // Menunggu permintaan dari penonton
-    peer.on('connection', (conn) => {
-        conn.on('data', (data) => {
-            if (data === 'MINTA_STREAM' && myStream) {
-                // Berikan stream video ke penonton yang meminta
-                peer.call(conn.peer, myStream);
+        // Update Viewer UI
+        function updateViewerUI() {
+            const list = document.getElementById('viewer-list');
+            const count = document.getElementById('viewer-count');
+            const viewers = Object.values(activeViewers);
+            
+            count.textContent = viewers.length;
+            list.innerHTML = '';
+            
+            if (viewers.length === 0) {
+                list.innerHTML = '<li class="fst-italic text-muted">No one has joined yet...</li>';
+                document.getElementById('chat-input').disabled = true;
+                document.getElementById('chat-btn').disabled = true;
+            } else {
+                document.getElementById('chat-input').disabled = false;
+                document.getElementById('chat-btn').disabled = false;
+                viewers.forEach(name => {
+                    list.innerHTML += `<li class="mb-2 text-light"><i class="fas fa-user-circle me-2 text-success"></i>${name}</li>`;
+                });
             }
-        });
-    });
-
-    async function mulaiShareScreen() {
-        const shareBtn = document.getElementById('shareBtn');
-        try {
-            myStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-            document.getElementById('localVideo').srcObject = myStream;
-
-            shareBtn.textContent = "Layar Sedang Disiarkan";
-            shareBtn.classList.replace('btn-primary', 'btn-success');
-            shareBtn.disabled = true;
-
-            // Jika tombol Stop ditekan dari UI browser
-            myStream.getVideoTracks()[0].onended = () => {
-                myStream = null;
-                document.getElementById('localVideo').srcObject = null;
-                shareBtn.textContent = "1. Mulai Bagikan Layar";
-                shareBtn.classList.replace('btn-success', 'btn-primary');
-                shareBtn.disabled = false;
-            };
-        } catch (error) {
-            alert("Gagal membagikan layar. Pastikan Anda memberi izin.");
         }
-    }
 
-    function bukaFullscreen(elemenId) {
-        const elemen = document.getElementById(elemenId);
-        if (elemen.requestFullscreen) elemen.requestFullscreen();
-        else if (elemen.webkitRequestFullscreen) elemen.webkitRequestFullscreen();
-    }
-</script>
+        // Print message to chatbox
+        function printMessage(sender, text, isHost = false) {
+            const box = document.getElementById('chat-box');
+            const className = isHost ? 'chat-bubble host' : 'chat-bubble';
+            const nameColor = isHost ? 'text-warning' : 'text-info';
+            
+            box.innerHTML += `
+                <div class="${className}">
+                    <strong class="${nameColor} d-block" style="font-size: 0.75rem;">${sender}</strong>
+                    ${text}
+                </div>`;
+            box.scrollTop = box.scrollHeight; 
+        }
+
+        // Broadcast message to ALL connected viewers
+        function broadcastMessage(messageData) {
+            Object.values(activeConnections).forEach(conn => {
+                if (conn.open) conn.send(messageData);
+            });
+        }
+
+        // =====================================
+        // CONNECTION LOGIC (RECEIVING DATA)
+        // =====================================
+        peer.on('connection', (conn) => {
+            activeConnections[conn.peer] = conn; 
+
+            conn.on('data', (data) => {
+                // 1. Viewer requests stream and sends name
+                if (data.type === 'REQUEST_STREAM') {
+                    activeViewers[conn.peer] = data.name || 'Anonymous';
+                    updateViewerUI();
+                    
+                    if (myStream) peer.call(conn.peer, myStream);
+                }
+                
+                // 2. Viewer sends chat message
+                if (data.type === 'CHAT') {
+                    printMessage(data.sender, data.text); 
+                    broadcastMessage(data); 
+                }
+            });
+
+            conn.on('close', () => {
+                delete activeViewers[conn.peer];
+                delete activeConnections[conn.peer];
+                updateViewerUI();
+            });
+        });
+
+        // =====================================
+        // SENDING MESSAGE FROM HOST
+        // =====================================
+        function sendHostMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const messageObj = { type: 'CHAT', sender: 'Host (You)', text: text };
+            
+            printMessage('Host (You)', text, true); 
+            broadcastMessage(messageObj); 
+            
+            input.value = '';
+        }
+
+        // =====================================
+        // SCREEN SHARE LOGIC
+        // =====================================
+        async function startScreenShare() {
+            const shareBtn = document.getElementById('shareBtn');
+            try {
+                myStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                document.getElementById('localVideo').srcObject = myStream;
+
+                shareBtn.innerHTML = '<i class="fas fa-broadcast-tower me-2"></i> Broadcasting...';
+                shareBtn.classList.replace('btn-gradient-primary', 'btn-danger');
+
+                // Auto-call viewers who joined before screen was shared
+                Object.values(activeConnections).forEach(conn => {
+                    if (conn.open) peer.call(conn.peer, myStream);
+                });
+
+                myStream.getVideoTracks()[0].onended = () => {
+                    myStream = null;
+                    document.getElementById('localVideo').srcObject = null;
+                    shareBtn.innerHTML = '<i class="fas fa-play me-2"></i> Start Sharing Screen';
+                    shareBtn.classList.replace('btn-danger', 'btn-gradient-primary');
+                };
+            } catch (error) { console.error(error); }
+        }
+    </script>
 </body>
 </html>
