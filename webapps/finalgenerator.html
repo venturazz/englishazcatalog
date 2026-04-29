@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>E-Kinerja Bot Generator (Stable Edition)</title>
+    <style>
+        :root { --primary: #0f172a; --accent: #10b981; --bg: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 15px; color: #334155; margin: 0; }
+        .wrapper { max-width: 1200px; margin: auto; display: grid; grid-template-columns: 420px 1fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
+        h2 { font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .form-group { margin-bottom: 15px; position: relative; }
+        label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; color: #64748b; }
+        input, select, textarea { width: 100%; padding: 12px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; transition: 0.2s;}
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        
+        .session-box { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .flex-row { display: flex; gap: 10px; }
+        
+        .btn { padding: 12px 15px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.2s; font-size: 14px; box-sizing: border-box;}
+        .btn-blue { background: #3b82f6; color: white; }
+        .btn-blue:hover { background: #2563eb; }
+        .btn-dark { background: var(--primary); color: white; margin-top: 20px; border: 2px solid var(--primary); }
+        .btn-dark:hover { background: white; color: var(--primary); }
+        
+        .action-buttons { display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 15px; }
+        .btn-copy { background: var(--accent); color: white; display: none; padding: 8px 15px; width: auto; }
+        .btn-copy:hover { background: #059669; }
+        .btn-download { background: #8b5cf6; color: white; display: none; padding: 8px 15px; width: auto; }
+        .btn-download:hover { background: #7c3aed; }
+        .btn-helper { background: #10b981; color: white; padding: 4px 8px; font-size: 10px; border-radius: 4px; cursor: pointer; border: none; display: inline-block; margin-bottom: 5px;}
+
+        #finalCode { background: #0f172a; color: #38bdf8; padding: 15px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 11px; display: none; margin-top: 15px; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: anywhere; box-sizing: border-box; max-height: 400px; overflow-y: auto; overflow-x: hidden; border: 1px solid #334155; }
+        
+        table { width: 100%; border-collapse: collapse; background: white; font-size: 13px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top;}
+        th { background: #f8fafc; color: #475569; border-bottom: 2px solid #e2e8f0;}
+        .date-badge { background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 4px; display: inline-block; margin: 4px 4px 0 0; font-size: 12px; font-weight: bold; border: 1px solid #bbf7d0;}
+        .autocomplete-items { position: absolute; border: 1px solid #cbd5e1; z-index: 99; top: 100%; left: 0; right: 0; max-height: 250px; overflow-y: auto; background: #fff; border-radius: 0 0 6px 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); display: none; }
+        .autocomplete-items div { padding: 12px 10px; cursor: pointer; border-bottom: 1px solid #cbd5e1; font-size: 14px;}
+        .autocomplete-items div:hover { background: #e2e8f0; font-weight: 500;}
+        .vol-info { font-size: 11px; color: #64748b; font-style: italic; margin-top: 6px; }
+
+        @media (max-width: 900px) { 
+            .wrapper { grid-template-columns: 1fr; width: 100%;} 
+            body { padding: 10px; background: #e2e8f0; overflow-x: hidden;}
+            .action-buttons { flex-direction: column; } 
+            .btn-copy, .btn-download { width: 100%; text-align: center; padding: 12px;} 
+
+            table, thead, tbody, th, td, tr { display: block; width: 100%; box-sizing: border-box; }
+            thead tr { display: none; }
+            tr { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 15px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            td { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; text-align: left; }
+            td:last-child { border-bottom: none; padding-bottom: 0; }
+            td::before { content: attr(data-label); font-weight: 800; color: #94a3b8; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;}
+            .btn-hapus-mobile { width: 100%; padding: 10px; margin-top: 5px; font-size: 14px; box-sizing: border-box; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="card">
+        <h2>⚙️ Konfigurasi Bot</h2>
+        
+        <div class="session-box">
+            <label style="color:#166534;">🔑 Akun ETPP (Terinjeksi Otomatis):</label>
+            <div class="flex-row">
+                <input type="text" id="botUser" placeholder="Username ETPP" autocomplete="off">
+                <input type="password" id="botPass" placeholder="Password ETPP" autocomplete="off">
+            </div>
+            
+            <label style="color:#166534; margin-top: 15px;">🍪 Cookie Aktif (Bypass Login):</label>
+            <textarea id="botCookie" rows="2" placeholder="Harus mengandung kata 'session' agar tembus!"></textarea>
+            <div style="background: #fff; border: 1px dashed #10b981; padding: 10px; font-size: 11px; margin-top: 8px; border-radius: 4px; color: #334155;">
+                <b>Trik Wajib (Karena ETPP dikunci):</b><br>
+                1. Di browser ETPP, tekan <b>F12</b> (Inspect) > tab <b>Network</b>.<br>
+                2. Refresh halaman (F5).<br>
+                3. Klik nama file paling atas (biasanya <i>harian</i> atau <i>etpp...</i>).<br>
+                4. Lihat panel kanan, scroll ke <b>Request Headers</b>.<br>
+                5. Copy teks panjang di sebelah tulisan <code>cookie:</code> lalu Paste ke sini.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>1. Pilih Tanggal:</label>
+            <div class="flex-row">
+                <input type="date" id="tglInput">
+                <button class="btn btn-blue" style="width: 100px; margin-top:0;" onclick="pushDate()">Tambah</button>
+            </div>
+            <div id="selectedDates" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="form-group" style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; box-sizing: border-box;">
+            <label>2. Kategori:</label>
+            <select id="jenisInput" onchange="toggleInd()" style="margin-bottom: 10px;">
+                <option value="Utama">Utama (Pakai Indikator)</option>
+                <option value="Umum">Umum (Tanpa Indikator)</option>
+            </select>
+            
+            <div id="indGroup">
+                <label>Indikator:</label>
+                <select id="indInput">
+				<option>Jumlah Alur Tujuan Pembelajaran</option>
+                <option>Jumlah Program Tahunan</option>
+                <option>Jumlah Program Semester</option>
+                <option>Jumlah Modul Ajar</option>
+                <option selected>Jumlah Himpunan Materi/Bahan Ajar</option>
+                <option>Jumlah Daftar Hadir Peserta Didik Bulanan</option>
+                <option>Jumlah Kriteria Ketercapaian Tujuan Pembelajaran</option>
+                <option value="Laporan Sumatif Tengah Semester">Jumlah Laporan Sumatif Tengah Semester</option>
+                <option value="Laporan Sumatif Akhir Semester">Jumlah Laporan Sumatif Akhir Semester</option>
+                <option value="Tindak Lanjut Hasil Pembelajaran Tengah Semester">Jumlah Laporan Program Tindak Lanjut Tengah Semester</option>
+                <option value="Tindak Lanjut Hasil Pembelajaran Akhir Semester">Jumlah Laporan Program Tindak Lanjut Akhir Semester</option>
+                <option value="Hasil Pembimbingan dan Pelatihan Kegiatan Ekstrakurikuler">Jumlah Laporan Pembimbingan Ekstrakurikuler</option>
+                <option value="Hasil Pendampingan sebagai Guru Wali">Jumlah Dokumen Hasil Pendampingan Wali Kelas</option>
+                <option value="Pelaksanaan Tugas Lain yang Relevan">Jumlah Laporan Pelaksanaan Tugas Lain (SK)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>3. Cari Aktivitas:</label>
+            <input type="text" id="actInput" placeholder="Ketik: Mengajar..." autocomplete="off">
+            <div id="autocomplete-list" class="autocomplete-items"></div>
+        </div>
+
+        <div class="flex-row">
+            <div class="form-group" style="flex:1">
+                <label>Jam Mulai:</label>
+                <input type="time" id="jamM" value="07:30" onchange="calcVolume()">
+            </div>
+            <div class="form-group" style="flex:1">
+                <label>Jam Selesai:</label>
+                <input type="time" id="jamS" value="09:30" onchange="calcVolume()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Volume (Pure Math Auto):</label>
+            <input type="number" id="volOutput" value="0" style="background:#fff; border-color:var(--accent); font-weight:bold;">
+            <div class="vol-info" id="volHint">Sisa waktu ≥ setengah standar akan ditambah 1 Volume.</div>
+        </div>
+
+        <div class="form-group">
+            <label>Keterangan:</label>
+            <textarea id="ketInput" rows="2" placeholder="Contoh: Mengajar kelas 12. D (PM)"></textarea>
+        </div>
+
+        <button class="btn btn-blue" onclick="addToTable()">Simpan ke Antrean ➡️</button>
+    </div>
+
+    <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+        <h2 style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">📊 Rencana Batch Input</h2>
+        
+        <div style="width: 100%; overflow: hidden;">
+            <table>
+                <thead style="background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    <tr>
+                        <th width="15%">Tanggal</th>
+                        <th width="45%">Aktivitas & Keterangan</th>
+                        <th width="20%">Waktu</th>
+                        <th width="10%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="monitorTable"></tbody>
+            </table>
+        </div>
+
+        <div style="margin-top:20px; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; width: 100%;">
+            <button class="btn btn-dark" style="margin-top:0;" onclick="generateScript()">⚡ GENERATE SCRIPT BATCH</button>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap;">
+                <span id="scriptTitle" style="display:none; font-size: 13px; font-weight: bold; color: var(--accent);">Script berhasil dibuat!</span>
+                
+                <div class="action-buttons">
+                    <button id="copyBtn" class="btn btn-copy" onclick="copyToClipboard()">📋 Copy Code</button>
+                    <button id="downloadBtn" class="btn btn-download" onclick="downloadScript()">💾 Download .js</button>
+                </div>
+            </div>
+            
+            <div id="finalCode"></div>
+        </div>
+    </div>
+</div>
+
+<datalist id="actList" style="display:none;">
+    <option value="Memeriksa kelengkapan surat kendaraan bermotor (Per 1 dokumen) 15 menit">
+    <option value="Menyusun dan mengerjakan SPJ Langsung (LS) per paket 30 menit">
+    <option value="Menyusun dan mengerjakan SPJ Langsung (LS) per paket 60 menit">
+    <option value="Menyusun data laporan jurnal SPJ 30 menit">
+    <option value="Penyelesaian dokumen pertanggungjawaban belanja (SPJ) 30 menit">
+    <option value="Penyelesaian dokumen pertanggungjawaban belanja (SPJ) 60 menit">
+    <option value="Menerima dan menyortir bukti-bukti pengeluaran dan penerimaan serta Buku Kas 15 menit">
+    <option value="Meneliti dan mencocokan bukti-bukti pengeluaran dan penerimaan dengan laporan realisasi keuangan dan Buku Kas 15 menit">
+    <option value="Membuat Penatausahaan Keuangan oleh bendahara dan PPK SKPD 15 menit">
+    <option value="Membuat SPM 15 menit">
+    <option value="Mencatat BKU (per transaksi) 2 menit">
+    <option value="Menyusun Laporan Pertanggungjawaban Keuangan (bendahara pengeluaran) 30 menit">
+    <option value="Membuat SPT Pajak Tahunan Pegawai 10 menit">
+    <option value="Menyusun data setoran SP2D Langsung (LS) 60 menit">
+    <option value="Menyusun data setoran SP2D Langsung (LS) 120 menit">
+    <option value="Menyusun data setoran SP2D Langsung (LS) 300 menit">
+    <option value="Menyusun data setoran SP2D Uang Persediaan (UP) 60 menit">
+    <option value="Menyusun data setoran SP2D Uang Persediaan (UP) 120 menit">
+    <option value="Menyusun data setoran SP2D Uang Persediaan (UP) 300 menit">
+    <option value="Menginventarisir daftar pajak terutang 30 menit">
+    <option value="Menginventarisir daftar pajak terutang 60 menit">
+    <option value="Menyusun daftar pajak terutang beserta fotokopi SSP 60 menit">
+    <option value="Pencairan SPM ke kantor kas daerah 60 menit">
+    <option value="Menyusun laporan jurnal SP2D 30 menit">
+    <option value="Menyusun laporan jurnal SP2D 60 menit">
+    <option value="Mengumpulkan laporan keuangan 30 menit">
+    <option value="Melakukan penjilidan dan pendistribusian laporan keuangan 60 menit">
+    <option value="Mendistribusikan hasil audit BPK (temuan sementara dan jurnal) 60 menit">
+    <option value="Membuat Surat Perintah Pencairan (SPP) 30 menit">
+    <option value="Membuat Surat Setoran Pajak (SSP) 10 menit">
+    <option value="Membuat Surat Tanda Setoran (STS) 10 menit">
+    <option value="Membuat Surat Penyediaan Dana (SPD) 30 menit">
+    <option value="Memverifikasi / meneliti / memvalidasi / memaraf dokumen terkait penerbitan Surat Penyediaan Dana (SPD) 5 menit">
+    <option value="Memverifikasi / meneliti / memvalidasi / memaraf dokumen terkait penerbitan Surat Penyediaan Dana (SPD) 10 menit">
+    <option value="Memverifikasi / meneliti / memvalidasi / memaraf dokumen terkait penerbitan Surat Penyediaan Dana (SPD) 15 menit">
+    <option value="Memposting data usulan komponen / kode rekening SKPD / UKPD (per 10 item) 15 menit">
+    <option value="Mencatat dan Membukukan Buku Kas Umum (BKU) dan Buku Pembantu Lainnya 5 menit">
+    <option value="Meneliti Laporan Keuangan 60 menit">
+    <option value="Meneliti Laporan Keuangan 120 menit">
+    <option value="Meneliti Laporan Keuangan 180 menit">
+    <option value="Review Laporan Keuangan 60 menit">
+    <option value="Review Laporan Keuangan 120 menit">
+    <option value="Review Laporan Keuangan 180 menit">
+    <option value="Mengestimasi Pendapatan (per tagihan) 15 menit">
+    <option value="Menginventarisir pendapatan jasa giro 30 menit">
+    <option value="Menyusun laporan pendapatan jasa giro 30 menit">
+    <option value="Menyusun data rekonsiliasi belanja 60 menit">
+    <option value="Menyusun data rekonsiliasi belanja 120 menit">
+    <option value="Menyusun data rekonsiliasi belanja 180 menit">
+    <option value="Melakukan rekonsiliasi Laporan Keuangan 30 menit">
+    <option value="Melakukan rekonsiliasi Laporan Keuangan 60 menit">
+    <option value="Melakukan rekonsiliasi Laporan Keuangan 120 menit">
+    <option value="Menyusun draft Neraca 60 menit">
+    <option value="Menyusun draft Neraca 120 menit">
+    <option value="Menyusun draft Laporan Realisasi Anggaran (LRA) 60 menit">
+    <option value="Menyusun draft Laporan Realisasi Anggaran (LRA) 120 menit">
+    <option value="Menyusun draft Catatan atas Laporan Keuangan (CaLK) 60 menit">
+    <option value="Menyusun draft Catatan atas Laporan Keuangan (CaLK) 120 menit">
+    <option value="Melakukan pencairan SP2D 30 menit">
+    <option value="Mencatat transaksi pembayaran via Bendahara Pengeluaran Pembantu 30 menit">
+    <option value="Menyusun laporan keuangan SKPD 60 menit">
+    <option value="Menyusun laporan keuangan SKPD 120 menit">
+    <option value="Menyusun laporan keuangan SKPD 180 menit">
+    <option value="Menyetorkan Surat Tanda Setoran Langsung / Uang Persediaan / Ganti Uang / Tambah Uang (STS- LS / UP / GU / TU) 60 menit">
+    <option value="Melaksanakan Transaksi Pembayaran ke Pihak Ketiga 30 menit">
+    <option value="Memvalidasi dokumen Surat Permintaan Pembayaran (SPP) dan Laporan Keuangan 60 menit">
+    <option value="Memvalidasi dokumen Surat Permintaan Pembayaran (SPP) dan Laporan Keuangan 180 menit">
+    <option value="Memvalidasi dokumen Surat Permintaan Pembayaran (SPP) dan Laporan Keuangan 120 menit">
+    <option value="Menyusun Nota Keuangan 180 menit">
+    <option value="Menyusun Nota Keuangan 120 menit">
+    <option value="Membuat laporan Realisasi Keuangan 120 menit">
+    <option value="Membuat dan melaporkan SPT kepada Kantor Pelayanan Pajak 30 menit">
+    <option value="Membuat dan melaporkan SPT kepada Kantor Pelayanan Pajak 60 menit">
+    <option value="Menghimpun, mencocokan dan meneliti tagihan penyediaan jasa TALI dan IPAL 30 menit">
+    <option value="Memungut dan menyetorkan Pajak yang ditarik dari Pihak Ketiga ke Kantor Pajak 60 menit">
+    <option value="Menyusun laporan tutup buku 120 menit">
+    <option value="Menyusun laporan tutup buku 180 menit">
+    <option value="Menginput jurnal SPJ / SP2D ke aplikasi LPJ SIPKD BPKD Provinsi DKI Jakarta 15 menit">
+    <option value="Menginput jurnal SPJ / SP2D ke aplikasi LPJ SIPKD BPKD Provinsi DKI Jakarta 30 menit">
+    <option value="Menginput jurnal SPJ / SP2D ke aplikasi LPJ SIPKD BPKD Provinsi DKI Jakarta 60 menit">
+    <option value="Menginput jurnal SPJ / SP2D ke aplikasi LPJ SIPKD BPKD Provinsi DKI Jakarta 120 menit">
+    <option value="Melakukan rekonsiliasi 15 menit">
+    <option value="Melakukan rekonsiliasi 30 menit">
+    <option value="Melakukan rekonsiliasi 60 menit">
+    <option value="Membuat rancangan Peraturan Daerah 120 menit">
+    <option value="Membuat rancangan Peraturan Daerah 180 menit">
+    <option value="Membuat rancangan Peraturan Daerah 240 menit">
+    <option value="Membuat rancangan Peraturan Gubernur 60 menit">
+    <option value="Membuat rancangan Peraturan Gubernur 120 menit">
+    <option value="Membuat rancangan Peraturan Gubernur 180 menit">
+    <option value="Menganalisis / Validasi Perbal Naskah Dinas 30 menit">
+    <option value="Menganalisis / Validasi Perbal Naskah Dinas 60 menit">
+    <option value="Menganalisis / Validasi Perbal Naskah Dinas 120 menit">
+    <option value="Membuat Rancangan Keputusan Gubernur 30 menit">
+    <option value="Membuat Rancangan Keputusan Gubernur 60 menit">
+    <option value="Membuat Rancangan Keputusan Gubernur 120 menit">
+    <option value="Membuat Instruksi Gubernur 30 menit">
+    <option value="Membuat Instruksi Gubernur 60 menit">
+    <option value="Membuat Instruksi Gubernur 90 menit">
+    <option value="Mempelajari / membuat resume peraturan 60 menit">
+    <option value="Membuat perbal Peraturan Gubernur 15 menit">
+    <option value="Memaraf Perbal 2 menit">
+    <option value="Memaraf Perbal 5 menit">
+    <option value="Membuat perbaikan / koreksi Peraturan Perundang-undangan 30 menit">
+    <option value="Membuat perbaikan / koreksi Peraturan Perundang-undangan 60 menit">
+    <option value="Membuat perbaikan / koreksi Peraturan Perundang-undangan 120 menit">
+    <option value="Menyusun bahan pembahasan rancangan Kebijakan 60 menit">
+    <option value="Menyusun bahan pembahasan rancangan Kebijakan 120 menit">
+    <option value="Penelitian berkas permohonan perizinan (per aplikasi pengajuan) 5 menit">
+    <option value="Penelitian berkas permohonan perizinan (per aplikasi pengajuan) 15 menit">
+    <option value="Penelitian berkas permohonan perizinan (per aplikasi pengajuan) 30 menit">
+    <option value="Penelitian berkas permohonan perizinan (per aplikasi pengajuan) 60 menit">
+    <option value="Memberikan informasi terkait hasil verifikasi berkas perizinan dan non perizinan 5 menit">
+    <option value="Penelitian berkas permohonan perizinan (teknis) 5 menit">
+    <option value="Penelitian berkas permohonan perizinan (teknis) 10 menit">
+    <option value="Penelitian berkas permohonan perizinan (teknis) 15 menit">
+    <option value="Memberikan informasi status proses berkas perizinan dan non perizinan 5 menit">
+    <option value="Wawancara teknis terhadap pelaku teknis bangunan untuk proses permohonan IPTB baru / perpanjangan 30 menit">
+    <option value="Penandatanganan Berkas Perizinan dan Non Perizinan 5 menit">
+    <option value="Menyusun Formasi Jabatan Pelaksana / Fungsional 30 menit">
+    <option value="Menyusun Formasi Jabatan Pelaksana / Fungsional 60 menit">
+    <option value="Menyusun Kebutuhan Formasi PNS 30 menit">
+    <option value="Menyusun Kebutuhan Formasi PNS 60 menit">
+    <option value="Menyusun Kebutuhan Formasi PNS 120 menit">
+    <option value="Menganalisa formasi Izin Belajar / Tugas Belajar 15 menit">
+    <option value="Menganalisa formasi Izin Belajar / Tugas Belajar 30 menit">
+    <option value="Menyusun rincian usulan Formasi kebutuhan pegawai 120 menit">
+    <option value="Menyusun rincian usulan Formasi kebutuhan pegawai 180 menit">
+    <option value="Melakukan pemeriksaan terhadap alat-alat bukti 10 menit">
+    <option value="Melakukan pemeriksaan berdasarkan temuan, aduan, tangkap tangan 60 menit">
+    <option value="Melakukan pemeriksaan berdasarkan temuan, aduan, tangkap tangan 120 menit">
+    <option value="Pemeriksaan / pengawasan terhadap konstruksi / bangunan 120 menit">
+    <option value="Pemeriksaan / pengawasan terhadap konstruksi / bangunan 180 menit">
+    <option value="Pemeriksaan gambar pelaksanaan bangunan / shop drawing / as built drawing (Per Gambar) 30 menit">
+    <option value="Pemeriksaan gambar pelaksanaan bangunan / shop drawing / as built drawing (Per Gambar) 60 menit">
+    <option value="Melakukan pendampingan penyusunan Analisa jabatan, Analisa Beban Kerja dan Evaluasi Jabatan 60 menit">
+    <option value="Melakukan pendampingan penyusunan Analisa jabatan, Analisa Beban Kerja dan Evaluasi Jabatan 120 menit">
+    <option value="Membuat dan menempel barcode aset tetap SKPD / UKPD 5 menit">
+    <option value="Membuat daftar gaji / tunjangan / penghasilan lainnya 30 menit">
+    <option value="Membuat daftar gaji / tunjangan / penghasilan lainnya 60 menit">
+    <option value="Membuat daftar gaji / tunjangan / penghasilan lainnya 120 menit">
+    <option value="Meneliti data entry gaji dan tunjangan lainnya sebagai bahan konfirmasi belanja pegawai dengan SKPD 30 menit">
+    <option value="Melakukan konfirmasi gaji dan tunjangan lainnya sebagai data bahan belanja pegawai SKPD 30 menit">
+    <option value="Melakukan konfirmasi gaji dan tunjangan lainnya sebagai data bahan belanja pegawai SKPD 60 menit">
+    <option value="Membuat konsep keputusan gubernur kenaikan gaji berkala / pangkat / pensiun / PNS / CPNS / Mutasi 30 menit">
+    <option value="Melakukan pengecekan mutasi aset 60 menit">
+    <option value="Melakukan pengecekan mutasi aset 120 menit">
+    <option value="Melakukan pengecekan mutasi aset 180 menit">
+    <option value="Membuat konsep keputusan gubernur kenaikan gaji berkala / pangkat / pensiun / PNS / CPNS / Mutasi 60 menit">
+    <option value="Melakukan pengaturan / setting router multiplayer / radio wireless / kamera / cctv (per objek) 15 menit">
+    <option value="Melakukan uji coba 30 menit">
+    <option value="Melakukan uji coba 60 menit">
+    <option value="Melakukan uji coba 120 menit">
+    <option value="Melakukan tindakan processing film 15 menit">
+    <option value="Melaksanakan Pemeriksaan penunjang pelayanan kesehatan olahraga dan kebugaran medical check up pegawai 90 menit">
+    <option value="Membuat catatan medik (per pasien) 5 menit">
+    <option value="Menyusun rencana pemeriksaan okupasi terapi (Kasus ringan) 10 menit">
+    <option value="Membuat catatan medik gigi dan mulut pasien rawat inap / jalan 5 menit">
+    <option value="Membuat catatan medik gigi dan mulut pasien rawat inap / jalan 15 menit">
+    <option value="Memberikan asistensi kepada pasien dalam terapi kelompok musculoskeletal (per 1 pasien) 45 menit">
+    <option value="Menyiapkan / meracik obat berdasarkan resep dokter 5 menit">
+    <option value="Menyiapkan / meracik obat berdasarkan resep dokter 15 menit">
+    <option value="Mengikuti pembahasan dalam sidang Musrenbang tingkat provinsi / kota / kabupaten / kecamatan / kelurahan 120 menit">
+    <option value="Mengikuti pembahasan dalam sidang Musrenbang tingkat provinsi / kota / kabupaten / kecamatan / kelurahan 180 menit">
+    <option value="Membuat perencanaan kebutuhan, penempatan, mutasi, pengembangan kompetensi pegawai 30 menit">
+    <option value="Membuat gambar perencanaan 60 menit">
+    <option value="Membuat gambar perencanaan 120 menit">
+    <option value="Membuat Berita Acara 30 menit">
+    <option value="Membuat Berita Acara 60 menit">
+    <option value="Membuat Berita Acara 120 menit">
+    <option value="Mencetak Perda sebagai bahan APBD / APBD Perubahan 10 menit">
+    <option value="Mencetak Pergub sebagai bahan APBD / APBD Perubahan 10 menit">
+    <option value="Menggandakan dan Memberikan cap stempel naskah dinas 1 menit">
+    <option value="Menerima tamu dan mencatat keperluannya 5 menit">
+    <option value="Mencetak 1 menit">
+    <option value="Membuat karya tulis / karya ilmiah hasil pengkajian di bidang pengawasan yang dipublikasikan dalam bentuk buku yang diterbitkan dan diedarkan secara nasional / internasional 120 menit">
+    <option value="Melakukan pemeriksaan objek pasca bencana (banjir, kebakaran, gempa, dll) 180 menit">
+    <option value="Melakukan pemeriksaan objek pasca bencana (banjir, kebakaran, gempa, dll) 120 menit">
+    <option value="Melaksanakan tugas bantuan kesehatan lapangan seperti pada situasi gadar dan bencana 180 menit">
+    <option value="Melakukan evakuasi kegiatan emergency / kecelakaan terhadap sarana dan prasarana lampu lalu lintas 60 menit">
+    <option value="Penyusunan Dokumen Rencana Kebutuhan Barang / Jasa 60 menit">
+    <option value="Penyusunan Dokumen Rencana Kebutuhan Barang / Jasa 120 menit">
+    <option value="Penyusunan Rencana Pemaketan Pekerjaan Pengadaan Barang / Jasa 60 menit">
+    <option value="Penyusunan Rencana Pemaketan Pekerjaan Pengadaan Barang / Jasa 120 menit">
+    <option value="Membuat pengumuman dan upload dokumen rencana umum pengadaan Barang / Jasa (per kegiatan) 15 menit">
+    <option value="Penyusunan Rencana Pelaksanaan Pengadaan Barang / Jasa (per kegiatan) 60 menit">
+    <option value="Penyusunan Rencana Pelaksanaan Pengadaan Barang / Jasa (per kegiatan) 120 menit">
+    <option value="Menyusun rencana kebutuhan 15 menit">
+    <option value="Menyusun rencana kebutuhan 30 menit">
+    <option value="Meneliti Berita Acara Serah Terima (BAST) 15 menit">
+    <option value="Meneliti Berita Acara Serah Terima (BAST) 30 menit">
+    <option value="Meracik pakan satwa 45 menit">
+    <option value="Membuat atau memperbaiki pengkayaan kandang (enrichment) 60 menit">
+    <option value="Membuat data kunjungan mancanegara 30 menit">
+    <option value="Registrasi data pencari kerja 5 menit">
+    <option value="Menerima, mencatat bahan / objek kerja 1 menit">
+    <option value="Menerima, mencatat bahan / objek kerja 10 menit">
+    <option value="Menerima, mencatat bahan / objek kerja 15 menit">
+    <option value="Menghadiri acara seremonial 30 menit">
+    <option value="Menghadiri acara seremonial 60 menit">
+    <option value="Menghadiri acara seremonial 90 menit">
+    <option value="Mempersiapkan acara / kegiatan 30 menit">
+    <option value="Mempersiapkan acara / kegiatan 60 menit">
+    <option value="Mempersiapkan acara / kegiatan 90 menit">
+    <option value="Mempersiapkan acara / kegiatan 120 menit">
+    <option value="Membawakan acara / MC (Per kegiatan) 60 menit">
+    <option value="Melaksakan tugas sebagai pembaca doa (1x acara / event) 15 menit">
+    <option value="Meliput acara 60 menit">
+    <option value="Melakukan dokumentasi kegiatan seperti pengambilan gambar dan cetak gambar 10 menit">
+    <option value="Menjadi petugas upacara / apel 30 menit">
+    <option value="Menjadi petugas upacara / apel 60 menit">
+    <option value="Melaksanakan / mengikuti kegiatan apel / upacara 60 menit">
+    <option value="Melaksanakan / mengikuti kegiatan apel / upacara 90 menit">
+    <option value="Monitoring CCTV lalu lintas melalui ruang pusat kendali lalu lintas ITS 30 menit">
+    <option value="Membuka / menutup rincian kegiatan SKPD / UKPD dalam sistem informasi 5 menit">
+    <option value="Melakukan verifikasi gambar perencanaan 30 menit">
+    <option value="Menyusun Naskah Akademis 60 menit">
+    <option value="Menyusun Naskah Akademis 120 menit">
+    <option value="Melakukan pendampingan sidak (per lokasi sidak) 60 menit">
+    <option value="Melakukan pendampingan sidak (per lokasi sidak) 120 menit">
+    <option value="Melakukan Pengawasan dan Audit 60 menit">
+    <option value="Melakukan Pengawasan dan Audit 120 menit">
+    <option value="Melakukan Pengawasan dan Audit 180 menit">
+    <option value="Melaksanakan tugas-tugas pengawasan dengan kompleksitas rendah dalam kegiatan pemantauan 120 menit">
+    <option value="Melaksanakan tugas-tugas pengawasan dengan kompleksitas rendah dalam kegiatan pemantauan 240 menit">
+    <option value="Melaksanakan tugas-tugas pengawasan dengan kompleksitas sedang dalam kegiatan pemantauan 120 menit">
+    <option value="Melaksanakan tugas-tugas pengawasan dengan kompleksitas sedang dalam kegiatan pemantauan 240 menit">
+    <option value="Memeriksa kelengkapan surat / dokumen 5 menit">
+    <option value="Melakukan pendampingan kegiatan 120 menit">
+    <option value="Melakukan pendampingan kegiatan 180 menit">
+    <option value="Pemantauan kegiatan posyandu 60 menit">
+    <option value="Pemantauan kegiatan posyandu 120 menit">
+    <option value="Melakukan rekonsiliasi data / keuangan / aset 30 menit">
+    <option value="Mengevaluasi / meneliti hasil konfirmasi gaji dan tunjangan lainnya dengan SKPD 30 menit">
+    <option value="Melaksanakan pembinaan fisik, pembinaan olahraga dan kegiatan pelatihan 60 menit">
+    <option value="Melaksanakan pembinaan fisik, pembinaan olahraga dan kegiatan pelatihan 120 menit">
+    <option value="Melaksanakan Identifikasi dan asesmen Warga Binaan Sosial 60 menit">
+    <option value="Melaksanakan imunisasi, vaksinasi, feed additive 15 menit">
+    <option value="Melaksanakan imunisasi, vaksinasi, feed additive 30 menit">
+    <option value="Melaksanakan imunisasi, vaksinasi, feed additive 60 menit">
+    <option value="Melaksanakan imunisasi, vaksinasi, feed additive 120 menit">
+    <option value="Melaksanakan imunisasi, vaksinasi, feed additive 180 menit">
+    <option value="Membuat program fisioterapi 15 menit">
+    <option value="Membuat program fisioterapi 30 menit">
+    <option value="Membuat program fisioterapi 60 menit">
+    <option value="Melakukan pemeriksaan okupasi terapi (Formal kasus berat) 15 menit">
+    <option value="Melakukan tindakan terapi pada problem gerak dan fungsi pada tumbuh kembang anak kasus sedang 30 menit">
+    <option value="Melakukan pemeriksaan okupasi terapi ( Informal ) 20 menit">
+    <option value="Membuat File PDF Perda / Pergub 5 menit">
+    <option value="Menerima pendaftaran pasien (per pasien) 3 menit">
+    <option value="Melakukan penilaian angka kredit terhadap JFT 60 menit">
+    <option value="Membuat Daftar Usulan Penilaian Angka Kredit (DUPAK) 30 menit">
+    <option value="Pelaporan dan pertanggungjawaban pelaksanaan tugas dan fungsi Inspektorat Pembantu 120 menit">
+    <option value="Pelaporan dan pertanggungjawaban pelaksanaan tugas dan fungsi Inspektorat Pembantu 180 menit">
+    <option value="Pelaporan dan pertanggungjawaban pelaksanaan tugas dan fungsi Inspektorat Pembantu 240 menit">
+    <option value="Klarifikasi dan Negosiasi Penawaran Penyedia Barang / Jasa 30 menit">
+    <option value="Klarifikasi dan Negosiasi Penawaran Penyedia Barang / Jasa 60 menit">
+    <option value="Evaluasi Dokumen Kualifikasi Pengadaan Barang / Jasa (termasuk lelang ulang) 60 menit">
+    <option value="Evaluasi Dokumen Kualifikasi Pengadaan Barang / Jasa (termasuk lelang ulang) 90 menit">
+    <option value="Evaluasi Dokumen Kualifikasi Pengadaan Barang / Jasa (termasuk lelang ulang) 120 menit">
+    <option value="Menginput Data / informasi (Per Kegiatan / Paket) 5 menit">
+    <option value="Menginput Data / informasi (Per Kegiatan / Paket) 10 menit">
+    <option value="Menginput Data / informasi (Per Kegiatan / Paket) 15 menit">
+    <option value="Menginput Data / informasi (Per Kegiatan / Paket) 30 menit">
+    <option value="Mengupload Data / Artikel Kedalam Sistem Informasi 15 menit">
+    <option value="Mengupload Data / Artikel Kedalam Sistem Informasi 30 menit">
+    <option value="Menandatangani / memaraf Surat Kedinasan / dokumen / petikan 5 menit">
+    <option value="Menandatangani / memaraf Surat Kedinasan / dokumen / petikan 10 menit">
+    <option value="Memeriksa dan mengklasifikasikan bahan dan data objek kerja 10 menit">
+    <option value="Mengikuti seminar / lokakarya / konferensi 60 menit">
+    <option value="Mengikuti seminar / lokakarya / konferensi 120 menit">
+    <option value="Menerima pendaftaran 5 menit">
+    <option value="Menerima pendaftaran 15 menit">
+    <option value="Mengumpulkan dan mengedit artikel / media foto / video / audio untuk publikasi 30 menit">
+    <option value="Meneliti dan memverifikasi RKA / DPA 30 menit">
+    <option value="Meneliti dan memverifikasi RKA / DPA 60 menit">
+    <option value="Meneliti dan memverifikasi RKA / DPA 90 menit">
+    <option value="Meneliti dan memverifikasi Standar Satuan Harga (SSH) / kode rekening 5 menit">
+    <option value="Meneliti dan memverifikasi Standar Satuan Harga (SSH) / kode rekening 10 menit">
+    <option value="Meneliti dan memverifikasi Standar Satuan Harga (SSH) / kode rekening 20 menit">
+    <option value="Meneliti dan memverifikasi Standar Satuan Harga (SSH) / kode rekening 30 menit">
+    <option value="Mengidentifikasi dan memverifikasi data 5 menit">
+    <option value="Mengidentifikasi dan memverifikasi data 15 menit">
+    <option value="Mengidentifikasi dan memverifikasi data 30 menit">
+    <option value="Melakukan verifikasi gambar perencanaan 60 menit">
+    <option value="Melakukan verifikasi dan validasi 15 menit">
+    <option value="Melakukan verifikasi dan validasi 30 menit">
+    <option value="Melakukan verifikasi dan validasi 60 menit">
+    <option value="Memverifikasi penatausahaan keuangan oleh bendahara dan PPK SKPD 20 menit">
+    <option value="Memverifikasi usulan Standar Satuan Harga (SSH) / Analisis Standar Biaya (ASB) (per 2 SSH) 10 menit">
+    <option value="Verifikasi dokumen kontrak pengadaan barang / jasa 30 menit">
+    <option value="Verifikasi dokumen kontrak pengadaan barang / jasa 60 menit">
+    <option value="Verifikasi dokumen kontrak pengadaan barang / jasa 90 menit">
+    <option value="Verifikasi Surat Pertanggungjawaban (SPJ) 15 menit">
+    <option value="Verifikasi Surat Pertanggungjawaban (SPJ) 30 menit">
+    <option value="Verifikasi Surat Pertanggungjawaban (SPJ) 60 menit">
+    <option value="Memverifikasi Penetapan Angka Kredit (PAK) Jabatan Fungsional Tertentu 15 menit">
+    <option value="Memverifikasi Penetapan Angka Kredit (PAK) Jabatan Fungsional Tertentu 30 menit">
+    <option value="Memverifikasi Penetapan Angka Kredit (PAK) Jabatan Fungsional Tertentu 60 menit">
+    <option value="Melaksanakan / melakukan Survei / tinjauan lapangan (per lokasi) 60 menit">
+    <option value="Melaksanakan / melakukan Survei / tinjauan lapangan (per lokasi) 120 menit">
+    <option value="Melaksanakan / melakukan Survei / tinjauan lapangan (per lokasi) 180 menit">
+    <option value="Pemutakhiran data aset 60 menit">
+    <option value="Pemutakhiran data aset 120 menit">
+    <option value="Melakukan analisa / kajian / telaahan 30 menit">
+    <option value="Melakukan analisa / kajian / telaahan 60 menit">
+    <option value="Melakukan analisa / kajian / telaahan 120 menit">
+    <option value="Melakukan analisa / kajian / telaahan 180 menit">
+    <option value="Menganalisa hasil uji 30 menit">
+    <option value="Menganalisa hasil uji 60 menit">
+    <option value="Mendampingi kegiatan pelatihan keterampilan 60 menit">
+    <option value="Mendampingi kegiatan pelatihan keterampilan 120 menit">
+    <option value="Melaksanakan pelatihan per kegiatan 60 menit">
+    <option value="Melaksanakan pelatihan per kegiatan 120 menit">
+    <option value="Melaksanakan pelatihan per kegiatan 180 menit">
+    <option value="Membuat Media Pembelajaran / pelatihan dan bimbingan Pendidikan 90 menit">
+    <option value="Membuat Media Pembelajaran / pelatihan dan bimbingan Pendidikan 120 menit">
+    <option value="Membuat transkrip nilai peserta pelatihan per kegiatan 30 menit">
+    <option value="Membuat transkrip nilai peserta pelatihan per kegiatan 60 menit">
+    <option value="Perawatan Kesehatan Warga Binaan Sosial (WBS) per pasien 10 menit">
+    <option value="Melakukan Pemeliharaan Perangkat Keras / Lunak 30 menit">
+    <option value="Melakukan Pemeliharaan Perangkat Keras / Lunak 60 menit">
+    <option value="Melakukan pengambilan darah / sampling ke pasien 5 menit">
+    <option value="Melaksanakan pengolahan dokumen rekam medis 15 menit">
+    <option value="Melaksanakan pengolahan dokumen rekam medis 30 menit">
+    <option value="Melakukan kegiatan promosi kesehatan perorangan 15 menit">
+    <option value="Membimbing pelaksanaan Pelayanan kesehatan olahraga dan kebugaran 15 menit">
+    <option value="Membimbing pelaksanaan Pelayanan kesehatan olahraga dan kebugaran 30 menit">
+    <option value="Menyelenggarakan pelayanan pemulasaraan jenazah 30 menit">
+    <option value="Melaksanakan tugas sebagai asistensi Pelayanan Kesehatan 10 menit">
+    <option value="Mengikuti pembahasan dalam sidang Musrenbang 120 menit">
+    <option value="Mengikuti pembahasan dalam sidang Musrenbang 180 menit">
+    <option value="Mengikuti pelatihan input / supervisi e-Musrenbang 120 menit">
+    <option value="Membuat konsep Lakip Kota (asumsi bahan lengkap) 60 menit">
+    <option value="Membuat konsep Lakip Kota (asumsi bahan lengkap) 120 menit">
+    <option value="Membuat konsep Lakip Kota (asumsi bahan lengkap) 180 menit">
+    <option value="Menghadiri / mendampingi persidangan 60 menit">
+    <option value="Menghadiri / mendampingi persidangan 120 menit">
+    <option value="Menghadiri / mendampingi persidangan 180 menit">
+    <option value="Pemberian keterangan ahli / saksi / sebagai pendamping di persidangan 120 menit">
+    <option value="Pemberian keterangan ahli / saksi / sebagai pendamping di persidangan 180 menit">
+    <option value="Menghadiri sidang di pengadilan 60 menit">
+    <option value="Menghadiri sidang di pengadilan 120 menit">
+    <option value="Menghadiri sidang di pengadilan 180 menit">
+    <option value="Melaksanakan tindakan rawat jalan 10 menit">
+    <option value="Melaksanakan tindakan rawat jalan 30 menit">
+    <option value="Melaksanakan tindakan rawat jalan 60 menit">
+    <option value="Melakukan terapi pada kasus gangguan jiwa / psikososial tingkat sedang kelompok relaksasi / interaksi sosial 30 menit">
+    <option value="Melakukan terapi pada kasus gangguan jiwa / psikososial tingkat sedang kelompok relaksasi / interaksi sosial 60 menit">
+    <option value="Melaksanakan pelayanan klinis umum, spesialis, gizi kerja dan produktivitas kerja 15 menit">
+    <option value="Melaksanakan pelayanan klinis umum, spesialis, gizi kerja dan produktivitas kerja 30 menit">
+    <option value="Membuat RENJA 60 menit">
+    <option value="Membuat RENJA 120 menit">
+    <option value="Membuat RENJA 180 menit">
+    <option value="Menyusun Dokumen RPJPD / RPJMD / RKPD 60 menit">
+    <option value="Menyusun Dokumen RPJPD / RPJMD / RKPD 120 menit">
+    <option value="Menyusun Dokumen RPJPD / RPJMD / RKPD 180 menit">
+    <option value="Membuat gugatan / jawaban / replik / duplik / akta bukti / kesimpulan untuk persidangan di pengadilan 60 menit">
+    <option value="Membuat gugatan / jawaban / replik / duplik / akta bukti / kesimpulan untuk persidangan di pengadilan 120 menit">
+    <option value="Membuat gugatan / jawaban / replik / duplik / akta bukti / kesimpulan untuk persidangan di pengadilan 180 menit">
+    <option value="Mengajukan gugatan / banding / kasasi / peninjauan kembali / memori / kontra memori ke pengadilan 60 menit">
+    <option value="Memberikan keterangan mewakili pemerintah provinsi DKI Jakarta kepada pihak berwajib 60 menit">
+    <option value="Memberikan keterangan mewakili pemerintah provinsi DKI Jakarta kepada pihak berwajib 120 menit">
+    <option value="Memberikan keterangan mewakili pemerintah provinsi DKI Jakarta kepada pihak berwajib 180 menit">
+    <option value="Mempersiapkan alat kerja 5 menit">
+    <option value="Mempersiapkan alat kerja 15 menit">
+    <option value="Mempersiapkan alat kerja 30 menit">
+    <option value="Melaksanakan Penertiban (per titik / per objek) 60 menit">
+    <option value="Melaksanakan Penertiban (per titik / per objek) 120 menit">
+    <option value="Melaksanakan Penertiban (per titik / per objek) 180 menit">
+    <option value="Melakukan pengaturan pada objek kerja 15 menit">
+    <option value="Melakukan pengaturan pada objek kerja 30 menit">
+    <option value="Melakukan pengaturan pada objek kerja 60 menit">
+    <option value="Melaksanakan Penilaian Kinerja Guru 60 menit">
+    <option value="Melakukan inspeksi 30 menit">
+    <option value="Melakukan inspeksi 60 menit">
+    <option value="Melakukan inspeksi 120 menit">
+    <option value="Melakukan QC, kalibrasi, persiapan reagen masing-masing alat kimia, hematologi, urinalisa, imunologi 10 menit">
+    <option value="Menindaklanjuti pertanyaan masyarakat melalui QLUE / CROPS / sistem aplikasi lainnya 5 menit">
+    <option value="Menindaklanjuti pertanyaan masyarakat melalui QLUE / CROPS / sistem aplikasi lainnya 15 menit">
+    <option value="Menindaklanjuti pertanyaan masyarakat melalui QLUE / CROPS / sistem aplikasi lainnya 30 menit">
+    <option value="Melakukan visum et repertum 60 menit">
+    <option value="Melakukan visum et repertum 120 menit">
+    <option value="Menganalisis aktivitas (Kasus ringan okupasi terapi) 20 menit">
+    <option value="Mengikuti visit dokter (per 1 pasien) 5 menit">
+    <option value="Melakukan evakuasi penyelamatan 120 menit">
+    <option value="Melakukan evakuasi penyelamatan 60 menit">
+    <option value="Melaksanakan / mengikuti sosialisasi tingkat kota / provinsi / nasional 120 menit">
+    <option value="Melaksanakan / mengikuti sosialisasi tingkat kota / provinsi / nasional 180 menit">
+    <option value="Melaksanakan / mengikuti sosialisasi tingkat kota / provinsi / nasional 240 menit">
+    <option value="Melaksanakan / mengikuti sosialisasi tingkat kota / provinsi / nasional 300 menit">
+    <option value="Melaksanakan / Melayani Konsultasi Individu / kelompok 10 menit">
+    <option value="Melaksanakan / Melayani Konsultasi Individu / kelompok 30 menit">
+    <option value="Melaksanakan / Melayani Konsultasi Individu / kelompok 60 menit">
+    <option value="Melakukan validasi data 5 menit">
+    <option value="Melakukan validasi data 15 menit">
+    <option value="Menginventarisasi surat usulan anggaran 5 menit">
+    <option value="Membuat perbaikan / koreksi / revisi objek kerja 15 menit">
+    <option value="Membuat perbaikan / koreksi / revisi objek kerja 30 menit">
+    <option value="Membuat perbaikan / koreksi / revisi objek kerja 60 menit">
+    <option value="Melaksanakan pengumpulan data, validasi data, analisis data dan penyajian (publikasi data) sesuai dengan objek kerja 60 menit">
+    <option value="Melaksanakan pengumpulan data, validasi data, analisis data dan penyajian (publikasi data) sesuai dengan objek kerja 120 menit">
+    <option value="Melakukan koordinasi dengan pusat / provinsi 60 menit">
+    <option value="Melakukan koordinasi dengan pusat / provinsi 120 menit">
+    <option value="Menyelenggarakan event kegiatan 30 menit">
+    <option value="Menyelenggarakan event kegiatan 60 menit">
+    <option value="Menyelenggarakan event kegiatan 120 menit">
+    <option value="Penyaluran Warga Binaan Sosial (WBS) per kegiatan 60 menit">
+    <option value="Penyaluran Warga Binaan Sosial (WBS) per kegiatan 90 menit">
+    <option value="Memandikan Warga Binaan Sosial (WBS) 30 menit">
+    <option value="Pelayanan Makan Warga Binaan Sosial (WBS) perpasien 15 menit">
+    <option value="Melakukan anamnesa keperawatan per pasien 5 menit">
+    <option value="Pengurusan administrasi kepegawaian 15 menit">
+    <option value="Pengurusan administrasi kepegawaian 30 menit">
+    <option value="Pengurusan administrasi kepegawaian 60 menit">
+    <option value="Melaksanakan Penilaian Kinerja Kepala Sekolah / Pengawas Sekolah 60 menit">
+    <option value="Melaksanakan Penilaian Kinerja Kepala Sekolah / Pengawas Sekolah 120 menit">
+    <option value="Melakukan pembinaan / penilaian pegawai 15 menit">
+    <option value="Mewarnai sediaan / Objek Kerja 5 menit">
+    <option value="Melakukan pengawasan 15 menit">
+    <option value="Melakukan pengawasan 30 menit">
+    <option value="Melakukan pengawasan 60 menit">
+    <option value="Melakukan pengawasan 120 menit">
+    <option value="Melakukan pemerikasaan dan pengawasan 60 menit">
+    <option value="Melakukan pemerikasaan dan pengawasan 120 menit">
+    <option value="Melaksanakan tindakan medis terhadap satwa (per hewan) 30 menit">
+    <option value="Melaksanakan tindakan medis terhadap satwa (per hewan) 60 menit">
+    <option value="Melaksanakan tindakan medis terhadap satwa (per hewan) 120 menit">
+    <option value="Merawat satwa (per hewan) 30 menit">
+    <option value="Merawat satwa (per hewan) 60 menit">
+    <option value="Mengurus perizinan keluar masuk satwa 90 menit">
+    <option value="Memandu atraksi satwa 30 menit">
+    <option value="Melatih satwa 30 menit">
+    <option value="Menerima satwa yang baru datang / sakit 30 menit">
+    <option value="Melaksanakan pelayanan penanganan satwa liar 180 menit">
+    <option value="Melaksanakan pelayanan penanganan satwa liar 120 menit">
+    <option value="Mengawasi pelaksanaan karantina satwa 60 menit">
+    <option value="Membuat jadwal kegiatan 15 menit">
+    <option value="Membuat jadwal kegiatan 30 menit">
+    <option value="Mengawasi pengolahan sampah 60 menit">
+    <option value="Mengawasi pengolahan sampah 30 menit">
+    <option value="Meneliti surat usulan penyampaian data belanja pegawai SKPD dalam rangka penyusunan APBD / APBD-P 30 menit">
+    <option value="Memverifikasi usulan masyarakat hasil Musrenbang Kecamatan melalui website e-Musrenbang DKI 30 menit">
+    <option value="Input Keterangan Absensi Pegawai Melalui Media Elektronik (Per Hari) 15 menit">
+    <option value="Input Keterangan Absensi Pegawai Melalui Media Elektronik (Per Hari) 30 menit">
+    <option value="Melakukan Perawatan Benda Cagar Budaya / Benda Seni 30 menit">
+    <option value="Melakukan Perawatan Benda Cagar Budaya / Benda Seni 60 menit">
+    <option value="Melaksanakan Layanan Perpustakaan Siswa 30 menit">
+    <option value="Menyusun Jadwal Anggaran Per Kegiatan Dalam Aplikasi Sistem informasi 30 menit">
+    <option value="Menyusun Jadwal Anggaran Per Kegiatan Dalam Aplikasi Sistem informasi 60 menit">
+    <option value="Melaporkan dan mempertanggungjawabkan pengeluaran Anggaran APBD / APBN ke BPKD, Inspektorat dan Kementerian Keuangan 30 menit">
+    <option value="Menyusun / Membuat Sasaran Kerja Pegawai (SKP) 60 menit">
+    <option value="Menyusun LKPJ (Laporan Kinerja Pertanggungjawaban) gubernur 180 menit">
+    <option value="Membuat Sasaran Kerja Pegawai 30 menit">
+    <option value="Membuat konsep expose 30 menit">
+    <option value="Membuat konsep expose 60 menit">
+    <option value="Menerima kunjungan kerja (1x kunjungan) 60 menit">
+    <option value="Menerima kunjungan kerja (1x kunjungan) 120 menit">
+    <option value="Menerima kunjungan kerja (1x kunjungan) 180 menit">
+    <option value="Menerjemahkan Bahasa (1x kunjungan) 60 menit">
+    <option value="Melakukan kegiatan administrasi (Menerima surat, fax, telepon dan mengirim surat, fax) 5 menit">
+    <option value="Melakukan kegiatan administrasi (Menerima surat, fax, telepon dan mengirim surat, fax) 10 menit">
+    <option value="Melakukan kegiatan administrasi (Menerima surat, fax, telepon dan mengirim surat, fax) 15 menit">
+    <option value="Menyusun angka konsolidasi aset 60 menit">
+    <option value="Menyusun angka konsolidasi aset 120 menit">
+    <option value="Menyusun angka konsolidasi selain aset 30 menit">
+    <option value="Menyusun angka konsolidasi selain aset 60 menit">
+    <option value="Menyusun angka konsolidasi selain aset 120 menit">
+    <option value="Melakukan pelayanan Pap Smear 20 menit">
+    <option value="Menyusun LAKIP 60 menit">
+    <option value="Menyusun LAKIP 120 menit">
+    <option value="Menyusun LAKIP 180 menit">
+    <option value="Melakukan Pengkodean, Pendokumentasian dan Penyimpanan Hasil Uji 20 menit">
+    <option value="Uji Kelayakan Kendaraan Bermotor 5 menit">
+    <option value="Uji Kelayakan Kendaraan Bermotor 15 menit">
+    <option value="Menerbitkan Surat Rekomendasi / Surat Izin 30 menit">
+    <option value="Melakukan kegiatan Promosi / Pameran / Bazar Investasi Dalam Negeri 120 menit">
+    <option value="Melakukan kegiatan Promosi / Pameran / Bazar Investasi Dalam Negeri 180 menit">
+    <option value="Membuat Surat Pengantar Rekomendasi Teknis ke instansi terkait sesuai dengan bidang perizinan 30 menit">
+    <option value="Melaksanakan Pemberian Peringatan Terhadap Pelanggaran Perizinan dan Non Perizinan 30 menit">
+    <option value="Melakukan tindakan teknik pemeriksaan radiologi USG 15 menit">
+    <option value="Melakukan tindakan teknik pemeriksaan radiologi USG 30 menit">
+    <option value="Melaksanakan pemeriksaan pasien 5 menit">
+    <option value="Melaksanakan pemeriksaan pasien 15 menit">
+    <option value="Melaksanakan pemeriksaan pasien 30 menit">
+    <option value="Melaksanakan pemeriksaan ante mortem dan post mortem (per pasien) 60 menit">
+    <option value="Melaksanakan pemeriksaan ante mortem dan post mortem (per pasien) 120 menit">
+    <option value="Penggandaan berkas / dokumen 1 menit">
+    <option value="Melakukan / melaksanakan pemeriksaan / penelitian / uji pada laboratorium 5 menit">
+    <option value="Melakukan / melaksanakan pemeriksaan / penelitian / uji pada laboratorium 15 menit">
+    <option value="Melakukan / melaksanakan pemeriksaan / penelitian / uji pada laboratorium 30 menit">
+    <option value="Uji Kelayakan Kendaraan Bermotor 30 menit">
+    <option value="Melaksanakan penanganan keadaan darurat 30 menit">
+    <option value="Melaksanakan penanganan keadaan darurat 60 menit">
+    <option value="Melaksanakan penanganan keadaan darurat 120 menit">
+    <option value="Melaksanakan penanganan keadaan darurat 180 menit">
+    <option value="Melakukan analisa dalam proses pengadaan Barang / Jasa 60 menit">
+    <option value="Melakukan analisa dalam proses pengadaan Barang / Jasa 120 menit">
+    <option value="Penyusunan RAB / HPS dalam Pengadaan Barang / Jasa 60 menit">
+    <option value="Penyusunan RAB / HPS dalam Pengadaan Barang / Jasa 120 menit">
+    <option value="Melakukan penilaian dalam proses pengadaan barang / jasa 60 menit">
+    <option value="Membuat penetapan terhadap pemutusan pelaksanaan Pengadaan Barang / Jasa 30 menit">
+    <option value="Membuat penetapan terhadap pemutusan pelaksanaan Pengadaan Barang / Jasa 60 menit">
+    <option value="Penerimaan Hasil Pengadaan Barang / Jasa 30 menit">
+    <option value="Penerimaan Hasil Pengadaan Barang / Jasa 60 menit">
+    <option value="Penyusunan Harga Perkiraan Sendiri (HPS) Barang / Jasa 15 menit">
+    <option value="Penyusunan Harga Perkiraan Sendiri (HPS) Barang / Jasa 30 menit">
+    <option value="Menerima / memeriksa jumlah dan jenis barang / hasil pekerjaan 90 menit">
+    <option value="Menerima / memeriksa jumlah dan jenis barang / hasil pekerjaan 60 menit">
+    <option value="Melakukan pemeriksaan barang / dokumen / berkas 3 menit">
+    <option value="Melakukan pemeriksaan barang / dokumen / berkas 5 menit">
+    <option value="Melakukan pemeliharaan kandang (per lokasi) 30 menit">
+    <option value="Membuat konsep Surat Edaran Sekretaris Daerah 60 menit">
+    <option value="Membuat konsep Surat Edaran Sekretaris Daerah 90 menit">
+    <option value="Membuat konsep Surat Edaran Sekretaris Daerah 120 menit">
+    <option value="Membuat instruksi Sekertaris Daerah 30 menit">
+    <option value="Membuat instruksi Sekertaris Daerah 60 menit">
+    <option value="Membuat instruksi Sekertaris Daerah 90 menit">
+    <option value="Narator pertunjukan teater bintang 60 menit">
+    <option value="Mengoperasikan pertunjukan (teater) 60 menit">
+    <option value="Mengontrol keamanan gedung dan lingkungan kantor pada siang / malam hari 30 menit">
+    <option value="Mengontrol keamanan gedung dan lingkungan kantor pada siang / malam hari 60 menit">
+    <option value="Mengontrol keamanan gedung dan lingkungan kantor pada siang / malam hari 90 menit">
+    <option value="Melaksanakan tugas untuk kelancaran dan ketertiban di area pelabuhan 30 menit">
+    <option value="Memeriksa keadaan muatan sesuai prosedur yg berlaku untuk kelancaran pelaksanan pelayaran 30 menit">
+    <option value="Menyandarkan kapal setelah pelaksanan pelayaran sesuai prosedur yang berlaku agar kapal terjaga keamananya 30 menit">
+    <option value="Membuat press release 30 menit">
+    <option value="Membuat press release 60 menit">
+    <option value="Memeriksa dan mencocokan nomor kendaraan yang meninggalkan areal parkir 2 menit">
+    <option value="Mengelola alokasi area database 15 menit">
+    <option value="Mengelola alokasi area database 30 menit">
+    <option value="Mengelola alokasi area database 60 menit">
+    <option value="Melaksanakan Penilaian Kinerja Guru 120 menit">
+    <option value="Melakukan penilaian 10 menit">
+    <option value="Melakukan penilaian 30 menit">
+    <option value="Melakukan penilaian 60 menit">
+    <option value="Melakukan penilaian 120 menit">
+    <option value="Menghitung pemakaian barang habis pakai 30 menit">
+    <option value="Menghitung pemakaian barang habis pakai 60 menit">
+    <option value="Membuat perbaikan Surat Keputusan 15 menit">
+    <option value="Membuat perbaikan Surat Keputusan 30 menit">
+    <option value="Membuat perbaikan Surat Keputusan 60 menit">
+    <option value="Melaksanakan perbaikan objek kerja setelah koreksi pimpinan 15 menit">
+    <option value="Melaksanakan perbaikan objek kerja setelah koreksi pimpinan 30 menit">
+    <option value="Memperbaiki / memeriksa objek kerja 15 menit">
+    <option value="Memperbaiki / memeriksa objek kerja 30 menit">
+    <option value="Memperbaiki / memeriksa objek kerja 60 menit">
+    <option value="Penindakan penyegelan sesuai dengan objek kerja 60 menit">
+    <option value="Melaksanakan pelayanan kesehatan sesuai dengan objek kerja 30 menit">
+    <option value="Verifikasi Buku Kas Umum (BKU) dan Buku Pembantu Lainnya 30 menit">
+    <option value="Verifikasi Buku Kas Umum (BKU) dan Buku Pembantu Lainnya 60 menit">
+    <option value="Verifikasi Daftar Gaji / Daftar TKD / Daftar tunjangan lainnya 15 menit">
+    <option value="Verifikasi Daftar Gaji / Daftar TKD / Daftar tunjangan lainnya 30 menit">
+    <option value="Verifikasi Daftar Gaji / Daftar TKD / Daftar tunjangan lainnya 60 menit">
+    <option value="Restorasi Perbaikan Arsip 5 menit">
+    <option value="Membuat Laporan Penggunaan Barang Pakai Habis (ATK, Obat, Alkes) 30 menit">
+    <option value="Melaksanakan pemeliharaan dan perbaikan instalasi listrik dan air 60 menit">
+    <option value="Melaksanakan pemeliharaan dan perbaikan instalasi listrik dan air 30 menit">
+    <option value="Mengendalikan kapal sebagai nahkoda sesuai dengan prosedur pelayaran 120 menit">
+    <option value="Mengendalikan kapal sebagai nahkoda sesuai dengan prosedur pelayaran 60 menit">
+    <option value="Melakukan pelayaran sebagai ABK sesuai dengan prosedur pelayaran 60 menit">
+    <option value="Melakukan pelayaran sebagai ABK sesuai dengan prosedur pelayaran 120 menit">
+    <option value="Melakukan pengecekan kelengkapan kapal sesuai prosedur dan arahan pimpinan 60 menit">
+    <option value="Mengecek kondisi kapal sesuai prosedur yg berlaku untuk kelancaran pelaksanaan pelayaran 60 menit">
+    <option value="Membuat jurnal / catatan kondisi kapal secara berkala sesuai prosedur dan arahan pimpinan agar dapat mengetahui kondisi kapal 45 menit">
+    <option value="Menginput Usulan Pensiun BUP ke dalam Sistem Aplikasi Pelayanan Kepegawaian (SAPK) BKN 5 menit">
+    <option value="Memelihara peralatan operasional truk / bis / kendaraan lain 60 menit">
+    <option value="Melakukan rekonsiliasi data / keuangan / aset 60 menit">
+    <option value="Melakukan rekonsiliasi data / keuangan / aset 120 menit">
+    <option value="Melakukan rekonsiliasi data / keuangan / aset 180 menit">
+    <option value="Melakukan rekonsiliasi aset 60 menit">
+    <option value="Melakukan rekonsiliasi aset 120 menit">
+    <option value="Melakukan penelitian 15 menit">
+    <option value="Melakukan penelitian 30 menit">
+    <option value="Melakukan penelitian 60 menit">
+    <option value="Melakukan tindakan proteksi radiasi / kalibrasi 15 menit">
+    <option value="Melakukan tindakan proteksi radiasi / kalibrasi 30 menit">
+    <option value="Melakukan tindakan proteksi radiasi / kalibrasi 60 menit">
+    <option value="Melakukan tindakan proteksi radiasi / kalibrasi 180 menit">
+    <option value="Melakukan pendistribusian barang 15 menit">
+    <option value="Menyiapkan naskah soal ujian perkegiatan 15 menit">
+    <option value="Membuat soal ujian 60 menit">
+    <option value="Membuat soal ujian 120 menit">
+    <option value="Memantau pasien 5 menit">
+    <option value="Membuat konsep TOR atau KAK 60 menit">
+    <option value="Membuat konsep TOR atau KAK 120 menit">
+    <option value="Pemantauan Unjuk Rasa 60 menit">
+    <option value="Pemantauan Unjuk Rasa 120 menit">
+    <option value="Melaksanakan tugas kedinasan lain yang diperintahkan oleh pimpinan baik tertulis maupun lisan 30 menit">
+    <option value="Melaksanakan tugas kedinasan lain yang diperintahkan oleh pimpinan baik tertulis maupun lisan 60 menit">
+    <option value="Melakukan kegiatan pelayanan (Menerima, memverifikasi, dan mencatat berkas / surat / dokumen dan / atau memberi penjelasan) 3 menit">
+    <option value="Melakukan kegiatan pelayanan (Menerima, memverifikasi, dan mencatat berkas / surat / dokumen dan / atau memberi penjelasan) 5 menit">
+    <option value="Melakukan kegiatan pelayanan (Menerima, memverifikasi dan mencatat berkas / surat / dokumen dan / atau memberi penjelasan) 15 menit">
+    <option value="Membuat Surat Gugatan / Memori atau Kontra Memori 300 menit">
+    <option value="Melakukan kegiatan surveilance kasus atau penyakit yang berpotensi menjadi KLB per lokasi 60 menit">
+    <option value="Melakukan kegiatan surveilance kasus atau penyakit yang berpotensi menjadi KLB per lokasi 120 menit">
+    <option value="Melakukan kegiatan surveilance kasus atau penyakit yang berpotensi menjadi KLB per lokasi 180 menit">
+    <option value="Mengembangkan dan atau meremajakan rancangan rinci sistem informasi 60 menit">
+    <option value="Mengembangkan dan atau meremajakan rancangan rinci sistem informasi 120 menit">
+    <option value="Melakukan Pengamanan / Pemantauan Data / Sistem 60 menit">
+    <option value="Melakukan Pengamanan / Pemantauan Data / Sistem 120 menit">
+    <option value="Melakukan Audit Rutin Sistem 30 menit">
+    <option value="Melakukan Audit Rutin Sistem 60 menit">
+    <option value="Menilai Usulan Pengembangan atau Pembangunan Sistem Informasi Baru dan Mengidetifikasi Dampak 30 menit">
+    <option value="Menilai Usulan Pengembangan atau Pembangunan Sistem Informasi Baru dan Mengidetifikasi Dampak 60 menit">
+    <option value="Membuat sistem / aplikasi IT 60 menit">
+    <option value="Membuat sistem / aplikasi IT 120 menit">
+    <option value="Membuat resep 1 menit">
+    <option value="Melakukan tindakan / terapi pengobatan 15 menit">
+    <option value="Melakukan tindakan / terapi pengobatan 30 menit">
+    <option value="Melakukan tindakan / terapi pengobatan 60 menit">
+    <option value="Memberikan resep obat / pasien 1 menit">
+    <option value="Menaklik Tiknet Perbal Naskah Dinas 30 menit">
+    <option value="Menaklik Tiknet Perbal Naskah Dinas 60 menit">
+    <option value="Melakukan pendistribusian barang 30 menit">
+    <option value="Melakukan pendistribusian barang 60 menit">
+    <option value="Melakukan pendistribusian barang 120 menit">
+    <option value="Mempersiapkan peralatan dan bahan penunjang untuk pengambilan spesimen / sample Laboratorium 5 menit">
+    <option value="Melaksanakan pemusnahan dokumen / barang (per dokumen / barang) 15 menit">
+    <option value="Melaksanakan pemusnahan dokumen / barang (per dokumen / barang) 30 menit">
+    <option value="Melaksanakan pemusnahan dokumen / barang (per dokumen / barang) 60 menit">
+    <option value="Membuat Penetapan / penunjukan Penyedia barang / Jasa 15 menit">
+    <option value="Membuat sambutan / pidato pejabat 15 menit">
+    <option value="Membuat sambutan / pidato pejabat 30 menit">
+    <option value="Melakukan validasi / verifikasi nama jabatan SKPD / UKPD 60 menit">
+    <option value="Melakukan validasi / verifikasi nama jabatan SKPD / UKPD 90 menit">
+    <option value="Melakukan validasi / verifikasi Analisa Jabatan / Analisa Beban Kerja / Evaluasi Jabatan SKPD / UKPD 60 menit">
+    <option value="Melakukan validasi / verifikasi Analisa Jabatan / Analisa Beban Kerja / Evaluasi Jabatan SKPD / UKPD 90 menit">
+    <option value="Melakukan validasi / verifikasi Kelas Jabatan / Nama Jabatan / Formasi Jabatan 30 menit">
+    <option value="Melakukan validasi / verifikasi Kelas Jabatan / Nama Jabatan / Formasi Jabatan 60 menit">
+    <option value="Menyusun tabel manual anggaran per kegiatan tahun anggaran 60 menit">
+    <option value="Melakukan Evaluasi Sistem Akuntabilitas Kinerja Instansi Pemerintah per 1 SKPD 30 menit">
+    <option value="Melakukan Evaluasi Sistem Akuntabilitas Kinerja Instansi Pemerintah per 1 SKPD 60 menit">
+    <option value="Menyusun Evaluasi Jabatan / Kelas Jabatan 60 menit">
+    <option value="Menyusun Evaluasi Jabatan / Kelas Jabatan 30 menit">
+    <option value="Menyusun kamus jabatan 60 menit">
+    <option value="Menyusun kamus jabatan 120 menit">
+    <option value="Menyusun data jabatan SKPD / UKPD 90 menit">
+    <option value="Melaksanakan cap bakar / tanda selar kapal-kapal di bawah 7 GT pada pelabuhan 30 menit">
+    <option value="Membuat jawaban 30 menit">
+    <option value="Membuat jawaban 60 menit">
+    <option value="Membuat jawaban 120 menit">
+    <option value="Mengumpulkan jawaban ujian 15 menit">
+    <option value="Membuat surat jawaban atas pengaduan masyarakat 60 menit">
+    <option value="Melaksanakan penginformasian kepada pengguna jalan dengan Variable Message Sign (VMS) Mobile 60 menit">
+    <option value="Melaksanakan penginformasian kepada pengguna jalan dengan Variable Message Sign (VMS) Mobile 120 menit">
+    <option value="Melakukan coding program database 60 menit">
+    <option value="Melakukan coding program database 90 menit">
+    <option value="Melakukan konversi sistem database 30 menit">
+    <option value="Melakukan konversi sistem database 60 menit">
+    <option value="Membuat otorisasi akses database 15 menit">
+    <option value="Membuat otorisasi akses database 30 menit">
+    <option value="Membuat otorisasi akses database 60 menit">
+    <option value="Melaksanakan duplikasi database 15 menit">
+    <option value="Melaksanakan duplikasi database 30 menit">
+    <option value="Melaksanakan duplikasi database 60 menit">
+    <option value="Migrasi database 15 menit">
+    <option value="Migrasi database 30 menit">
+    <option value="Migrasi database 60 menit">
+    <option value="Memfasilitasi Permintaan Dari PA / KPA / PPK / ULP / Pejabat Pengadaan Berkaitan Dengan Blacklist Terhadap Penyedia Barang / Jasa 30 menit">
+    <option value="Pemeriksaan Lab. Kesehatan 10 menit">
+    <option value="Pemeriksaan Lab. Kesehatan 15 menit">
+    <option value="Pemeriksaan Lab. Kesehatan 20 menit">
+    <option value="Melakukan Pencatatan dan pelayanan laboratorium 60 menit">
+    <option value="Melakukan penanggulangan KLB dan wabah 15 menit">
+    <option value="Melakukan penanggulangan KLB dan wabah 30 menit">
+    <option value="Melakukan penanggulangan KLB dan wabah 60 menit">
+    <option value="Mengumpulkan data / berkas / dokumen 5 menit">
+    <option value="Mengumpulkan data / berkas / dokumen 10 menit">
+    <option value="Mengumpulkan data / berkas / dokumen 15 menit">
+    <option value="Mengumpulkan data / berkas / dokumen 30 menit">
+    <option value="Menyediakan data untuk Rapim Gubernur 30 menit">
+    <option value="Menyediakan data untuk Rapim Gubernur 60 menit">
+    <option value="Mengumpulkan Berkas / Dokumen 15 menit">
+    <option value="Mengumpulkan Berkas / Dokumen 30 menit">
+    <option value="Menjadi narasumber 60 menit">
+    <option value="Menjadi narasumber 120 menit">
+    <option value="Melaksanakan Verifikasi (per berkas) 5 menit">
+    <option value="Melaksanakan Verifikasi (per berkas) 15 menit">
+    <option value="Melaksanakan Verifikasi (per berkas) 30 menit">
+    <option value="Melaksanakan Verifikasi (per berkas) 60 menit">
+    <option value="Melakukan Pengujian Atas Analisa Data pada Benda Cagar Budaya / Benda Seni (Per Benda) 30 menit">
+    <option value="Melakukan Pengujian Atas Analisa Data pada Benda Cagar Budaya / Benda Seni (Per Benda) 60 menit">
+    <option value="Menempatkan Benda Cagar Budaya / Benda Seni (Per Benda) 30 menit">
+    <option value="Menempatkan Benda Cagar Budaya / Benda Seni (Per Benda) 60 menit">
+    <option value="Pengetikan Call Number Bahan Perpustakaan (Per 5 Buku) 5 menit">
+    <option value="Melaksanakan Pemberantasan Sarang Nyamuk (PSN) 60 menit">
+    <option value="Melaksanakan Pemberantasan Sarang Nyamuk (PSN) 120 menit">
+    <option value="Pembahasan KUA-PPAS Bersama DPRD 120 menit">
+    <option value="Pembahasan KUA-PPAS Bersama DPRD 180 menit">
+    <option value="Menyusun Analisa Beban Kerja 30 menit">
+    <option value="Menyusun Analisa Beban Kerja 60 menit">
+    <option value="Menyiapkan, menganalisis, menyajikan dokumen untuk kebutuhan sertifikasi ISO 120 menit">
+    <option value="Menyiapkan, menganalisis, menyajikan dokumen untuk kebutuhan sertifikasi ISO 60 menit">
+    <option value="Melakukan Update Berita pada Website 10 menit">
+    <option value="Melaksanakan tugas sebagai asisten pelayanan kesehatan 5 menit">
+    <option value="Melaksanakan tugas sebagai asisten pelayanan kesehatan 10 menit">
+    <option value="Menanam pohon / tumbuhan / bibit (per lokasi) 30 menit">
+    <option value="Menanam pohon / tumbuhan / bibit (per lokasi) 60 menit">
+    <option value="Menanam pohon / tumbuhan / bibit (per lokasi) 120 menit">
+    <option value="Melaksanakan pembibitan tanaman (per lokasi) 60 menit">
+    <option value="Melaksanakan pembibitan tanaman (per lokasi) 30 menit">
+    <option value="Melakukan koordinasi dengan subbidang / subbagian dalam satu SKPD 15 menit">
+    <option value="Melakukan koordinasi dengan subbidang / subbagian dalam satu SKPD 30 menit">
+    <option value="Meneliti dan memverifikasi Analisis Standar Biaya (ASB) / Harga Satuan Pokok Kegiatan (HSPK) 30 menit">
+    <option value="Meneliti dan memverifikasi Analisis Standar Biaya (ASB) / Harga Satuan Pokok Kegiatan (HSPK) 60 menit">
+    <option value="Meneliti dan memverifikasi Analisis Standar Biaya (ASB) / Harga Satuan Pokok Kegiatan (HSPK) 90 menit">
+    <option value="Melaksanakan Layanan Perpustakaan Mobil Keliling 120 menit">
+    <option value="Melaksanakan Layanan Perpustakaan Mobil Keliling 180 menit">
+    <option value="Membuat buku inventaris (BI) 30 menit">
+    <option value="Membuat buku induk inventaris (BII) 30 menit">
+    <option value="Membuat Rencana Kerja Bidang Pendidikan 60 menit">
+    <option value="Membuat Rencana Kerja Bidang Pendidikan 120 menit">
+    <option value="Melaksanakan Kegiatan Pembinaan 30 menit">
+    <option value="Melaksanakan Kegiatan Pembinaan 60 menit">
+    <option value="Melaksanakan Kegiatan Pembinaan 90 menit">
+    <option value="Melaksanakan Kegiatan Pembinaan 120 menit">
+    <option value="Melaksanakan Kegiatan Pembinaan 180 menit">
+    <option value="Mengambil / mengantar dokumen / surat / berkas 5 menit">
+    <option value="Mengambil / mengantar dokumen / surat / berkas 15 menit">
+    <option value="Mengambil / mengantar dokumen / surat / berkas 30 menit">
+    <option value="Mengambil / mengantar dokumen / surat / berkas 60 menit">
+    <option value="Mengambil / mengantar dokumen / surat / berkas 120 menit">
+    <option value="Membimbing mahasiswa / peserta Diklat 30 menit">
+    <option value="Mengajar / Melatih Diklat di Bidang Pengadaan Barang / Jasa 90 menit">
+    <option value="Melaksanakan Pengambilan Gambar dengan Kamera 2 menit">
+    <option value="Melaksanakan Pengambilan Gambar dengan Kamera 5 menit">
+    <option value="Melaksanakan Pengambilan Gambar dengan Kamera 15 menit">
+    <option value="Melaksanakan Pendistribusian Logistik dan Penanganan Kedaruratan 60 menit">
+    <option value="Menerima dan menyetor retribusi 20 menit">
+    <option value="Melakukan kalibrasi 15 menit">
+    <option value="Melakukan kalibrasi 30 menit">
+    <option value="Melakukan kalibrasi 60 menit">
+    <option value="Membuat inventaris barang ( KIB) 30 menit">
+    <option value="Menyiapkan bahan yang dibutuhkan oleh Lembaga Pemeriksa 60 menit">
+    <option value="Menyiapkan bahan yang dibutuhkan oleh Lembaga Pemeriksa 120 menit">
+    <option value="Menghitung Besaran Retribusi Pemakaian Alat Ukur 10 menit">
+    <option value="Menghitung Besaran Retribusi Pemakaian Alat Ukur 30 menit">
+    <option value="Melakukan Print Out Borderel, SKP dan TNKB 30 menit">
+    <option value="Melakukan Print Out Borderel, SKP dan TNKB 60 menit">
+    <option value="Membuat dan memasang Nomor Ujian (per objek) 5 menit">
+    <option value="Pemeriksaan dan Pengujian Khusus Objek Kesehatan Keselamatan Kerja (K3 ) 60 menit">
+    <option value="Melakukan penghitungan terhadap objek kerja 15 menit">
+    <option value="Melakukan penghitungan terhadap objek kerja 30 menit">
+    <option value="Melakukan penghitungan terhadap objek kerja 60 menit">
+    <option value="Melakukan pengaturan / pengelolaan objek kerja 15 menit">
+    <option value="Melakukan pengaturan / pengelolaan objek kerja 30 menit">
+    <option value="Melakukan otorisasi / pengesahan objek kerja 5 menit">
+    <option value="Melakukan otorisasi / pengesahan objek kerja 15 menit">
+    <option value="Membuat uji kelayakan terhadap objek kerja 30 menit">
+    <option value="Membuat uji kelayakan terhadap objek kerja 60 menit">
+    <option value="Observasi Jasa Telekomunikasi 30 menit">
+    <option value="Observasi Jasa Telekomunikasi 60 menit">
+    <option value="Observasi jasa pos 30 menit">
+    <option value="Observasi jasa pos 60 menit">
+    <option value="Observasi Multimedia 30 menit">
+    <option value="Observasi Multimedia 60 menit">
+    <option value="Melakukan Pengukuran Objek 30 menit">
+    <option value="Melakukan Pengukuran Objek 60 menit">
+    <option value="Melakukan perbaikan objek kerja 15 menit">
+    <option value="Melakukan perbaikan objek kerja 30 menit">
+    <option value="Melakukan perbaikan objek kerja 45 menit">
+    <option value="Melakukan perbaikan objek kerja 60 menit">
+    <option value="Melakukan perbaikan objek kerja 90 menit">
+    <option value="Melakukan perbaikan objek kerja 120 menit">
+    <option value="Melakukan pemeliharaan objek kerja 15 menit">
+    <option value="Melakukan pemeliharaan objek kerja 30 menit">
+    <option value="Melakukan pemeliharaan objek kerja 45 menit">
+    <option value="Melakukan pemeliharaan objek kerja 60 menit">
+    <option value="Memperbaiki / memeriksa objek kerja 5 menit">
+    <option value="Membuat RENSTRA 60 menit">
+    <option value="Membuat RENSTRA 120 menit">
+    <option value="Membuat RENSTRA 180 menit">
+    <option value="Membuat / melaksanakan administrasi 15 menit">
+    <option value="Membuat / melaksanakan administrasi 30 menit">
+    <option value="Membuat / melaksanakan administrasi 60 menit">
+    <option value="Membuat Karya Ilmiah / Makalah 120 menit">
+    <option value="Pembuatan karya tulis / karya ilmiah 60 menit">
+    <option value="Mengumpulkan dan mengedit artikel untuk publikasi 60 menit">
+    <option value="Menghubungi keluarga anak asuh dalam rangka konsultasi dan monitoring perkembangan anak asuh 10 menit">
+    <option value="Melakukan analisa usulan anggaran and perubahan anggaran SKPD / UKPD 90 menit">
+    <option value="Mengikuti RAPIM Gubernur 60 menit">
+    <option value="Mengikuti RAPIM Gubernur 120 menit">
+    <option value="Mengikuti RAPIM Gubernur 180 menit">
+    <option value="Membuat konsep Surat Edaran Gubernur 60 menit">
+    <option value="Menyusun ringkasan surat masuk Gubernur (Membuat resume) 10 menit">
+    <option value="Menyusun ringkasan surat masuk Gubernur (Membuat resume) 15 menit">
+    <option value="Memberikan Informasi Layanan Publik 5 menit">
+    <option value="Memberikan Informasi Layanan Publik 10 menit">
+    <option value="Melakukan Penanganan Masalah (Troubleshooting) pada Aplikasi / Sistem 30 menit">
+    <option value="Melakukan Penanganan Masalah (Troubleshooting) pada Aplikasi / Sistem 60 menit">
+    <option value="Mengikuti RAPIM Wakil Gubernur 60 menit">
+    <option value="Mengikuti RAPIM Wakil Gubernur 120 menit">
+    <option value="Mengikuti RAPIM Wakil Gubernur 180 menit">
+    <option value="Pengecapan Identitas Bahan Perpustakaan (Per 5 Buku) 5 menit">
+    <option value="Menyusun Rencana Kegiatan / Anggaran 30 menit">
+    <option value="Menyusun Rencana Kegiatan / Anggaran 60 menit">
+    <option value="Menyusun Rencana Kegiatan / Anggaran 120 menit">
+    <option value="Menyusun Rancangan APBD / APBD-P 60 menit">
+    <option value="Menyusun Rancangan APBD / APBD-P 120 menit">
+    <option value="Menyusun Rancangan APBD / APBD-P 180 menit">
+    <option value="Merevisi Rencana Kerja dan Anggaran per kegiatan 30 menit">
+    <option value="Menghimpun usulan Rencana Kerja dan Anggaran 60 menit">
+    <option value="Mengolah data perencanaan dan anggaran 90 menit">
+    <option value="Pengawasan / Pelaksanaan Kegiatan Perencanaan dan Evaluasi Pengawasan / Melaksanakan kegiatan perencanaan pengawasan 60 menit">
+    <option value="Pengawasan / Pelaksanaan Kegiatan Perencanaan dan Evaluasi Pengawasan / Melaksanakan kegiatan perencanaan pengawasan 120 menit">
+    <option value="Pengawasan / Pelaksanaan Kegiatan Perencanaan dan Evaluasi Pengawasan / Melaksanakan kegiatan perencanaan pengawasan 180 menit">
+    <option value="Menyiapkan rapat / diklat (Snack, daftar hadir) (Per 1 kegiatan) 15 menit">
+    <option value="Menyiapkan rapat / diklat (Snack, daftar hadir) (Per 1 kegiatan) 30 menit">
+    <option value="Melakukan Back Up Data 60 menit">
+    <option value="Melakukan Back Up Data 120 menit">
+    <option value="Melakukan Back Up Aplikasi / Sistem 60 menit">
+    <option value="Melakukan Back Up Aplikasi / Sistem 120 menit">
+    <option value="Registrasi Koleksi KCKR (Karya Cetak dan Karya Rekam) 30 menit">
+    <option value="Registrasi Koleksi KCKR (Karya Cetak dan Karya Rekam) 60 menit">
+    <option value="Registrasi Koleksi KCKR (Karya Cetak dan Karya Rekam) 90 menit">
+    <option value="Melaksanakan upaya pencegahan 30 menit">
+    <option value="Melaksanakan upaya pencegahan 60 menit">
+    <option value="Mencetak hasil input Renja melalui sistem informasi 5 menit">
+    <option value="Melakukan Inservice Jaringan Online Mainframe 15 menit">
+    <option value="Melakukan Inservice Printer Online 15 menit">
+    <option value="Pre / Post Confrence Keperawatan 20 menit">
+    <option value="Pre / Post Confrence Keperawatan 30 menit">
+    <option value="Melakukan Recovery Data / Aplikasi / Sistem 60 menit">
+    <option value="Melakukan Recovery Data / Aplikasi / Sistem 120 menit">
+    <option value="Pemeriksaan Specimen 5 menit">
+    <option value="Menyusun konsep rincian anggaran 30 menit">
+    <option value="Menyusun konsep rincian anggaran 60 menit">
+    <option value="Update Content Social Media 2 menit">
+    <option value="Melakukan Stock Opname 15 menit">
+    <option value="Melakukan Stock Opname 30 menit">
+    <option value="Melakukan Stock Opname 60 menit">
+    <option value="Pendampingan Terhadap Penggunaan SPSE dan Aplikasi e-Procurement Lainnya 30 menit">
+    <option value="Melakukan tindakan radiologi 15 menit">
+    <option value="Melakukan tindakan radiologi 30 menit">
+    <option value="Melaksanakan tera ulang terhadap alat ukur (per alat ukur) 15 menit">
+    <option value="Melaksanakan tera ulang terhadap alat ukur (per alat ukur) 30 menit">
+    <option value="Mengadministrasikan surat 5 menit">
+    <option value="Menjadi moderator 60 menit">
+    <option value="Menjadi moderator 120 menit">
+    <option value="Panitia pada pelaksanaan kegiatan di SKPD / UKPD 60 menit">
+    <option value="Panitia pada pelaksanaan kegiatan di SKPD / UKPD 120 menit">
+    <option value="Panitia pada pelaksanaan kegiatan di SKPD / UKPD 180 menit">
+    <option value="Melaksanakan deteksi dini (per lokasi) 60 menit">
+    <option value="Melakukan deteksi 60 menit">
+    <option value="Melakukan deteksi 120 menit">
+    <option value="Melakukan koordinasi dengan SKPD 30 menit">
+    <option value="Melakukan koordinasi dengan SKPD 45 menit">
+    <option value="Melakukan koordinasi dengan SKPD 60 menit">
+    <option value="Alih Media Indeksing dan Editing Arsip 15 menit">
+    <option value="Alih Media Indeksing dan Editing Arsip 30 menit">
+    <option value="Pembahasan RAPBD / RAPBD-P dengan DPRD 120 menit">
+    <option value="Pembahasan RAPBD / RAPBD-P dengan DPRD 180 menit">
+    <option value="Melakukan validasi Anggaran per kode rekening kegiatan 10 menit">
+    <option value="Melakukan validasi Anggaran per kode rekening kegiatan 20 menit">
+    <option value="Melakukan validasi Anggaran per kode rekening kegiatan 30 menit">
+    <option value="Pembahasan RAPBD / RAPBD-P dengan Pemerintah Pusat 180 menit">
+    <option value="Melakukan identifikasi 15 menit">
+    <option value="Melakukan identifikasi 30 menit">
+    <option value="Melakukan identifikasi 60 menit">
+    <option value="Melakukan identifikasi 90 menit">
+    <option value="Melakukan Rapat Rekonsiliasi dengan para PPTK yang memiliki tagihan utang pada pihak ketiga 120 menit">
+    <option value="Melakukan Rapat Rekonsiliasi dengan pengurus barang dan penyimpan barang 120 menit">
+    <option value="Melakukan Rapat Rekonsiliasi dengan para bendahara pengeluaran 120 menit">
+    <option value="Melaksanakan konfirmasi / rekonsiliasi dengan pusat / provinsi / SKPD / UKPD 30 menit">
+    <option value="Melaksanakan konfirmasi / rekonsiliasi dengan pusat / provinsi / SKPD / UKPD 60 menit">
+    <option value="Melaksanakan konfirmasi / rekonsiliasi dengan pusat / provinsi / SKPD / UKPD 120 menit">
+    <option value="Melaksanakan konfirmasi / rekonsiliasi dengan pusat / provinsi / SKPD / UKPD 180 menit">
+    <option value="Mendesain sertifikat, spanduk dan piagam 30 menit">
+    <option value="Melakukan usulan komponen per kode rekening kegiatan 20 menit">
+    <option value="Membuat Detail Engineering Drawing (DED) konstruksi fisik 90 menit">
+    <option value="Membuat Detail Engineering Drawing (DED) konstruksi fisik 120 menit">
+    <option value="Membuat Detail Engineering Drawing (DED) konstruksi fisik 180 menit">
+    <option value="Melaksanakan Wawancara dengan Pelapor / Saksi 30 menit">
+    <option value="Melaksanakan Wawancara dengan Pelapor / Saksi 60 menit">
+    <option value="Melakukan Identifikasi dan Verfikasi Perangkat Keras 30 menit">
+    <option value="Melakukan Identifikasi dan Verfikasi Perangkat Keras 60 menit">
+    <option value="Mengikuti ronde keperawatan 30 menit">
+    <option value="Mengikuti ronde keperawatan 60 menit">
+    <option value="Mengikuti ronde keperawatan 120 menit">
+    <option value="Melakukan tindakan operasi medis 90 menit">
+    <option value="Melakukan tindakan operasi medis 120 menit">
+    <option value="Melakukan tindakan darurat medik gigi dan mulut kompleks tingkat I 60 menit">
+    <option value="Mengoperasikan sarana dan prasarana penanggulangan kedaruratan 60 menit">
+    <option value="Membuat Penetapan / penunjukan Penyedia barang / Jasa 30 menit">
+    <option value="Melakukan koordinasi melalui media elektronik 15 menit">
+    <option value="Membuat / menyusun Standar Operasional Prosedur (SOP) 30 menit">
+    <option value="Membuat / menyusun Standar Operasional Prosedur (SOP) 60 menit">
+    <option value="Membuat / menyusun Standar Operasional Prosedur (SOP) 180 menit">
+    <option value="Menyusun pedoman / petunjuk teknis / petunjuk pelaksanaan 60 menit">
+    <option value="Menyusun pedoman / petunjuk teknis / petunjuk pelaksanaan 90 menit">
+    <option value="Menyusun pedoman / petunjuk teknis / petunjuk pelaksanaan 120 menit">
+    <option value="Membuat Surat Edaran 30 menit">
+    <option value="Membuat Surat Edaran 60 menit">
+    <option value="Melakukan proses kegiatan akreditasi 30 menit">
+    <option value="Melakukan Pengukuran Teknis Telekomunikasi dan Multimedia 30 menit">
+    <option value="Melakukan Pengukuran Teknis Telekomunikasi dan Multimedia 60 menit">
+    <option value="Mengisi resume medis 10 menit">
+    <option value="Melakukan tindakan komplek medis 120 menit">
+    <option value="Melakukan tindakan komplek medis 180 menit">
+    <option value="Melakukan edukasi pasien 15 menit">
+    <option value="Melakukan pekerjaan rekam medis 10 menit">
+    <option value="Penomoran naskah dinas 5 menit">
+    <option value="Melaksanakan penyidikan (per hari per kasus) 60 menit">
+    <option value="Melaksanakan penyidikan (per hari per kasus) 120 menit">
+    <option value="Mengikuti pelatihan / sosialisasi / pendidikan 60 menit">
+    <option value="Mengikuti pelatihan / sosialisasi / pendidikan 120 menit">
+    <option value="Mengikuti pelatihan / sosialisasi / pendidikan 180 menit">
+    <option value="Mengikuti pelatihan / sosialisasi / pendidikan 240 menit">
+    <option value="Mengikuti pelatihan / sosialisasi / pendidikan 300 menit">
+    <option value="Menghidupkan mesin 5 menit">
+    <option value="Menghidupkan mesin kapal 15 menit">
+    <option value="Meneliti, memeriksa, memvalidasi konsep Surat Keputusan 15 menit">
+    <option value="Meneliti, memeriksa, memvalidasi konsep Surat Keputusan 30 menit">
+    <option value="Meneliti, memeriksa, memvalidasi Surat Keputusan 15 menit">
+    <option value="Membuat user ID baru pada aplikasi 15 menit">
+    <option value="Melaksanakan Grouping ID Radio Trunking 60 menit">
+    <option value="Melaksanakan Grouping ID Radio Trunking 120 menit">
+    <option value="Memberikan Informasi User ID dari Aplikasi SPSE 20 menit">
+    <option value="Melaksanakan / Melayani Konsultasi Individu / kelompok 15 menit">
+    <option value="Menyusun Dokumen 5 menit">
+    <option value="Menyusun Dokumen 10 menit">
+    <option value="Menyusun Dokumen 15 menit">
+    <option value="Memeriksa kelengkapan surat / dokumen 10 menit">
+    <option value="Memeriksa kelengkapan surat / dokumen 15 menit">
+    <option value="Memeriksa kelengkapan surat / dokumen 30 menit">
+    <option value="Mendokumentasikan kegiatan (per kegiatan) 15 menit">
+    <option value="Mendokumentasikan kegiatan (per kegiatan) 30 menit">
+    <option value="Mendokumentasikan dokumen penting 5 menit">
+    <option value="Mendokumentasikan dokumen penting 15 menit">
+    <option value="Penyusunan Dokumen KUA-PPAS 120 menit">
+    <option value="Memeriksa dokumen kapal nelayan / bakgan / kapal tradisonal (per kapal) 30 menit">
+    <option value="Legalisir dokumen (per 5 lembar) 5 menit">
+    <option value="Menerima Konsul dari dokter spesialis lain 20 menit">
+    <option value="Mengikuti visit dokter 10 menit">
+    <option value="Mengikuti visit dokter 30 menit">
+    <option value="Mengikuti visit dokter 60 menit">
+    <option value="Menyusun Kurikulum / Buku / Diktat / Modul 180 menit">
+    <option value="Menyusun Kurikulum / Buku / Diktat / Modul 120 menit">
+    <option value="Menyusun Kurikulum / Buku / Diktat / Modul 60 menit">
+    <option value="Membuat algoritma pemrograman per modul 30 menit">
+    <option value="Membuat algoritma pemrograman per modul 60 menit">
+    <option value="Mengisi Buku Induk Siswa 15 menit">
+    <option value="Membuat terjemahan / menyadur buku dan bahan lainnya 30 menit">
+    <option value="Menerima Pengaduan Masyarakat (per aduan) 15 menit">
+    <option value="Menyusun rencana induk sistem informasi keseluruhan (Master Plan) 60 menit">
+    <option value="Menyusun rencana induk sistem informasi keseluruhan (Master Plan) 120 menit">
+    <option value="Mengantar / Menjemput / Mengemudi Kendaraan Operasional 30 menit">
+    <option value="Mengantar / Menjemput / Mengemudi Kendaraan Operasional 60 menit">
+    <option value="Mengantar / Menjemput / Mengemudi Kendaraan Operasional 120 menit">
+    <option value="Menyusun studi kelayakan sistem 30 menit">
+    <option value="Menyusun studi kelayakan sistem 60 menit">
+    <option value="Menyusun studi kelayakan sistem 120 menit">
+    <option value="Melakukan screening palliative 15 menit">
+    <option value="Melakukan transfer pasien antara unit 5 menit">
+    <option value="Melakukan transfer pasien antara unit 15 menit">
+    <option value="Melakukan transfer pasien antara unit 30 menit">
+    <option value="Mencatat dan menghitung waktu tunggu pasien rawat inap 5 menit">
+    <option value="Mencatat dan menghitung waktu tunggu pasien rawat inap 10 menit">
+    <option value="Mencatat dan menghitung waktu tunggu pasien rawat inap 15 menit">
+    <option value="Melaksanakan Pengukuran Spektrum Radio Frekuensi 15 menit">
+    <option value="Melaksanakan Pengukuran Spektrum Radio Frekuensi 30 menit">
+    <option value="Membuat daftar menu 15 menit">
+    <option value="Membuat daftar menu 30 menit">
+    <option value="Membuat daftar menu 60 menit">
+    <option value="Verifikasi Surat Perintah Pembayaran (SPP) 15 menit">
+    <option value="Verifikasi Surat Perintah Pembayaran (SPP) 30 menit">
+    <option value="Melakukan Digitalisasi Arsip (per file) 15 menit">
+    <option value="Melakukan Digitalisasi Arsip (per file) 30 menit">
+    <option value="Perekaman / Pemotretan Arsip Mikro Film 30 menit">
+    <option value="Pembuatan Tanda Nomor Pemeriksaan Uji pada Fisik Kendaraan 5 menit">
+    <option value="Melaksanakan Penerapan rancangan konfigurasi sistem jaringan komputer 60 menit">
+    <option value="Melaksanakan Penerapan rancangan konfigurasi sistem jaringan komputer 120 menit">
+    <option value="Melaksanakan Pendataan Fisik Menara Telekomunikasi 30 menit">
+    <option value="Pembuatan Album Foto Peserta Ujian Nasional 60 menit">
+    <option value="Mengembangkan / meremajakan aplikasi / sistem informasi 30 menit">
+    <option value="Mengembangkan / meremajakan aplikasi / sistem informasi 60 menit">
+    <option value="Membuat rancangan aplikasi / sistem informasi lainnya 60 menit">
+    <option value="Membuat rancangan aplikasi / sistem informasi lainnya 90 menit">
+    <option value="Menerima permohonan Penyelesaian Sengketa Informasi (PSI) 5 menit">
+    <option value="Menyusun formasi pegawai non PNS 60 menit">
+    <option value="Menyusun formasi pegawai non PNS 120 menit">
+    <option value="Membuat pointers / agenda rapat 15 menit">
+    <option value="Membuat pointers / agenda rapat 30 menit">
+    <option value="Melakukan rekrutmen calon tenaga kerja untuk penempatan (per orang) 30 menit">
+    <option value="Melakukan rekrutmen calon tenaga kerja untuk penempatan (per orang) 60 menit">
+    <option value="Melakukan rekrutmen calon tenaga kerja untuk penempatan (per orang) 120 menit">
+    <option value="Rekrutmen Tenaga Non PNS (per kegiatan) 30 menit">
+    <option value="Melaksanakan penagihan pada penyewa 15 menit">
+    <option value="Menghadiri kegiatan pemberdayaan dan kesejahteraan keluarga (PKK ) bagi pegawai kelurahan 120 menit">
+    <option value="Melaksanakan Pengukuran Pengukuran Gelombang Elektromagnetik (Radiasi) 15 menit">
+    <option value="Melaksanakan Pengukuran Pengukuran Gelombang Elektromagnetik (Radiasi) 30 menit">
+    <option value="Pengendalian organisme pengganggu tanaman (OPT) 60 menit">
+    <option value="Pengesahan gambar pelaksanaan bangunan / shop drawing / as built drawing untuk SLF (Per Gambar) 15 menit">
+    <option value="Pengesahan gambar pelaksanaan bangunan / shop drawing / as built drawing untuk SLF (Per Gambar) 30 menit">
+    <option value="Melakukan penyegelan terhadap bangunan 60 menit">
+    <option value="Mengelola surat 5 menit">
+    <option value="Mengetik Surat 15 menit">
+    <option value="Melakukan Pengamatan dan Penggambaran terhadap target operasi 30 menit">
+    <option value="Melakukan Pengamatan dan Penggambaran terhadap target operasi 60 menit">
+    <option value="Melakukan pengelolaan / pemeliharaan sistem aplikasi 30 menit">
+    <option value="Melakukan pengelolaan / pemeliharaan sistem aplikasi 60 menit">
+    <option value="Mengikuti kegiatan kerja bakti 45 menit">
+    <option value="Mengikuti kegiatan kerja bakti 60 menit">
+    <option value="Mengikuti kegiatan kerja bakti 90 menit">
+    <option value="Melaksanakan penjurian (per hari per kegiatan) 120 menit">
+    <option value="Monitoring kegiatan 30 menit">
+    <option value="Monitoring kegiatan 60 menit">
+    <option value="Monitoring kegiatan 90 menit">
+    <option value="Monitoring kegiatan 120 menit">
+    <option value="Melaporkan hasil kegiatan kepada pimpinan 10 menit">
+    <option value="Melaporkan hasil kegiatan kepada pimpinan 15 menit">
+    <option value="Melakukan pendampingan kegiatan 30 menit">
+    <option value="Melakukan pendampingan kegiatan 60 menit">
+    <option value="Membuat Pakta Integritas 5 menit">
+    <option value="Membuat Pakta Integritas 15 menit">
+    <option value="Menginput data ke dalam sistem 5 menit">
+    <option value="Menginput data ke dalam sistem 15 menit">
+    <option value="Menginput data ke dalam sistem 30 menit">
+    <option value="Mengikuti tes kompetensi 180 menit">
+    <option value="Mengikuti tes kompetensi 120 menit">
+    <option value="Menerima dan menyampaikan berita lewat Rig / HT 5 menit">
+    <option value="Menerima dan menyampaikan berita lewat Rig / HT 3 menit">
+    <option value="Melaksanakan Pemrograman HT / RIG Trunking 15 menit">
+    <option value="Melaksanakan Registrasi HT / RIG Trunking Ke Sistem 5 menit">
+    <option value="Melaksanakan Perakitan dan Instalasi Pemasangan RIG Trunking 60 menit">
+    <option value="Melaksanakan Perakitan dan Instalasi Pemasangan RIG Trunking 120 menit">
+    <option value="Melaksanakan Pendataan HT / RIG Trunking 30 menit">
+    <option value="Melaksanakan Penanganan Gangguan pada HT / RIG Pengguna 30 menit">
+    <option value="Mengolah data 10 menit">
+    <option value="Mengolah data 15 menit">
+    <option value="Mengolah data 30 menit">
+    <option value="Mengolah data 60 menit">
+    <option value="Mengolah data 5 menit">
+    <option value="Mengolah / menyiapkan / menyajikan data 15 menit">
+    <option value="Mengolah / menyiapkan / menyajikan data 30 menit">
+    <option value="Mengoreksi hasil tes peserta pelatihan 30 menit">
+    <option value="Mengoreksi hasil tes peserta pelatihan 60 menit">
+    <option value="Melakukan negosiasi dan penyelesaian masalah (per kejadian) 60 menit">
+    <option value="Melakukan Pemungutan / Penyetoran Pajak 30 menit">
+    <option value="Melakukan Pemungutan / Penyetoran Pajak 60 menit">
+    <option value="Menyiapkan Laporan Barang Pengguna Barang Semesteran (LBPS) dan Laporan Barang Pengguna Tahunan (LBPT) serta laporan inventarisasi 5 (lima) tahunan yang berada di SKPD 60 menit">
+    <option value="Ujian Kompetensi Guru dan Pengawas jenjang SD, SMP, SMA, SMK 180 menit">
+    <option value="Melakukan pengukuran kapal nelayan untuk penetapan di bawah 7 GT (per kapal) 60 menit">
+    <option value="Melaksanakan pengukuran tanah < 500 m2 (per lokasi) 30 menit">
+    <option value="Melaksanakan pengukuran tanah 500 - 1000 m2 (per lokasi) 60 menit">
+    <option value="Melaksanakan pengukuran tanah >1000 m2 (per lokasi) 90 menit">
+    <option value="Mengurus kelengkapan kendaraan bermotor 30 menit">
+    <option value="Memasang tanda legalitas mendirikan bangunan 60 menit">
+    <option value="Membuat Surat Teguran 30 menit">
+    <option value="Mengumpulkan bahan kerja 30 menit">
+    <option value="Mengumpulkan bahan kerja 15 menit">
+    <option value="Melakukan Pengukuran Teknis Postel 30 menit">
+    <option value="Melakukan Pengukuran Teknis Postel 120 menit">
+    <option value="Melaksanakan tugas piket diluar jam kerja 30 menit">
+    <option value="Melaksanakan tugas piket diluar jam kerja 60 menit">
+    <option value="Melaksanakan tugas piket diluar jam kerja 120 menit">
+    <option value="Mengikuti kegiatan Rapat Kerja Nasional / Rembug Nasional 180 menit">
+    <option value="Mengikuti kegiatan Rapat Kerja Nasional / Rembug Nasional 300 menit">
+    <option value="Mengikuti kegiatan Rapat Kerja Nasional / Rembug Nasional 360 menit">
+    <option value="Bertugas menjadi Panitera Pengganti 30 menit">
+    <option value="Bertugas menjadi Panitera Pengganti 60 menit">
+    <option value="Bertugas menjadi Panitera Pengganti 120 menit">
+    <option value="Pelaksanaan gugus kendali mutu 60 menit">
+    <option value="Pelaksanaan gugus kendali mutu 120 menit">
+    <option value="Membuat / menyiapkan bahan paparan 30 menit">
+    <option value="Membuat / menyiapkan bahan paparan 60 menit">
+    <option value="Membuat / menyiapkan bahan paparan 120 menit">
+    <option value="Menata Koleksi Bahan Pustaka 30 menit">
+    <option value="Melakukan Seleksi Bahan Pustaka 60 menit">
+    <option value="Melakukan Seleksi Bahan Pustaka 90 menit">
+    <option value="Seleksi Bahan Perpustakaan 10 menit">
+    <option value="Nomerator Bahan Perpustakaan (Per 5 Buku) 5 menit">
+    <option value="Menjadi instruktur senam kesehatan 60 menit">
+    <option value="Melakukan Pelayanan Kesehatan Wanita 20 menit">
+    <option value="Pemeliharaan dan Perawatan alat kesehatan 10 menit">
+    <option value="Membuat Konsep Perhitungan Masa Kerja dan Jumlah Besaran Hak Pensiun atas Permintaan Sendiri 5 menit">
+    <option value="Melakukan pemeliharaan kandang (per lokasi) 60 menit">
+    <option value="Melakukan pemeliharaan kandang (per lokasi) 120 menit">
+    <option value="Melaksanakan pemeliharaan tanaman (per lokasi) 60 menit">
+    <option value="Melaksanakan pemeliharaan tanaman (per lokasi) 30 menit">
+    <option value="Mengajar / melatih 60 menit">
+    <option value="Mengajar / melatih 120 menit">
+    <option value="Melaksanakan pemeliharaan / perawatan / pembersihan prasarana dan sarana 15 menit">
+    <option value="Melaksanakan pemeliharaan / perawatan / pembersihan prasarana dan sarana 30 menit">
+    <option value="Melaksanakan pemeliharaan / perawatan / pembersihan prasarana dan sarana 60 menit">
+    <option value="Melaksanakan pemeliharaan / perawatan / pembersihan prasarana dan sarana 120 menit">
+    <option value="Melaksanakan latihan musik (pada Dinas Damkar) 30 menit">
+    <option value="Melaksanakan latihan musik (pada Dinas Damkar) 60 menit">
+    <option value="Melaksanakan latihan musik (pada Dinas Damkar) 120 menit">
+    <option value="Melakukan penyuluhan 30 menit">
+    <option value="Melakukan penyuluhan 60 menit">
+    <option value="Mempersiapkan operasional pertunjukan 30 menit">
+    <option value="Melaksanakan Penanganan Gangguan pada BTS Radio Trunking 120 menit">
+    <option value="Melakukan pointing arah antena sentral (per lokasi) 30 menit">
+    <option value="Melakukan reviu 30 menit">
+    <option value="Melakukan reviu 60 menit">
+    <option value="Melakukan reviu 120 menit">
+    <option value="Melakukan reviu 180 menit">
+    <option value="Membuat konsep MOU / perjanjian / kontrak 30 menit">
+    <option value="Membuat konsep MOU / perjanjian / kontrak 60 menit">
+    <option value="Membuat konsep MOU / perjanjian / kontrak 120 menit">
+    <option value="Mengajukan Senam 60 menit">
+    <option value="Mengajukan Senam 90 menit">
+    <option value="Mengajukan senam lansia 60 menit">
+    <option value="Mengikuti Proses Ujian Sekolah (per mata pelajaran) 120 menit">
+    <option value="Melaksanakan 5 R (Ringkas, Rapi, Resik, Rawat, Rajin) 30 menit">
+    <option value="Melaksanakan 5 R (Ringkas, Rapi, Resik, Rawat, Rajin) 60 menit">
+    <option value="Melakukan / membuat sistem manajemen mutu 60 menit">
+    <option value="Melakukan / membuat sistem manajemen mutu 120 menit">
+    <option value="Input PKG Jenjang SD, SMP, SMA, SMK 60 menit">
+    <option value="Input PKG Jenjang SD, SMP, SMA, SMK 120 menit">
+    <option value="Menyusun indikator perjanjian kinerja SKPD / UKPD 180 menit">
+    <option value="Menyusun indikator perjanjian kinerja SKPD / UKPD 120 menit">
+    <option value="Menguji pegawai / Mahasiswa / siswa 15 menit">
+    <option value="Menguji pegawai / Mahasiswa / siswa 30 menit">
+    <option value="Menguji pegawai / Mahasiswa / siswa 60 menit">
+    <option value="Menjustir alat ukur 30 menit">
+    <option value="Menjustir alat ukur 60 menit">
+    <option value="Melakukan kunjungan kerja 60 menit">
+    <option value="Melakukan kunjungan kerja 120 menit">
+    <option value="Melakukan kunjungan kerja 180 menit">
+    <option value="Melakukan kunjungan kerja 300 menit">
+    <option value="Menyusun Tindak Lanjut Temuan BPK 30 menit">
+    <option value="Menyusun Tindak Lanjut Temuan BPK 60 menit">
+    <option value="Menginput jurnal SPJ ke aplikasi LPJ SIPKD BPKD Provinsi DKI Jakarta 60 menit">
+    <option value="Menginput jurnal SP2D ke aplikasi LPJ SIPKD BPKD Provinsi DKI Jakarta 120 menit">
+    <option value="Menginput jurnal SP2D ke aplikasi LPJ SIPKD BPKD Provinsi DKI Jakarta 180 menit">
+    <option value="Melakukan rujukan 30 menit">
+    <option value="Melakukan rujukan 60 menit">
+    <option value="Melakukan instalasi perangkat lunak / keras 15 menit">
+    <option value="Melakukan instalasi perangkat lunak / keras 30 menit">
+    <option value="Membuat rekapitulasi data 30 menit">
+    <option value="Membuat rekapitulasi data 60 menit">
+    <option value="Membuat rekapitulasi data 120 menit">
+    <option value="Meningkatkan kinerja perangkat lunak pada komputer mainframe / server 15 menit">
+    <option value="Meningkatkan kinerja perangkat lunak pada komputer mainframe / server 30 menit">
+    <option value="Melakukan pekerjaan linen Rumah Sakit 15 menit">
+    <option value="Melakukan pekerjaan linen Rumah Sakit 30 menit">
+    <option value="Melakukan pekerjaan linen Rumah Sakit 45 menit">
+    <option value="Memasang alat kontrasepsi 20 menit">
+    <option value="Melaksanakan / Melayani Konsultasi SKPD / UKPD 15 menit">
+    <option value="Melaksanakan / Melayani Konsultasi SKPD / UKPD 30 menit">
+    <option value="Melaksanakan / Melayani Konsultasi SKPD / UKPD 60 menit">
+    <option value="Melaksanakan panen tanaman (per lokasi) 30 menit">
+    <option value="Melaksanakan panen tanaman (per lokasi) 60 menit">
+    <option value="Melakukan patroli 15 menit">
+    <option value="Menyelenggarakan senam lansia 60 menit">
+    <option value="Membuat notulen rapat 20 menit">
+    <option value="Membuat notulen rapat 30 menit">
+    <option value="Membuat notulen rapat 45 menit">
+    <option value="Membuat notulen rapat 60 menit">
+    <option value="Menerima, mencatat, memberi lembar disposisi 3 menit">
+    <option value="Menerima, mencatat, memberi lembar disposisi 5 menit">
+    <option value="Melaksanakan Pengukuran Tinggi Menara Telekomunikasi 10 menit">
+    <option value="Melaksanakan Inventaris Alat Ukur Telekomunikasi 30 menit">
+    <option value="Melakukan patroli 30 menit">
+    <option value="Pembuatan karya tulis / karya ilmiah 120 menit">
+    <option value="Memeriksa / meneliti hasil kegiatan / kerja 15 menit">
+    <option value="Memeriksa / meneliti hasil kegiatan / kerja 30 menit">
+    <option value="Melakukan Rekonsiliasi Data per kegiatan 30 menit">
+    <option value="Melaksanakan Penentuan Titik Lokasi CCTV 30 menit">
+    <option value="Melakukan evaluasi 30 menit">
+    <option value="Melakukan evaluasi 60 menit">
+    <option value="Melakukan evaluasi 120 menit">
+    <option value="Menyusun dan menyiapkan bahan evaluasi 120 menit">
+    <option value="Menyusun dan menyiapkan bahan evaluasi 60 menit">
+    <option value="Melaksanakan pengaturan lalu lintas 30 menit">
+    <option value="Melaksanakan pengaturan lalu lintas 60 menit">
+    <option value="Melaksanakan pengaturan lalu lintas 120 menit">
+    <option value="Setting Network pada perangkat keras / lunak 10 menit">
+    <option value="Penginputan sisa mati anggaran 30 menit">
+    <option value="Inventarisasi permasalahan 30 menit">
+    <option value="Inventarisasi permasalahan 60 menit">
+    <option value="Melakukan Laminasi Arsip 10 menit">
+    <option value="Memimpin rapat 30 menit">
+    <option value="Memimpin rapat 60 menit">
+    <option value="Memimpin rapat 120 menit">
+    <option value="Memimpin rapat 180 menit">
+    <option value="Melaksanakan arahan pimpinan 15 menit">
+    <option value="Melaksanakan arahan pimpinan 30 menit">
+    <option value="Melaksanakan arahan pimpinan 60 menit">
+    <option value="Melakukan klaim asuransi 30 menit">
+    <option value="Melakukan klaim asuransi 60 menit">
+    <option value="Monitoring kegiatan 15 menit">
+    <option value="Meneliti data 5 menit">
+    <option value="Meneliti data 10 menit">
+    <option value="Meneliti data 15 menit">
+    <option value="Meneliti data 30 menit">
+    <option value="Meneliti data 60 menit">
+    <option value="Meneliti laporan 5 menit">
+    <option value="Meneliti laporan 10 menit">
+    <option value="Meneliti laporan 30 menit">
+    <option value="Membuat konsep Surat Dinas / Nota Dinas 15 menit">
+    <option value="Membuat konsep Surat Dinas / Nota Dinas 30 menit">
+    <option value="Membuat konsep Surat Dinas / Nota Dinas 45 menit">
+    <option value="Membuat konsep Surat Dinas / Nota Dinas 60 menit">
+    <option value="Mengikuti rapat koordinasi 45 menit">
+    <option value="Mengikuti rapat koordinasi 60 menit">
+    <option value="Mengikuti rapat koordinasi 90 menit">
+    <option value="Mengikuti rapat koordinasi 120 menit">
+    <option value="Mengikuti rapat koordinasi 180 menit">
+    <option value="Melaksanakan Pengukuran Koordinat 10 menit">
+    <option value="Memberikan disposisi kepada bawahan 3 menit">
+    <option value="Memberikan disposisi kepada bawahan 5 menit">
+    <option value="Membuat konsep Surat Keputusan / Penetapan 30 menit">
+    <option value="Membuat konsep Surat Keputusan / Penetapan 60 menit">
+    <option value="Membuat instruksi Kepala SKPD / UKPD 30 menit">
+    <option value="Membuat instruksi Kepala SKPD / UKPD 60 menit">
+    <option value="Melakukan tindakan keperawatan 30 menit">
+    <option value="Melakukan tindakan keperawatan 20 menit">
+    <option value="Membuat Kliping Berita 30 menit">
+    <option value="Membuat Kliping Berita 15 menit">
+    <option value="Mempersiapkan ruangan dan peralatan dalam kondisi siap pakai (Kasus berat okupasi terapi) 5 menit">
+    <option value="Penyusutan Arsip 5 menit">
+    <option value="Penyusutan Arsip 15 menit">
+    <option value="Penyusutan Arsip 30 menit">
+    <option value="Menata / Menyusun Arsip 5 menit">
+    <option value="Menata / Menyusun Arsip 15 menit">
+    <option value="Menata / Menyusun Arsip 60 menit">
+    <option value="Penataan arsip kantor 15 menit">
+    <option value="Penataan arsip kantor 30 menit">
+    <option value="Penataan arsip kantor 45 menit">
+    <option value="Menyusun data / laporan 15 menit">
+    <option value="Menyusun data / laporan 30 menit">
+    <option value="Membuat laporan 15 menit">
+    <option value="Membuat laporan 30 menit">
+    <option value="Membuat laporan 60 menit">
+    <option value="Membuat laporan 120 menit">
+    <option value="Membuat laporan 180 menit">
+    <option value="Menyiapkan Bahan laporan 60 menit">
+    <option value="Menyiapkan Bahan laporan 30 menit">
+    <option value="Pemeriksaan Operasi K3 Konstruksi 60 menit">
+    <option value="Pemeriksaan Operasi K3 Konstruksi 120 menit">
+    <option value="Melakukan Stop Aplikasi Online pada Mesin Mainframe 10 menit">
+    <option value="Melakukan Stop Aplikasi Online pada Mesin Mainframe 30 menit">
+    <option value="Melakukan Up Date Data 15 menit">
+    <option value="Melakukan Up Date Data 30 menit">
+    <option value="Melakukan Up Update Data 60 menit">
+    <option value="Supervisi Anggaran 30 menit">
+    <option value="Supervisi Anggaran 60 menit">
+    <option value="Supervisi Anggaran 120 menit">
+    <option value="Melakukan Start Up Aplikasi Online pada Mesin Mainframe 10 menit">
+    <option value="Melakukan Start Up Aplikasi Online pada Mesin Mainframe 30 menit">
+    <option value="Penanganan kegawatdaruratan 30 menit">
+    <option value="Penanganan kegawatdaruratan 60 menit">
+    <option value="Pelayanan Surat PM1 / pernyataan / keterangan 10 menit">
+    <option value="Membuat bestek 60 menit">
+    <option value="Membuat bestek 120 menit">
+    <option value="Melakukan pemeriksaan tes kekuatan otot 15 menit">
+    <option value="Membuat SK Petikan (per 1 SK) 3 menit">
+    <option value="Membuat peta 30 menit">
+    <option value="Membuat peta 60 menit">
+    <option value="Mengikuti Senam 60 menit">
+    <option value="Mengikuti Senam 90 menit">
+    <option value="Mengikuti rapat teknis 45 menit">
+    <option value="Mengikuti rapat teknis 60 menit">
+    <option value="Melakukan inventarisasi 10 menit">
+    <option value="Melakukan inventarisasi 30 menit">
+    <option value="Melakukan inventarisasi 60 menit">
+    <option value="Inventarisasi permasalahan 120 menit">
+    <option value="Menyiapkan bahan 5 menit">
+    <option value="Menyiapkan bahan 10 menit">
+    <option value="Menyiapkan bahan 30 menit">
+    <option value="Menyiapkan bahan 60 menit">
+    <option value="Menyusun RKA dan DPA 60 menit">
+    <option value="Menyusun RKA dan DPA 120 menit">
+</datalist>
+
+<script>
+    let dateQueue = [];
+    let activityQueue = [];
+    let databaseAktivitas = [];
+
+    window.onload = function() {
+        document.querySelectorAll('#actList option').forEach(opt => databaseAktivitas.push(opt.value));
+    };
+
+    const actInput = document.getElementById("actInput");
+    const autoList = document.getElementById("autocomplete-list");
+
+    actInput.addEventListener("input", function() {
+        const val = this.value;
+        autoList.innerHTML = "";
+        if (!val) { autoList.style.display = "none"; return; }
+        autoList.style.display = "block";
+        let count = 0;
+        for (let i = 0; i < databaseAktivitas.length; i++) {
+            if (databaseAktivitas[i].toLowerCase().includes(val.toLowerCase())) {
+                const div = document.createElement("div");
+                div.innerHTML = databaseAktivitas[i]; 
+                div.addEventListener("click", function() {
+                    actInput.value = this.innerText; 
+                    autoList.style.display = "none"; 
+                    calcVolume(); 
+                });
+                autoList.appendChild(div);
+                count++;
+                if(count >= 30) break; 
+            }
+        }
+        if(count === 0) autoList.style.display = "none";
+    });
+
+    document.addEventListener("click", e => { if (e.target !== actInput) autoList.style.display = "none"; });
+
+    function pushDate() {
+        const val = document.getElementById('tglInput').value;
+        if(val && !dateQueue.includes(val)) { dateQueue.push(val); renderDates(); }
+    }
+
+    function renderDates() {
+        document.getElementById('selectedDates').innerHTML = dateQueue.map((d, i) => 
+            `<span class="date-badge">${d} <span style="cursor:pointer; margin-left:5px; color:#dc2626;" onclick="dateQueue.splice(${i},1);renderDates()">✖</span></span>`
+        ).join('');
+    }
+
+    function toggleInd() {
+        document.getElementById('indGroup').style.display = document.getElementById('jenisInput').value === 'Umum' ? 'none' : 'block';
+    }
+
+    function calcVolume() {
+        const actVal = document.getElementById('actInput').value;
+        const match = actVal.match(/(\d+)\s+menit/);
+        const start = document.getElementById('jamM').value;
+        const end = document.getElementById('jamS').value;
+
+        if(match && start && end) {
+            const menitStandar = parseInt(match[1]); 
+            const durasi = (new Date(`1970-01-01T${end}`) - new Date(`1970-01-01T${start}`)) / 60000; 
+            let finalVol = Math.round(durasi / menitStandar);
+            if (finalVol < 1) finalVol = 1;
+
+            document.getElementById('volOutput').value = finalVol;
+            document.getElementById('volHint').innerText = `Durasi ${durasi}m ÷ Standar ${menitStandar}m = ${(durasi/menitStandar).toFixed(2)} ➡️ Volume dibulatkan: ${finalVol}`;
+        }
+    }
+
+    function cleanText(text) { return text.replace(/\s\d+\smenit$/, "").trim(); }
+
+    function addToTable() {
+        const rawAct = document.getElementById('actInput').value;
+        if(dateQueue.length === 0 || !rawAct) return alert("Harap isi Tanggal dan Aktivitas terlebih dahulu!");
+
+        const jenisForm = document.getElementById('jenisInput').value;
+        const indSelect = document.getElementById('indInput');
+        const indValue = (jenisForm === 'Umum') ? 'UMUM' : indSelect.value;
+        const indLabel = (jenisForm === 'Umum') ? 'TUGAS UMUM / TAMBAHAN' : indSelect.value;
+        const cleanAct = cleanText(rawAct);
+        const matchIdx = databaseAktivitas.filter(val => cleanText(val) === cleanAct).indexOf(rawAct) > 0 ? 1 : 0;
+
+        dateQueue.forEach(tgl => {
+            activityQueue.push({
+                tgl: tgl, jenis: jenisForm, ind: indValue, indLabel: indLabel, 
+                actRaw: rawAct, actClean: cleanAct, matchIndex: matchIdx,
+                jamM: document.getElementById('jamM').value, jamS: document.getElementById('jamS').value,
+                vol: document.getElementById('volOutput').value, ket: document.getElementById('ketInput').value
+            });
+        });
+
+        dateQueue = [];
+        renderDates();
+        renderTable();
+        document.getElementById('actInput').value = "";
+    }
+
+    function renderTable() {
+        document.getElementById('monitorTable').innerHTML = activityQueue.map((item, i) => `
+            <tr>
+                <td data-label="📅 Tanggal">${item.tgl}</td>
+                <td data-label="📌 Aktivitas & Indikator">
+                    <b style="color:#0f172a;">${item.actClean}</b><br>
+                    <span style="font-size:11px; color:#64748b;">${item.indLabel} <br> ${item.ket}</span>
+                </td>
+                <td data-label="⏰ Waktu & Volume">
+                    ${item.jamM} - ${item.jamS}<br>
+                    <b style="color:var(--accent);">Vol: ${item.vol}</b>
+                </td>
+                <td data-label="⚙️ Aksi">
+                    <button class="btn-hapus-mobile" onclick="activityQueue.splice(${i},1);renderTable()" style="background:#fee2e2; color:#dc2626; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">Hapus</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function copyToClipboard() {
+        const codeText = document.getElementById('finalCode').textContent;
+        if (!codeText) return alert("Generate script terlebih dahulu!");
+        
+        navigator.clipboard.writeText(codeText).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.innerHTML = "✅ Tersalin!";
+            setTimeout(() => { btn.innerHTML = "📋 Copy Code"; }, 2000);
+        });
+    }
+
+    function downloadScript() {
+        const codeText = document.getElementById('finalCode').textContent;
+        if (!codeText) return alert("Generate script terlebih dahulu!");
+
+        const blob = new Blob([codeText], { type: 'text/javascript' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bot-ekinerja.js';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function generateScript() {
+        if(activityQueue.length === 0) return alert("Antrean masih kosong!");
+        
+        const username = document.getElementById('botUser').value || 'USERNAME_ANDA';
+        const password = document.getElementById('botPass').value || 'PASSWORD_ANDA';
+        const cookieVal = document.getElementById('botCookie').value.trim();
+
+        const code = `const puppeteer = require('puppeteer');
+const fs = require('fs');
+
+// ==========================================
+// 🚨 1. KONFIGURASI AKUN & DATA
+// ==========================================
+const MY_USERNAME = '${username}';
+const MY_PASSWORD = '${password}';
+let GENERATED_COOKIE = '${cookieVal}';
+const TARGET_DOMAIN = 'etpp.jakarta.go.id';
+const LOGIN_URL = \`https://\${TARGET_DOMAIN}/login\`; 
+const DASHBOARD_URL = \`https://\${TARGET_DOMAIN}/input/aktivitas\`;
+
+const batchData = ${JSON.stringify(activityQueue, null, 4)};
+
+// ==========================================
+// 🤖 2. FUNGSI PERSIAPAN BROWSER
+// ==========================================
+async function siapkanBrowser() {
+    let cookieToUse = GENERATED_COOKIE;
+    if (!cookieToUse && fs.existsSync('cookie.txt')) {
+        cookieToUse = fs.readFileSync('cookie.txt', 'utf8').trim();
+    }
+    
+    let hasCookie = cookieToUse.length > 5;
+    const userAgentAsli = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+    let browserOptions = { 
+        headless: hasCookie, 
+        defaultViewport: { width: 1366, height: 768 },
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+    };
+
+    if (!hasCookie) {
+        console.log(">>> [1/2] Membuka Mode Visual untuk login manual...");
+        browserOptions.headless = false;
+        browserOptions.defaultViewport = null;
+        browserOptions.args.push('--start-maximized');
+    } else {
+        console.log(">>> [1/2] Cookie ditemukan! Meluncur dalam Mode Latar Belakang (Aman)...");
+    }
+
+    let browser = await puppeteer.launch(browserOptions);
+    let page = await browser.newPage();
+    await page.setUserAgent(userAgentAsli);
+
+    if (hasCookie) {
+        const cookies = cookieToUse.split('; ').map(pair => {
+            const [name, ...valueParts] = pair.split('=');
+            return { name: name.trim(), value: valueParts.join('=').trim(), domain: TARGET_DOMAIN, path: '/' };
+        });
+        await page.setCookie(...cookies);
+        
+        await page.goto(DASHBOARD_URL, { waitUntil: 'networkidle2' });
+
+        if (!page.url().includes('login') && !page.url().includes('auth')) {
+            console.log("   ✅ BYPASS SUKSES!");
+            fs.writeFileSync('cookie.txt', cookieToUse); 
+            return { browser, page }; 
+        } else {
+            console.log("   ⚠️ Cookie basi/tidak lengkap. Beralih ke Login Manual...");
+            await browser.close(); 
+            if(fs.existsSync('cookie.txt')) fs.unlinkSync('cookie.txt');
+            
+            GENERATED_COOKIE = ''; 
+            return siapkanBrowser(); 
+        }
+    }
+
+    await page.goto(LOGIN_URL, { waitUntil: 'networkidle2' });
+    await new Promise(r => setTimeout(r, 1000)); await page.mouse.click(10, 10); await page.keyboard.press('Escape'); 
+
+    console.log("   [Bot] Mengisi Username & Password otomatis...");
+    try {
+        await page.waitForSelector('#username', { timeout: 5000 });
+        await page.type('#username', MY_USERNAME, { delay: 50 }); 
+        await page.type('#password', MY_PASSWORD, { delay: 50 });
+    } catch (e) { console.log("   ⚠️ Kotak input tidak ditemukan. Isi manual."); }
+
+    console.log("\\n=============================================");
+    console.log("🛑 SILAKAN ISI CAPTCHA DAN KLIK LOGIN");
+    console.log("=============================================\\n");
+
+    await page.waitForFunction(() => !window.location.href.includes('login') && !window.location.href.includes('auth'), { timeout: 0 });
+
+    const cookiesArray = await page.cookies();
+    fs.writeFileSync('cookie.txt', cookiesArray.map(c => \`\${c.name}=\${c.value}\`).join('; '));
+    console.log("   🍪 Cookie baru disimpan!");
+    
+    await page.goto(DASHBOARD_URL, { waitUntil: 'networkidle2' });
+    return { browser, page }; 
+}
+
+// ==========================================
+// 🚀 3. EKSEKUSI UTAMA (STEALTH INJECTION)
+// ==========================================
+(async () => {
+    const { browser, page } = await siapkanBrowser();
+    
+    // 💡 PENYARING LOG WEBSOCKET: Mengabaikan pesan error 502 dari server Jakarta
+    page.on('console', msg => {
+        const txt = msg.text();
+        if (txt.includes('WebSocket') || txt.includes('wss://')) return; // Abaikan pesan sampah
+        console.log('   [Browser] ' + txt);
+    });
+
+    console.log("\\n>>> [2/2] Memulai Injeksi Data (Mode Stealth Manusiawi)...");
+
+    try {
+        await page.waitForSelector('.fc-daygrid-day-frame', { timeout: 15000 });
+        await new Promise(r => setTimeout(r, 1500)); 
+
+        await page.evaluate(async (data) => {
+            const delayAcak = (min, max) => {
+                const waktu = Math.floor(Math.random() * (max - min + 1)) + min;
+                return new Promise(r => setTimeout(r, waktu));
+            };
+
+            const formatTanggalAman = (tgl) => { let b = tgl.split('-'); if(b.length===3){b[1]=b[1].padStart(2,'0');b[2]=b[2].padStart(2,'0');return b.join('-');} return tgl; };
+
+            const injectUniversal = (el, val) => {
+                if (!el) return;
+                try {
+                    const p = Object.getPrototypeOf(el); const d = Object.getOwnPropertyDescriptor(p, 'value');
+                    if (d && d.set) { d.set.call(el, val); } else { const t = Object.getPrototypeOf(document.createElement('textarea')); const td = Object.getOwnPropertyDescriptor(t, 'value'); if (td && td.set) td.set.call(el, val); else el.value = val; }
+                    el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
+                } catch (e) { el.value = val; el.dispatchEvent(new Event('input', { bubbles: true })); }
+            };
+
+            const deepClick = (el) => {
+                if (!el) return;
+                try { el.click(); } catch(e){}
+                const rect = el.getBoundingClientRect(); const x = rect.left + rect.width / 2; const y = rect.top + rect.height / 2;
+                const opts = { bubbles: true, cancelable: true, view: window, clientX: x, clientY: y };
+                el.dispatchEvent(new PointerEvent('pointerdown', opts)); el.dispatchEvent(new MouseEvent('mousedown', opts)); el.dispatchEvent(new MouseEvent('mouseup', opts));
+            };
+
+            const setTimeManual = async (el, value) => {
+                if (!el) return;
+                el.focus(); deepClick(el); 
+                await delayAcak(150, 350); 
+                injectUniversal(el, value); el.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter', keyCode: 13 }));
+                await delayAcak(100, 300); el.blur(); document.body.click(); 
+                await delayAcak(150, 400); 
+            };
+
+            for (let item of data) {
+                const tglFix = formatTanggalAman(item.tgl);
+                console.log("MEMPROSES TANGGAL: " + tglFix);
+
+                const cell = document.querySelector(\`td[data-date="\${tglFix}"]\`);
+                if (!cell) { console.log("ERROR: Tanggal tidak ditemukan!"); continue; }
+                const frame = cell.querySelector('.fc-daygrid-day-frame') || cell;
+                frame.scrollIntoView({ block: 'center' }); 
+                
+                await delayAcak(300, 600);
+                deepClick(frame);
+
+                let modal = null;
+                for (let i = 0; i < 40; i++) {
+                    modal = document.querySelector('#modal-aktivitas');
+                    if (modal && modal.classList.contains('show')) break;
+                    await delayAcak(100, 200); 
+                }
+                if (!modal) { console.log("ERROR: Modal tidak muncul!"); continue; }
+                
+                await delayAcak(500, 800); 
+
+                const labels = [...document.querySelectorAll('label, span, button, a, .nav-link, .custom-control-label')];
+                if (item.jenis === 'Umum') { const btnUmum = labels.find(x => ['umum', 'tugas umum', 'tambahan'].includes(x.innerText.trim().toLowerCase())); if (btnUmum) { deepClick(btnUmum); await delayAcak(400, 700); } } 
+                else { const btnUtama = labels.find(x => ['utama', 'tugas utama'].includes(x.innerText.trim().toLowerCase())); if (btnUtama) { deepClick(btnUtama); await delayAcak(400, 700); } }
+
+                const inputs = [...modal.querySelectorAll('input, textarea')];
+                await setTimeManual(inputs[1], item.jamM);
+                await setTimeManual(inputs[2], item.jamS);
+
+                if (item.jenis === 'Utama') {
+                    const ind = document.querySelector('#input-indikator-renkin') || modal.querySelectorAll('.multiselect')[0];
+                    if (ind) { deepClick(ind); await delayAcak(400, 600); const opt = [...document.querySelectorAll('.multiselect__option')].find(x => x.innerText.includes(item.ind)); if (opt) deepClick(opt); }
+                }
+                await delayAcak(400, 700);
+                
+                const msList = [...modal.querySelectorAll('.multiselect')];
+                let dropA = null;
+                if (item.jenis === 'Umum') { dropA = msList[0]; } 
+                else { const dropV = document.querySelector('.input-volume-aktivitas') || msList[msList.length - 1]; if (dropV) { const vIdx = msList.indexOf(dropV); if (vIdx > 0) { dropA = msList[vIdx - 1]; } } if (!dropA && msList.length > 1) dropA = msList[1]; }
+
+                if(dropA) {
+                    deepClick(dropA); await delayAcak(400, 600);
+                    const sBox = dropA.querySelector('.multiselect__input');
+                    if (sBox) {
+                        injectUniversal(sBox, item.actClean.split(' ')[0]); sBox.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'r' })); 
+                        await delayAcak(1500, 2500); 
+                        
+                        const matchingOptions = [...dropA.querySelectorAll('.multiselect__option')].filter(x => x.innerText.toLowerCase().includes(item.actClean.toLowerCase()));
+                        let targetA = matchingOptions[item.matchIndex]; if (!targetA && matchingOptions.length > 0) targetA = matchingOptions[0]; if (targetA) deepClick(targetA);
+                    }
+                }
+                await delayAcak(400, 600);
+                
+                const textAreas = [...modal.querySelectorAll('textarea')];
+                if(textAreas.length > 0) { injectUniversal(textAreas[0], item.ket); }
+
+                const dropVFinal = document.querySelector('.input-volume-aktivitas') || msList[msList.length - 1];
+                if (dropVFinal) { deepClick(dropVFinal); await delayAcak(300, 600); const vOpt = [...dropVFinal.querySelectorAll('.multiselect__option')].find(x => x.innerText.trim() === item.vol.toString()); if (vOpt) deepClick(vOpt); }
+                await delayAcak(800, 1200); 
+
+                const btnSimpan = [...modal.querySelectorAll('button')].find(b => b.innerText.trim() === 'Simpan');
+                if (btnSimpan) { 
+                    deepClick(btnSimpan); 
+                    await delayAcak(1500, 2000); 
+                    const okBtn = [...document.querySelectorAll('button')].find(b => ['OK', 'TUTUP', 'SUCCESS', 'BERHASIL'].includes(b.innerText.trim().toUpperCase())); 
+                    if (okBtn) deepClick(okBtn); 
+                }
+                console.log("SELESAI INPUT: " + tglFix);
+                await delayAcak(1000, 1500); 
+            }
+        }, batchData);
+
+    } catch (err) {
+        console.error("   ❌ Gagal mengeksekusi data: ", err.message);
+    }
+
+    console.log("\\n🎉 BATCH SELESAI SEMPURNA (MODE STEALTH)!");
+    await new Promise(r => setTimeout(r, 1000));
+    await browser.close(); 
+})();`;
+
+        document.getElementById('finalCode').textContent = code;
+        document.getElementById('finalCode').style.display = 'block';
+        document.getElementById('scriptTitle').style.display = 'block';
+        
+        document.getElementById('copyBtn').style.display = 'inline-block';
+        document.getElementById('downloadBtn').style.display = 'inline-block';
+        
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
