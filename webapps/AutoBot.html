@@ -70,17 +70,20 @@
             
             <label style="color:#166534; margin-top: 15px;">🍪 Cookie Aktif (Bypass Login):</label>
             <textarea id="botCookie" rows="2" onpaste="sanitizePaste(event)" placeholder="Tempel cookie ... contoh: e_tpp_session=xxxxxx"></textarea>
-            <div id="cookieInfoBox" style="background: #fff; border: 1px dashed #10b981; padding: 10px; font-size: 11px; margin-top: 8px; border-radius: 4px; color: #334155; transition: 0.3s;"></div>
-            <b>Trik Wajib (Karena ETPP dikunci):</b><br>
-            1. Buka browser ETPP lalu tekan <b>F12</b> untuk membuka Developer Tools.<br>
-            2. Pilih tab <b>Network</b>.<br>
-            3. Tekan <b>F5</b> untuk refresh halaman.<br>
-            4. Cari request yang muncul paling atas, biasanya berisi kata <i>harian</i> atau <i>etpp</i>.<br>
-            5. Klik request tersebut, lalu buka panel <b>Headers</b>.<br>
-            6. Pada bagian <b>Request Headers</b>, cari baris <code>cookie:</code>.<br>
-            7. Salin semua teks setelah <code>cookie:</code> sampai akhir baris, lalu tempel ke kolom Cookie di atas.<br>
-            <span style="display:block; margin-top:8px; color:#166534;">Pastikan Anda menyalin seluruh nilai cookie, bukan hanya sebagian kata.</span>
+            
+            <!-- PERHATIKAN: Teks instruksi sekarang masuk ke DALAM pembungkus cookieInfoBox -->
+            <div id="cookieInfoBox" style="background: #fff; border: 1px dashed #10b981; padding: 10px; font-size: 11px; margin-top: 8px; border-radius: 4px; color: #334155; transition: 0.3s;">
+                <b>Trik Wajib (Karena ETPP dikunci):</b><br>
+                1. Buka browser ETPP lalu tekan <b>F12</b> untuk membuka Developer Tools.<br>
+                2. Pilih tab <b>Network</b>.<br>
+                3. Tekan <b>F5</b> untuk refresh halaman.<br>
+                4. Cari request yang muncul paling atas, biasanya berisi kata <i>harian</i> atau <i>etpp</i>.<br>
+                5. Klik request tersebut, lalu buka panel <b>Headers</b>.<br>
+                6. Pada bagian <b>Request Headers</b>, cari baris <code>cookie:</code>.<br>
+                7. Salin semua teks setelah <code>cookie:</code> sampai akhir baris, lalu tempel ke kolom Cookie di atas.<br>
+                <span style="display:block; margin-top:8px; color:#166534;">Pastikan Anda menyalin seluruh nilai cookie, bukan hanya sebagian kata.</span>
             </div>
+            
             <button id="btnCheck" class="btn btn-blue" style="margin-top:10px; background:#0f172a;" onclick="checkStatus()">🔍 CHECK STATUS & AMBIL DATA</button>
         </div>
 
@@ -1587,35 +1590,78 @@
 
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwzuly914uxvgX6mbF9usXzB9-B1PxL6F0tuO8mj7JzcoYFHBQEzjPKRNHkjLeyyu6e/exec"; 
    
-    if (statusRes.status === "Success") {
-                    clearInterval(interval);
-                    btn.innerHTML = "✅ STATUS AKTIF";
-                    btn.style.background = "#10b981";
-                    btn.disabled = false;
-                    
-                    try {
-                        // Membongkar paket data JSON dari bot
-                        const responseData = JSON.parse(statusRes.msg);
-                        
-                        // 1. Ubah Div Instruksi Cookie menjadi Profil User
-                        const infoBox = document.getElementById('cookieInfoBox');
-                        infoBox.style.background = "#dcfce7";
-                        infoBox.style.border = "1px solid #10b981";
-                        infoBox.style.color = "#064e3b";
-                        infoBox.style.fontSize = "13px";
-                        infoBox.innerHTML = `✅ <b>Akun Terhubung:</b> ${responseData.profil.nama} <br> 🆔 <b>NRK:</b> ${responseData.profil.nrk}`;
+    // === TAMBAHKAN FUNGSI CHECK STATUS DI SINI ===
+    function checkStatus() {
+        const username = document.getElementById('botUser').value;
+        const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
+        if(!cookieVal) return alert("Cookie wajib diisi untuk pengecekan!");
 
-                        // 2. Tampilkan Data Kinerja di kotak bawah
-                        document.getElementById('infoKinerjaBox').style.display = 'block';
-                        document.getElementById('textKinerja').innerText = responseData.kinerja;
+        const btn = document.getElementById('btnCheck');
+        btn.innerHTML = "⏳ SEDANG MENGECEK...";
+        btn.disabled = true;
+
+        tulisLog("Memulai sesi pengecekan akun...", "warn");
+
+        fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "check_only", 
+                username: username,
+                cookie: cookieVal,
+                jadwal: [] 
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
+            const jobId = res.jobId;
+            const interval = setInterval(() => {
+                fetch(`${GAS_URL}?action=check&jobId=${jobId}`)
+                .then(r => r.json())
+                .then(statusRes => {
+                    if (statusRes.status === "Success") {
+                        clearInterval(interval);
+                        btn.innerHTML = "✅ STATUS AKTIF";
+                        btn.style.background = "#10b981";
+                        btn.disabled = false;
                         
-                        tulisLog(`Halo, ${responseData.profil.nama}! Data berhasil ditarik.`, "success");
-                    } catch(e) {
-                        // Fallback jika terjadi error format
-                        document.getElementById('infoKinerjaBox').style.display = 'block';
-                        document.getElementById('textKinerja').innerText = statusRes.msg;
+                        try {
+                            const responseData = JSON.parse(statusRes.msg);
+                            
+                            const infoBox = document.getElementById('cookieInfoBox');
+                            infoBox.style.background = "#dcfce7";
+                            infoBox.style.border = "1px solid #10b981";
+                            infoBox.style.color = "#064e3b";
+                            infoBox.style.fontSize = "13px";
+                            infoBox.innerHTML = `✅ <b>Akun Terhubung:</b> ${responseData.profil.nama} <br> 🆔 <b>NRK:</b> ${responseData.profil.nrk}`;
+
+                            document.getElementById('infoKinerjaBox').style.display = 'block';
+                            document.getElementById('textKinerja').innerText = responseData.kinerja;
+                            
+                            tulisLog(`Halo, ${responseData.profil.nama}! Data berhasil ditarik.`, "success");
+                        } catch(e) {
+                            document.getElementById('infoKinerjaBox').style.display = 'block';
+                            document.getElementById('textKinerja').innerText = statusRes.msg;
+                        }
+                    } else if (statusRes.status === "Error") {
+                        clearInterval(interval);
+                        btn.innerHTML = "❌ GAGAL/KADALUWARSA";
+                        btn.style.background = "#dc2626";
+                        btn.disabled = false;
+                        alert("Gagal: " + statusRes.msg);
                     }
-                }
+                })
+                .catch(err => console.log("Menunggu respon..."));
+            }, 5000);
+        })
+        .catch(error => {
+            tulisLog(`❌ KONEKSI GAGAL: ${error.message}`, "warn");
+            btn.innerHTML = "🔍 CHECK STATUS & AMBIL DATA";
+            btn.disabled = false;
+        });
+    }
+    // ==============================================
+
     function generateScript() {
         if(activityQueue.length === 0) return alert("Antrean jadwal masih kosong!");
         
