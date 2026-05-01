@@ -88,7 +88,7 @@
             
             <button id="btnCheck" class="btn btn-blue" style="margin-top:10px; background:#0f172a;" onclick="checkStatus()">🔍 CHECK STATUS & AMBIL DATA</button>
         </div>
-
+		<form id="myActivity">
       	<div class="form-group">
     	<label>1. Pilih Tanggal (Bisa pilih banyak sekaligus):</label>
     	<input type="text" id="tglInput" placeholder="Klik untuk memilih tanggal..." autocomplete="off" readonly style="cursor: pointer; background: #fff;">
@@ -151,6 +151,7 @@
 		</div>
 
         <button class="btn btn-blue" onclick="addToTable()">Simpan ke Antrean ➡️</button>
+		</form>
         <div id="infoKinerjaBox" style="display:none; margin-top:15px; background:#f1f5f9; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:12px; color:#334155;">
         <label style="color:#0f172a; font-weight:bold; margin-bottom:5px; display:block;">📋 Rencana Kinerja Terdeteksi:</label>
         <div id="textKinerja" style="white-space: pre-wrap; max-height:150px; overflow-y:auto;"></div>
@@ -1563,31 +1564,38 @@ function calcVolume() {
 
     function cleanText(text) { return text.replace(/\s\d+\smenit$/, "").trim(); }
 
-    function addToTable() {
-        const rawAct = document.getElementById('actInput').value;
-        if(dateQueue.length === 0 || !rawAct) return alert("Harap isi Tanggal dan Aktivitas terlebih dahulu!");
+function addToTable() {
+    // 1. Get the form element
+    const form = document.getElementById('myActivity');
 
-        const jenisForm = document.getElementById('jenisInput').value;
-        const indSelect = document.getElementById('indInput');
-        const indValue = (jenisForm === 'Umum') ? 'UMUM' : indSelect.value;
-        const indLabel = (jenisForm === 'Umum') ? 'TUGAS UMUM / TAMBAHAN' : indSelect.value;
-        const cleanAct = cleanText(rawAct);
-        const matchIdx = databaseAktivitas.filter(val => cleanText(val) === cleanAct).indexOf(rawAct) > 0 ? 1 : 0;
-
-        dateQueue.forEach(tgl => {
-            activityQueue.push({
-                tgl: tgl, jenis: jenisForm, ind: indValue, indLabel: indLabel, 
-                actRaw: rawAct, actClean: cleanAct, matchIndex: matchIdx,
-                jamM: document.getElementById('jamM').value, jamS: document.getElementById('jamS').value,
-                vol: document.getElementById('volOutput').value, ket: document.getElementById('ketInput').value
-            });
-        });
-
-        dateQueue = [];
-        renderDates();
-        renderTable();
-        document.getElementById('actInput').value = "";
+    // 2. Check if the form meets all HTML validation rules (required, minlength, etc.)
+    if (!form.checkValidity()) {
+        form.reportValidity(); // This forces the browser to show the pop-up warning
+        return; // Stop the function here so it doesn't add to the queue!
     }
+
+    // 3. Your original code continues here ONLY if the form is valid
+    const rawAct = document.getElementById('actInput').value;
+    if(dateQueue.length === 0 || !rawAct) return alert("Harap isi Tanggal dan Aktivitas terlebih dahulu!");
+
+    const jenisForm = document.getElementById('jenisInput').value;
+    const indSelect = document.getElementById('indInput');
+    const indValue = (jenisForm === 'Umum') ? 'UMUM' : indSelect.value;
+    const indLabel = (jenisForm === 'Umum') ? 'TUGAS UMUM / TAMBAHAN' : indSelect.value;
+    const cleanAct = cleanText(rawAct);
+    const matchIdx = databaseAktivitas.filter(val => cleanText(val) === cleanAct).indexOf(rawAct) > 0 ? 1 : 0;
+
+    dateQueue.forEach(tgl => {
+        activityQueue.push({
+            tgl: tgl, jenis: jenisForm, ind: indValue, indLabel: indLabel, 
+            actRaw: rawAct, actClean: cleanAct, matchIndex: matchIdx,
+            jamM: document.getElementById('jamM').value, jamS: document.getElementById('jamS').value,
+            vol: document.getElementById('volOutput').value, ket: document.getElementById('ketInput').value
+        });
+    });
+    
+    // (Add any UI update code you have here, like clearing the form)
+}
 
     function renderTable() {
         document.getElementById('monitorTable').innerHTML = activityQueue.map((item, i) => `
