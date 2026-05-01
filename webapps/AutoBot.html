@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>E-Kinerja Auto (Cloud API Edition)</title>
     <style>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+		<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         :root { --primary: #0f172a; --accent: #10b981; --bg: #f8fafc; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); padding: 15px; color: #334155; margin: 0; }
         .wrapper { max-width: 1200px; margin: auto; display: grid; grid-template-columns: 420px 1fr; gap: 20px; }
@@ -87,14 +89,11 @@
             <button id="btnCheck" class="btn btn-blue" style="margin-top:10px; background:#0f172a;" onclick="checkStatus()">🔍 CHECK STATUS & AMBIL DATA</button>
         </div>
 
-        <div class="form-group">
-            <label>1. Pilih Tanggal:</label>
-            <div class="flex-row">
-                <input type="date" id="tglInput">
-                <button class="btn btn-blue" style="width: 100px; margin-top:0;" onclick="pushDate()">Tambah</button>
-            </div>
-            <div id="selectedDates" style="margin-top:10px;"></div>
-        </div>
+      	<div class="form-group">
+    		<label>1. Pilih Tanggal (Bisa pilih banyak sekaligus):</label>
+    		<input type="text" id="tglInput" placeholder="Klik untuk memilih tanggal..." autocomplete="off">
+    		<div id="selectedDates" style="margin-top:10px;"></div>
+		</div>
 
         <div class="form-group" style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; box-sizing: border-box;">
             <label>2. Kategori:</label>
@@ -1463,9 +1462,26 @@
         event.target.value = text.replace(/[\r\n]+/g, ' ').trim();
     }
 
-    window.onload = function() {
-        document.querySelectorAll('#actList option').forEach(opt => databaseAktivitas.push(opt.value));
-    };
+   	let fpInstance; // Variabel untuk menyimpan kalender Flatpickr
+
+window.onload = function() {
+    // 1. KODE ASLI ANDA: Memuat database aktivitas
+    document.querySelectorAll('#actList option').forEach(opt => databaseAktivitas.push(opt.value));
+    
+    // 2. KODE BARU: Mengaktifkan Flatpickr untuk mode banyak tanggal
+    fpInstance = flatpickr("#tglInput", {
+        mode: "multiple",
+        dateFormat: "Y-m-d", 
+        onChange: function(selectedDates, dateStr, instance) {
+            if (dateStr) {
+                dateQueue = dateStr.split(', ');
+            } else {
+                dateQueue = [];
+            }
+            renderDates();
+        }
+    });
+};
 
     const actInput = document.getElementById("actInput");
     const autoList = document.getElementById("autocomplete-list");
@@ -1495,16 +1511,18 @@
 
     document.addEventListener("click", e => { if (e.target !== actInput) autoList.style.display = "none"; });
 
-    function pushDate() {
-        const val = document.getElementById('tglInput').value;
-        if(val && !dateQueue.includes(val)) { dateQueue.push(val); renderDates(); }
-    }
+	function renderDates() {
+    document.getElementById('selectedDates').innerHTML = dateQueue.map((d, i) => 
+        `<span class="date-badge">${d} <span style="cursor:pointer; margin-left:5px; color:#dc2626;" onclick="removeDate(${i})">✖</span></span>`
+    ).join('');
+	}
 
-    function renderDates() {
-        document.getElementById('selectedDates').innerHTML = dateQueue.map((d, i) => 
-            `<span class="date-badge">${d} <span style="cursor:pointer; margin-left:5px; color:#dc2626;" onclick="dateQueue.splice(${i},1);renderDates()">✖</span></span>`
-        ).join('');
-    }
+// Add this new helper function to handle deleting dates cleanly
+function removeDate(index) {
+    dateQueue.splice(index, 1); // Remove from your array
+    fpInstance.setDate(dateQueue); // Sync the calendar UI so it un-highlights the date
+    renderDates(); // Redraw the badges
+}
 
     function toggleInd() {
         document.getElementById('indGroup').style.display = document.getElementById('jenisInput').value === 'Umum' ? 'none' : 'block';
