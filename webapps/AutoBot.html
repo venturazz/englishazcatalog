@@ -1596,7 +1596,7 @@ function addToTable() {
     
 	// 4. TAMPILKAN KE LAYAR! (Ini yang sebelumnya kurang)
     renderTable();
-    // (Add any UI update code you have here, like clearing the form)
+	
 	// 5. KOSONGKAN INPUT FORM (Reset Manual)
     //document.getElementById('actInput').value = "";
     //document.getElementById('ketInput').value = "";
@@ -1606,7 +1606,21 @@ function addToTable() {
     // Untuk dropdown (select), kembalikan ke pilihan pertama/default (opsional)
     // document.getElementById('jenisInput').selectedIndex = 0; 
     // document.getElementById('indInput').selectedIndex = 0;
+	//Reset semua form
+	//formToReset.reset();
     // Jika Anda juga ingin mengosongkan antrean tanggal setelah simpan:
+	
+	// 6. RESET TAMPILAN FLATPICKR
+    const dateInput = document.getElementById('tglInput');
+    if (dateInput && dateInput._flatpickr) {
+        // Jika input tersebut adalah Flatpickr, gunakan fungsi clear() bawaan Flatpickr
+        dateInput._flatpickr.clear();
+    } else if (dateInput) {
+        // Fallback (jaga-jaga jika Flatpickr gagal dimuat dan kembali ke input HTML biasa)
+        dateInput.value = '';
+    }
+
+    // 7. RESET MEMORI TANGGAL GANDA 
     dateQueue = []; 
 }
 
