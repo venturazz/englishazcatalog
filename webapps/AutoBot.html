@@ -141,10 +141,10 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Volume (Otomatis):</label>
-            <input type="number" id="volOutput" value="0" style="background:#fff; border-color:var(--accent); font-weight:bold;">
-        </div>
+     	<div class="form-group">
+   		<label>Volume (Otomatis):</label>
+   		<select id="volOutput" style="background:#fff; border-color:var(--accent); font-weight:bold; padding: 12px 10px; width: 100%; border-radius: 6px;"></select>
+		</div>
 
         <div class="form-group">
             <label>Keterangan:</label>
@@ -1510,20 +1510,38 @@
         document.getElementById('indGroup').style.display = document.getElementById('jenisInput').value === 'Umum' ? 'none' : 'block';
     }
 
-    function calcVolume() {
-        const actVal = document.getElementById('actInput').value;
-        const match = actVal.match(/(\d+)\s+menit/);
-        const start = document.getElementById('jamM').value;
-        const end = document.getElementById('jamS').value;
+function calcVolume() {
+    const actVal = document.getElementById('actInput').value;
+    const match = actVal.match(/(\d+)\s+menit/);
+    const start = document.getElementById('jamM').value;
+    const end = document.getElementById('jamS').value;
 
-        if(match && start && end) {
-            const menitStandar = parseInt(match[1]); 
-            const durasi = (new Date(`1970-01-01T${end}`) - new Date(`1970-01-01T${start}`)) / 60000; 
-            let finalVol = Math.round(durasi / menitStandar);
-            if (finalVol < 1) finalVol = 1;
-            document.getElementById('volOutput').value = finalVol;
+    if(match && start && end) {
+        const menitStandar = parseInt(match[1]); 
+        const durasi = (new Date(`1970-01-01T${end}`) - new Date(`1970-01-01T${start}`)) / 60000; 
+        
+        // 1. Calculate the maximum volume (using your original formula)
+        let maxVol = Math.round(durasi / menitStandar);
+        if (maxVol < 1) maxVol = 1; 
+        
+        // 2. Get the dropdown element
+        const volOutput = document.getElementById('volOutput');
+        
+        // 3. Clear any existing options so they don't stack up
+        volOutput.innerHTML = ''; 
+        
+        // 4. Generate the dropdown options from 1 up to the maxVol
+        for (let i = 1; i <= maxVol; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.text = i;
+            volOutput.appendChild(option);
         }
+        
+        // 5. Automatically select the highest calculated value
+        volOutput.value = maxVol;
     }
+}
 
     function cleanText(text) { return text.replace(/\s\d+\smenit$/, "").trim(); }
 
