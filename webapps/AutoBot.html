@@ -1597,6 +1597,17 @@ function addToTable() {
 	// 4. TAMPILKAN KE LAYAR! (Ini yang sebelumnya kurang)
     renderTable();
     // (Add any UI update code you have here, like clearing the form)
+	// 5. KOSONGKAN INPUT FORM (Reset Manual)
+    //document.getElementById('actInput').value = "";
+    //document.getElementById('ketInput').value = "";
+    //document.getElementById('jamM').value = "";
+    //document.getElementById('jamS').value = "";
+    //document.getElementById('volOutput').value = "";
+    // Untuk dropdown (select), kembalikan ke pilihan pertama/default (opsional)
+    // document.getElementById('jenisInput').selectedIndex = 0; 
+    // document.getElementById('indInput').selectedIndex = 0;
+    // Jika Anda juga ingin mengosongkan antrean tanggal setelah simpan:
+    dateQueue = []; 
 }
 
     function renderTable() {
