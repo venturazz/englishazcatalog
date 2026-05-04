@@ -59,6 +59,11 @@
     </style>
 </head>
 <body>
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand(); // Important: forces full screen for your 2-column layout
+</script>
 
 <div class="wrapper">
     <div class="card">
@@ -177,7 +182,7 @@
         </div>
 
         <div style="margin-top:20px; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; width: 100%;">
-            <button id="btnEksekusi" class="btn btn-dark" onclick="generateScript()">⚡ EKSEKUSI LANGSUNG KE SERVER</button>
+            <button id="btnEksekusi" class="btn btn-dark" style="display:none" onclick="generateScript()">⚡ EKSEKUSI LANGSUNG KE SERVER</button>
             <div id="apiLogger"></div>
         </div>
     </div>
