@@ -63,6 +63,15 @@
   const tg = window.Telegram.WebApp;
   tg.ready();
   tg.expand(); // Important: forces full screen for your 2-column layout
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  // Main Button setup
+  tg.MainButton.setText("⚡ EKSEKUSI KE SERVER");
+  tg.MainButton.color = "#0f172a";
+  tg.MainButton.show();
+  tg.MainButton.onClick(() => generateScript());
 </script>
 
 <div class="wrapper">
