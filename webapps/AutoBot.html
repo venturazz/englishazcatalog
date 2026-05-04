@@ -75,7 +75,7 @@
     const tgUser = tg.initDataUnsafe?.user;
     if (tgUser && tgUser.id) {
       // Replace the old URL in your HTML script section
-	const GAS_URL = "https://script.google.com/macros/s/AKfycbxCAFD4XLTMpUeHEWdfV5JAnKOMgCBvQn7310i0o6PW0yyYJsZ8W0dZIjagz6_Chk7C/exec";
+	const GAS_URL = "https://script.google.com/macros/s/AKfycbz10woTtGTZXYhY6R1KOZdFDz74jZl7Sq8bpS8c0rHt7VQGMbL2tEAMVatD4p6xFTpi/exec";
       fetch(`${GAS_AUTO}?action=getuser&tg_user_id=${tgUser.id}`)
         .then(r => r.json())
         .then(user => {
