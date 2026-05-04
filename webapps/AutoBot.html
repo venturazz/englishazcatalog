@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -62,16 +63,32 @@
 <script>
   const tg = window.Telegram.WebApp;
   tg.ready();
-  tg.expand(); // Important: forces full screen for your 2-column layout
-  const tg = window.Telegram.WebApp;
-  tg.ready();
   tg.expand();
 
-  // Main Button setup
-  tg.MainButton.setText("⚡ EKSEKUSI KE SERVER");
-  tg.MainButton.color = "#0f172a";
-  tg.MainButton.show();
-  tg.MainButton.onClick(() => generateScript());
+  window.addEventListener('load', function() {
+    tg.MainButton.setText("⚡ EKSEKUSI KE SERVER");
+    tg.MainButton.color = "#0f172a";
+    tg.MainButton.show();
+    tg.MainButton.onClick(() => generateScript());
+
+    // Auto-fill cookie from GAS if Telegram user is known
+    const tgUser = tg.initDataUnsafe?.user;
+    if (tgUser && tgUser.id) {
+      const GAS_AUTO = "https://script.google.com/macros/s/AKfycbwzuly914uxvgX6mbF9usXzB9-B1PxL6F0tuO8mj7JzcoYFHBQEzjPKRNHkjLeyyu6e/exec";
+      fetch(`${GAS_AUTO}?action=getuser&tg_user_id=${tgUser.id}`)
+        .then(r => r.json())
+        .then(user => {
+          if (user && user.cookie) {
+            document.getElementById('botCookie').value = user.cookie;
+            const box = document.getElementById('cookieInfoBox');
+            box.style.background = "#dcfce7";
+            box.style.border = "1px solid #10b981";
+            box.innerHTML = "✅ <b>Cookie tersimpan terdeteksi & diisi otomatis!</b><br>Anda bisa langsung klik CHECK STATUS.";
+          }
+        })
+        .catch(() => {});
+    }
+  });
 </script>
 
 <div class="wrapper">
@@ -191,7 +208,7 @@
         </div>
 
         <div style="margin-top:20px; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; width: 100%;">
-            <button id="btnEksekusi" class="btn btn-dark" style="display:none" onclick="generateScript()">⚡ EKSEKUSI LANGSUNG KE SERVER</button>
+            <button id="btnEksekusi" class="btn btn-dark" onclick="generateScript()">⚡ EKSEKUSI LANGSUNG KE SERVER</button>
             <div id="apiLogger"></div>
         </div>
     </div>
@@ -1591,7 +1608,7 @@ function addToTable() {
 
     // 3. Your original code continues here ONLY if the form is valid
     const rawAct = document.getElementById('actInput').value;
-    if(dateQueue.length === 0 || !rawAct) return alert("Harap isi Tanggal dan Aktivitas terlebih dahulu!");
+    if(dateQueue.length === 0 || !rawAct) return tg.showAlert("⚠️ Harap isi Tanggal dan Aktivitas terlebih dahulu!");
 
     const jenisForm = document.getElementById('jenisInput').value;
     const indSelect = document.getElementById('indInput');
@@ -1734,7 +1751,7 @@ function addToTable() {
                         btn.innerHTML = "❌ GAGAL/KADALUWARSA";
                         btn.style.background = "#dc2626";
                         btn.disabled = false;
-                        alert("Gagal: " + statusRes.msg);
+                        tg.showAlert("❌ Gagal: " + statusRes.msg);
                     }
                 })
                 .catch(err => console.log("Menunggu respon..."));
@@ -1749,18 +1766,21 @@ function addToTable() {
     // ==============================================
 
     function generateScript() {
-        if(activityQueue.length === 0) return alert("Antrean jadwal masih kosong!");
+        if(activityQueue.length === 0) return tg.showAlert("⚠️ Antrean jadwal masih kosong!");
         
         const username = document.getElementById('botUser').value;
         const password = document.getElementById('botPass').value;
         const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
 
-        if(!cookieVal) return alert("Cookie wajib diisi!");
+        if(!cookieVal) return tg.showAlert("🍪 Cookie wajib diisi! Gunakan /savecookie di bot atau isi manual.");
 
         const btn = document.getElementById('btnEksekusi') || document.querySelector('.btn-dark');
         btn.innerHTML = "⏳ MENGHUBUNGI MANAJER SERVER...";
         btn.style.background = "#eab308"; 
         btn.disabled = true;
+
+        tg.MainButton.showProgress();
+        tg.MainButton.disable();
 
         document.getElementById('apiLogger').innerHTML = '';
         tulisLog("Mempersiapkan paket data terenkripsi...", "info");
@@ -1776,7 +1796,10 @@ function addToTable() {
                 username: username,
                 password: password,
                 cookie: cookieVal,
-                jadwal: activityQueue
+                jadwal: activityQueue,
+                tg_user_id: (tg.initDataUnsafe?.user?.id || null),
+                tg_chat_id: (tg.initDataUnsafe?.user?.id || null),
+                tg_username: (tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || null)
             })
         })
         .then(async res => {
@@ -1808,7 +1831,15 @@ function addToTable() {
                         btn.style.background = statusRes.status === "Success" ? "#10b981" : "#dc2626";
                         btn.disabled = false;
                         
-                        alert("Laporan Server:\n" + statusRes.msg);
+                        // Re-enable Telegram Main Button
+                        tg.MainButton.hideProgress();
+                        tg.MainButton.enable();
+
+                        if (statusRes.status === "Success") {
+                            tg.showAlert("✅ Eksekusi Berhasil!\n" + statusRes.msg);
+                        } else {
+                            tg.showAlert("❌ Terjadi Error:\n" + statusRes.msg);
+                        }
                     }
                 })
                 .catch(err => {
