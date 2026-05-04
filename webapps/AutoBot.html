@@ -74,7 +74,8 @@
     // Auto-fill cookie from GAS if Telegram user is known
     const tgUser = tg.initDataUnsafe?.user;
     if (tgUser && tgUser.id) {
-      const GAS_AUTO = "https://script.google.com/macros/s/AKfycbyoK8jHAf_5qWclEmJsfCXqE6he4cLHRf9-_EvLxfOal0Ia89R7PAtXm91wNGqyfBPV/exec";
+      // Replace the old URL in your HTML script section
+	const GAS_URL = "https://script.google.com/macros/s/AKfycbyoK8jHAf_5qWclEmJsfCXqE6he4cLHRf9-_EvLxfOal0Ia89R7PAtXm91wNGqyfBPV/exec";
       fetch(`${GAS_AUTO}?action=getuser&tg_user_id=${tgUser.id}`)
         .then(r => r.json())
         .then(user => {
