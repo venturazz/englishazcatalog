@@ -1490,6 +1490,7 @@
     <option value="Menyusun RKA dan DPA 60 menit">
     <option value="Menyusun RKA dan DPA 120 menit">
 </datalist>
+<div id="debugBox" style="font-size:10px;color:red;"></div>
 
 <script>
     let dateQueue = [];
@@ -1859,6 +1860,10 @@ function addToTable() {
             btn.disabled = false;
         });
     }
+	document.getElementById('debugBox').innerText = JSON.stringify({
+  hasTg: !!window.Telegram,
+  user: tg.initDataUnsafe?.user || null
+});
 </script>
 </body>
 </html>
