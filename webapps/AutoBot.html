@@ -67,29 +67,35 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbz10woTtGTZXYhY6R1KOZdFDz74jZl7Sq8bpS8c0rHt7VQGMbL2tEAMVatD4p6xFTpi/exec";
 
   window.addEventListener('load', function() {
-    tg.MainButton.setText("⚡ EKSEKUSI KE SERVER");
-    tg.MainButton.color = "#0f172a";
-    tg.MainButton.show();
-    tg.MainButton.onClick(() => generateScript());
+  tg.MainButton.setText("⚡ EKSEKUSI KE SERVER");
+  tg.MainButton.color = "#0f172a";
+  tg.MainButton.show();
+  tg.MainButton.onClick(() => generateScript());
 
-    // Auto-fill cookie from GAS if Telegram user is known
-    const tgUser = tg.initDataUnsafe?.user;
-    if (tgUser && tgUser.id) {
-      // Replace the old URL in your HTML script section
-      fetch(`${GAS_URL}?action=getuser&tg_user_id=${tgUser.id}`)
-        .then(r => r.json())
-        .then(user => {
-          if (user && user.cookie) {
-            document.getElementById('botCookie').value = user.cookie;
-            const box = document.getElementById('cookieInfoBox');
-            box.style.background = "#dcfce7";
-            box.style.border = "1px solid #10b981";
-            box.innerHTML = "✅ <b>Cookie tersimpan terdeteksi & diisi otomatis!</b><br>Anda bisa langsung klik CHECK STATUS.";
-          }
-        })
-        .catch(() => {});
-    }
-  });
+  const tgUser = tg.initDataUnsafe?.user;
+  if (tgUser && tgUser.id) {
+    fetch(`${GAS_URL}?action=getuser&tg_user_id=${tgUser.id}`)
+      .then(r => r.json())
+      .then(user => {
+        if (!user) return;
+
+        if (user.etpp_user) {
+          document.getElementById('botUser').value = user.etpp_user;
+        }
+        if (user.etpp_pass) {
+          document.getElementById('botPass').value = user.etpp_pass;
+        }
+        if (user.cookie) {
+          document.getElementById('botCookie').value = user.cookie;
+          const box = document.getElementById('cookieInfoBox');
+          box.style.background = "#dcfce7";
+          box.style.border = "1px solid #10b981";
+          box.innerHTML = "✅ <b>Cookie tersimpan terdeteksi & diisi otomatis!</b><br>Anda bisa langsung klik CHECK STATUS.";
+        }
+      })
+      .catch(() => {});
+  }
+});
 </script>
 
 <div class="wrapper">
