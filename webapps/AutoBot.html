@@ -62,19 +62,23 @@
 <body>
 <script>
   const tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbz10woTtGTZXYhY6R1KOZdFDz74jZl7Sq8bpS8c0rHt7VQGMbL2tEAMVatD4p6xFTpi/exec";
+tg.ready();
+tg.expand();
 
-  window.addEventListener('load', function() {
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz10woTtGTZXYhY6R1KOZdFDz74jZl7Sq8bpS8c0rHt7VQGMbL2tEAMVatD4p6xFTpi/exec";
+
+window.addEventListener('load', function() {
   tg.MainButton.setText("⚡ EKSEKUSI KE SERVER");
   tg.MainButton.color = "#0f172a";
   tg.MainButton.show();
   tg.MainButton.onClick(() => generateScript());
 
-  const tgUser = tg.initDataUnsafe?.user;
-  if (tgUser && tgUser.id) {
-    fetch(`${GAS_URL}?action=getuser&tg_user_id=${tgUser.id}`)
+  // AMBIL tg_user_id DARI QUERY STRING, BUKAN initDataUnsafe
+  const params   = new URLSearchParams(window.location.search);
+  const tgUserId = params.get('tg_user_id');
+
+  if (tgUserId) {
+    fetch(`${GAS_URL}?action=getuser&tg_user_id=${encodeURIComponent(tgUserId)}`)
       .then(r => r.json())
       .then(user => {
         if (!user) return;
@@ -93,7 +97,11 @@
           box.innerHTML = "✅ <b>Cookie tersimpan terdeteksi & diisi otomatis!</b><br>Anda bisa langsung klik CHECK STATUS.";
         }
       })
-      .catch(() => {});
+      .catch(err => {
+        console.log('getuser error', err);
+      });
+  } else {
+    console.log('tg_user_id tidak ada di URL');
   }
 });
 </script>
