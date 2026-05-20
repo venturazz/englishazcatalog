@@ -103,19 +103,60 @@ window.addEventListener('load', function() {
     console.log('tg_user_id tidak ada di URL');
   }
 });
+let currentJobId = null;
+
+function submitCaptchaHTML() {
+    const answer = document.getElementById('ui-captcha-input').value.trim();
+    if(!answer) return alert("Captcha tidak boleh kosong!");
+    
+    const btn = document.getElementById('btnSubmitCaptcha');
+    btn.innerHTML = "⏳ Mengirim ke Server...";
+    btn.disabled = true;
+
+    // Membajak endpoint update untuk mengirim jawaban kembali ke Node.js
+    fetch(`${GAS_URL}?action=update&jobId=${currentJobId}&status=CAPTCHA_ANSWER&msg=${encodeURIComponent(answer)}`)
+    .then(r => r.text())
+    .then(() => {
+        btn.innerHTML = "KIRIM CAPTCHA 🚀";
+        btn.disabled = false;
+        document.getElementById('captchaBox').style.display = 'none';
+        document.getElementById('ui-captcha-input').value = '';
+        tulisLog("✅ Captcha terkirim! Menunggu eksekusi server...", "success");
+    }).catch(e => {
+        btn.innerHTML = "KIRIM CAPTCHA 🚀";
+        btn.disabled = false;
+        alert("Gagal kirim captcha: " + e.message);
+    });
+}
 </script>
 
 <div class="wrapper">
     <div class="card">
         <h2>⚙️ Konfigurasi (Cloud API)</h2>
         
-        <div class="session-box">
+        	<div class="session-box">
             <label style="color:#166534;">🔑 Akun ETPP (Terinjeksi Otomatis):</label>
             <div class="flex-row">
                 <input type="text" id="botUser" placeholder="Username ETPP" autocomplete="off">
                 <input type="password" id="botPass" placeholder="Password ETPP" autocomplete="off">
             </div>
-            
+
+            <div id="captchaBox" style="display:none; background: #fef08a; border: 1px solid #eab308; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <label style="color:#854d0e; font-weight:bold; margin-bottom: 10px; display: block;">🛡️ Verifikasi Captcha Diperlukan:</label>
+                <div class="form-group mt-0 mb-2">
+                    <div class="captcha row no-gutters">
+                        <div class="col-lg-5 pr-lg-1 my-2">
+                            <div style="display: inline-block; border-radius: 0.3rem; overflow: hidden; width: 130px; height: 45px; border: 1px solid #cbd5e1; background: white;">
+                                <img id="ui-captcha-img" alt="Loading..." width="130" src="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="captcha-input mt-2">
+                        <input id="ui-captcha-input" type="text" autocomplete="off" placeholder="Ketik kode di gambar..." class="form-control" style="border: 2px solid #eab308; font-weight: bold; text-align: center; letter-spacing: 2px; text-transform: uppercase;">
+                    </div>
+                    <button id="btnSubmitCaptcha" type="button" class="btn" style="margin-top: 10px; background: #ca8a04; color: white; width: 100%;" onclick="submitCaptchaHTML()">KIRIM CAPTCHA 🚀</button>
+                </div>
+            </div>
             <label style="color:#166534; margin-top: 15px;">🍪 Cookie Aktif (Bypass Login):</label>
             <textarea id="botCookie" rows="2" onpaste="sanitizePaste(event)" placeholder="Tempel cookie ... contoh: e_tpp_session=xxxxxx"></textarea>
             
@@ -130,6 +171,11 @@ window.addEventListener('load', function() {
                 7. Salin semua teks setelah <code>cookie:</code> sampai akhir baris, lalu tempel ke kolom Cookie di atas.<br>
                 <span style="display:block; margin-top:8px; color:#166534;">Pastikan Anda menyalin seluruh nilai cookie, bukan hanya sebagian kata.</span>
             </div>
+            
+            <button id="btnCheck" class="btn btn-blue" style="margin-top:10px; background:#0f172a;" onclick="checkStatus()">🔍 CHECK STATUS & AMBIL DATA</button>
+            
+            <button id="btnRenkin" class="btn" style="margin-top:10px; background:#10b981; color:white;" onclick="eksekusiRenkin()">🎯 INPUT REALISASI RENKIN</button>
+        </div>
             
             <button id="btnCheck" class="btn btn-blue" style="margin-top:10px; background:#0f172a;" onclick="checkStatus()">🔍 CHECK STATUS & AMBIL DATA</button>
             
@@ -406,230 +452,300 @@ function addToTable() {
         logger.innerHTML += `<div><span class="log-time">[${waktu}]</span><span class="${warnaKelas}">${pesan}</span></div>`;
         logger.scrollTop = logger.scrollHeight; 
     }
+	// Letakkan ini di luar fungsi, misalnya tepat di bawah deklarasi variabel global lainnya
+let currentJobId = null;
 
-    // === FUNGSI CHECK STATUS ===
-    function checkStatus() {
-        const username = document.getElementById('botUser').value;
-        const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
-        if(!cookieVal) return alert("Cookie wajib diisi untuk pengecekan!");
+function submitCaptchaHTML() {
+    const answer = document.getElementById('ui-captcha-input').value.trim();
+    if(!answer) return alert("Captcha tidak boleh kosong!");
+    
+    const btn = document.getElementById('btnSubmitCaptcha');
+    btn.innerHTML = "⏳ Mengirim ke Server...";
+    btn.disabled = true;
 
-        const btn = document.getElementById('btnCheck');
-        btn.innerHTML = "⏳ SEDANG MENGECEK...";
-        btn.disabled = true;
+    // Membajak endpoint update untuk mengirim jawaban kembali ke Node.js
+    fetch(`${GAS_URL}?action=update&jobId=${currentJobId}&status=CAPTCHA_ANSWER&msg=${encodeURIComponent(answer)}`)
+    .then(r => r.text())
+    .then(() => {
+        btn.innerHTML = "KIRIM CAPTCHA 🚀";
+        btn.disabled = false;
+        document.getElementById('captchaBox').style.display = 'none';
+        document.getElementById('ui-captcha-input').value = '';
+        tulisLog("✅ Captcha terkirim! Menunggu eksekusi server...", "success");
+    }).catch(e => {
+        btn.innerHTML = "KIRIM CAPTCHA 🚀";
+        btn.disabled = false;
+        alert("Gagal kirim captcha: " + e.message);
+    });
+}
 
-        tulisLog("Memulai sesi pengecekan akun...", "warn");
+// === FUNGSI CHECK STATUS ===
+function checkStatus() {
+    const username = document.getElementById('botUser').value;
+    const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
+    
+    // Hapus alert wajib cookie karena sekarang bisa login via Captcha
+    // if(!cookieVal) return alert("Cookie wajib diisi untuk pengecekan!");
 
-        fetch(GAS_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-                action: "check_only", 
-                username: username,
-                cookie: cookieVal,
-                jadwal: [] 
-            })
+    const btn = document.getElementById('btnCheck');
+    btn.innerHTML = "⏳ SEDANG MENGECEK...";
+    btn.disabled = true;
+
+    tulisLog("Memulai sesi pengecekan akun...", "warn");
+    fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+            action: "check_only", 
+            username: username,
+            cookie: cookieVal,
+            jadwal: [] 
         })
-        .then(res => res.json())
-        .then(res => {
-            const jobId = res.jobId;
-            const interval = setInterval(() => {
-                fetch(`${GAS_URL}?action=check&jobId=${jobId}`)
-                .then(r => r.json())
-                .then(statusRes => {
+    })
+    .then(res => res.json())
+    .then(res => {
+        const jobId = res.jobId;
+        currentJobId = jobId; // Simpan ke variabel global untuk UI Captcha
+
+        const interval = setInterval(() => {
+            fetch(`${GAS_URL}?action=check&jobId=${jobId}`)
+            .then(r => r.json())
+            .then(statusRes => {
+                // --- LOGIKA BARU CAPTCHA ---
+                if (statusRes.status === "CAPTCHA") {
+                    document.getElementById('captchaBox').style.display = 'block';
+                    document.getElementById('ui-captcha-img').src = statusRes.msg; 
+                    tulisLog(`⚠️ Server menunggu Captcha. Cek form di atas atau Telegram.`, "warn");
+                    return; 
+                } else if (statusRes.status === "CAPTCHA_ANSWER") {
+                    tulisLog(`⏳ Menunggu server membaca jawaban captcha...`, "info");
+                    return;
+                } else if (statusRes.status === "MEMPROSES") {
+                    document.getElementById('captchaBox').style.display = 'none';
+                    tulisLog(`🔄 Server sedang memproses login...`, "info");
+                    return;
+                }
+                // ---------------------------
+
+                if (statusRes.status === "Success") {
+                    clearInterval(interval);
+                    btn.innerHTML = "✅ STATUS AKTIF";
+                    btn.style.background = "#10b981";
+                    btn.disabled = false;
+                    
+                    try {
+                        const responseData = JSON.parse(statusRes.msg);
+                        const infoBox = document.getElementById('cookieInfoBox');
+                        infoBox.style.background = "#dcfce7";
+                        infoBox.style.border = "1px solid #10b981";
+                        infoBox.style.color = "#064e3b";
+                        infoBox.style.fontSize = "13px";
+                        infoBox.innerHTML = `✅ <b>Akun Terhubung:</b> ${responseData.profil.nama} <br> 🆔 <b>NRK:</b> ${responseData.profil.nrk}`;
+
+                        document.getElementById('infoKinerjaBox').style.display = 'block';
+                        document.getElementById('textKinerja').innerText = responseData.kinerja;
+                        tulisLog(`Halo, ${responseData.profil.nama}! Data berhasil ditarik.`, "success");
+                    } catch(e) {
+                        document.getElementById('infoKinerjaBox').style.display = 'block';
+                        document.getElementById('textKinerja').innerText = statusRes.msg;
+                    }
+                } else if (statusRes.status === "Error") {
+                    clearInterval(interval);
+                    btn.innerHTML = "❌ GAGAL/KADALUWARSA";
+                    btn.style.background = "#dc2626";
+                    btn.disabled = false;
+                    tg.showAlert("❌ Gagal: " + statusRes.msg);
+                }
+            })
+            .catch(err => console.log("Menunggu respon..."));
+        }, 5000);
+    })
+    .catch(error => {
+        tulisLog(`❌ KONEKSI GAGAL: ${error.message}`, "warn");
+        btn.innerHTML = "🔍 CHECK STATUS & AMBIL DATA";
+        btn.disabled = false;
+    });
+}
+
+// === FUNGSI EKSEKUSI REALISASI RENKIN ===
+function eksekusiRenkin() {
+    const username = document.getElementById('botUser').value;
+    const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
+
+    const btn = document.getElementById('btnRenkin');
+    btn.innerHTML = "⏳ MENGHUBUNGI SERVER...";
+    btn.disabled = true;
+
+    tulisLog("Memulai eksekusi Realisasi Renkin otomatis...", "warn");
+    fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+            action: "realisasi_renkin", 
+            username: username,
+            cookie: cookieVal,
+            jadwal: [],
+            tg_user_id: (tg.initDataUnsafe?.user?.id || null),
+            tg_chat_id: (tg.initDataUnsafe?.user?.id || null)
+        })
+    })
+    .then(async res => {
+        const textLengkap = await res.text();
+        try { return JSON.parse(textLengkap); } 
+        catch (err) { throw new Error("Izin Akses Google Salah! Cek deployment GAS."); }
+    })
+    .then(res => {
+        const jobId = res.jobId;
+        currentJobId = jobId; // Simpan ke variabel global untuk UI Captcha
+        tulisLog(`✅ Perintah Renkin diterima! ID Antrean: ${jobId}`, "success");
+      
+        const interval = setInterval(() => {
+            fetch(`${GAS_URL}?action=check&jobId=${jobId}`)
+            .then(r => r.json())
+            .then(statusRes => {
+                tulisLog(`[Cek Status] Server menjawab: ${statusRes.status}...`, "info");
+
+                // --- LOGIKA BARU CAPTCHA ---
+                if (statusRes.status === "CAPTCHA") {
+                    document.getElementById('captchaBox').style.display = 'block';
+                    document.getElementById('ui-captcha-img').src = statusRes.msg; 
+                    tulisLog(`⚠️ Server menunggu Captcha. Cek form di atas atau Telegram.`, "warn");
+                    return; 
+                } else if (statusRes.status === "CAPTCHA_ANSWER") {
+                    tulisLog(`⏳ Menunggu server membaca jawaban captcha...`, "info");
+                    return;
+                } else if (statusRes.status === "MEMPROSES") {
+                    document.getElementById('captchaBox').style.display = 'none';
+                    tulisLog(`🔄 Server sedang memproses login...`, "info");
+                    return;
+                }
+                // ---------------------------
+
+                if (statusRes.status === "Success" || statusRes.status === "Error") {
+                    clearInterval(interval);
                     if (statusRes.status === "Success") {
-                        clearInterval(interval);
-                        btn.innerHTML = "✅ STATUS AKTIF";
+                        btn.innerHTML = "✅ RENKIN SELESAI";
                         btn.style.background = "#10b981";
-                        btn.disabled = false;
-                        
-                        try {
-                            const responseData = JSON.parse(statusRes.msg);
-                            
-                            const infoBox = document.getElementById('cookieInfoBox');
-                            infoBox.style.background = "#dcfce7";
-                            infoBox.style.border = "1px solid #10b981";
-                            infoBox.style.color = "#064e3b";
-                            infoBox.style.fontSize = "13px";
-                            infoBox.innerHTML = `✅ <b>Akun Terhubung:</b> ${responseData.profil.nama} <br> 🆔 <b>NRK:</b> ${responseData.profil.nrk}`;
-
-                            document.getElementById('infoKinerjaBox').style.display = 'block';
-                            document.getElementById('textKinerja').innerText = responseData.kinerja;
-                            
-                            tulisLog(`Halo, ${responseData.profil.nama}! Data berhasil ditarik.`, "success");
-                        } catch(e) {
-                            document.getElementById('infoKinerjaBox').style.display = 'block';
-                            document.getElementById('textKinerja').innerText = statusRes.msg;
-                        }
-                    } else if (statusRes.status === "Error") {
-                        clearInterval(interval);
-                        btn.innerHTML = "❌ GAGAL/KADALUWARSA";
+                        tg.showAlert("✅ Proses Renkin Selesai!\nCek Log Terminal / Notifikasi Telegram untuk detailnya.");
+                    } else {
+                        btn.innerHTML = "❌ TERJADI ERROR";
                         btn.style.background = "#dc2626";
-                        btn.disabled = false;
-                        tg.showAlert("❌ Gagal: " + statusRes.msg);
+                        tg.showAlert("❌ Gagal:\n" + statusRes.msg);
                     }
-                })
-                .catch(err => console.log("Menunggu respon..."));
-            }, 5000);
-        })
-        .catch(error => {
-            tulisLog(`❌ KONEKSI GAGAL: ${error.message}`, "warn");
-            btn.innerHTML = "🔍 CHECK STATUS & AMBIL DATA";
-            btn.disabled = false;
-        });
-    }
-
-    // === FUNGSI BARU: EKSEKUSI REALISASI RENKIN ===
-    function eksekusiRenkin() {
-        const username = document.getElementById('botUser').value;
-        const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
-        if(!cookieVal) return alert("Cookie wajib diisi untuk eksekusi Renkin!");
-
-        const btn = document.getElementById('btnRenkin');
-        btn.innerHTML = "⏳ MENGHUBUNGI SERVER...";
-        btn.disabled = true;
-
-        tulisLog("Memulai eksekusi Realisasi Renkin otomatis...", "warn");
-
-        fetch(GAS_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-                action: "realisasi_renkin", 
-                username: username,
-                cookie: cookieVal,
-                jadwal: [],
-                tg_user_id: (tg.initDataUnsafe?.user?.id || null),
-                tg_chat_id: (tg.initDataUnsafe?.user?.id || null)
+                    btn.disabled = false;
+                    tulisLog(`HASIL: ${statusRes.msg}`, statusRes.status === "Success" ? "success" : "warn");
+                }
             })
-        })
-        .then(async res => {
-            const textLengkap = await res.text();
-            try { return JSON.parse(textLengkap); } 
-            catch (err) { throw new Error("Izin Akses Google Salah! Cek deployment GAS."); }
-        })
-        .then(res => {
-            const jobId = res.jobId;
-            tulisLog(`✅ Perintah Renkin diterima! ID Antrean: ${jobId}`, "success");
-            
-            // Polling status
-            const interval = setInterval(() => {
-                fetch(`${GAS_URL}?action=check&jobId=${jobId}`)
-                .then(r => r.json())
-                .then(statusRes => {
-                    tulisLog(`[Cek Status] Server menjawab: ${statusRes.status}...`, "info");
-                    
-                    if (statusRes.status === "Success" || statusRes.status === "Error") {
-                        clearInterval(interval);
-                        
-                        if (statusRes.status === "Success") {
-                            btn.innerHTML = "✅ RENKIN SELESAI";
-                            btn.style.background = "#10b981";
-                            tg.showAlert("✅ Proses Renkin Selesai!\nCek Log Terminal / Notifikasi Telegram untuk detailnya.");
-                        } else {
-                            btn.innerHTML = "❌ TERJADI ERROR";
-                            btn.style.background = "#dc2626";
-                            tg.showAlert("❌ Gagal:\n" + statusRes.msg);
-                        }
-                        btn.disabled = false;
-                        tulisLog(`HASIL: ${statusRes.msg}`, statusRes.status === "Success" ? "success" : "warn");
-                    }
-                })
-                .catch(err => console.log("Menunggu respon status renkin..."));
-            }, 5000);
-        })
-        .catch(error => {
-            tulisLog(`❌ KONEKSI GAGAL: ${error.message}`, "warn");
-            btn.innerHTML = "🎯 INPUT REALISASI RENKIN";
-            btn.disabled = false;
-        });
-    }
+            .catch(err => console.log("Menunggu respon status renkin..."));
+        }, 5000);
+    })
+    .catch(error => {
+        tulisLog(`❌ KONEKSI GAGAL: ${error.message}`, "warn");
+        btn.innerHTML = "🎯 INPUT REALISASI RENKIN";
+        btn.disabled = false;
+    });
+}
 
-    // === FUNGSI EKSEKUSI JADWAL HARIAN ===
-    function generateScript() {
-        if(activityQueue.length === 0) return tg.showAlert("⚠️ Antrean jadwal masih kosong!");
+// === FUNGSI EKSEKUSI JADWAL HARIAN ===
+function generateScript() {
+    if(activityQueue.length === 0) return tg.showAlert("⚠️ Antrean jadwal masih kosong!");
+    const username = document.getElementById('botUser').value;
+    const password = document.getElementById('botPass').value;
+    const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
+
+    const btn = document.getElementById('btnEksekusi') || document.querySelector('.btn-dark');
+    btn.innerHTML = "⏳ MENGHUBUNGI MANAJER SERVER...";
+    btn.style.background = "#eab308"; 
+    btn.disabled = true;
+
+    tg.MainButton.showProgress();
+    tg.MainButton.disable();
+
+    document.getElementById('apiLogger').innerHTML = '';
+    tulisLog("Mempersiapkan paket data terenkripsi...", "info");
+    tulisLog("Menghubungi manajer server (Google Cloud)...", "warn");
+    
+    fetch(GAS_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8", 
+        },
+        body: JSON.stringify({
+            username: username,
+            password: password,
+            cookie: cookieVal,
+            jadwal: activityQueue,
+            tg_user_id: (tg.initDataUnsafe?.user?.id || null),
+            tg_chat_id: (tg.initDataUnsafe?.user?.id || null),
+            tg_username: (tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || null)
+        })
+    })
+    .then(async res => {
+        const textLengkap = await res.text();
+        try {
+            return JSON.parse(textLengkap); 
+        } catch (err) {
+            throw new Error("Izin Akses Google Salah! Google meminta login. Cek pengaturan 'Who has access: Anyone' di GAS.");
+        }
+    })
+    .then(res => {
+        const jobId = res.jobId;
+        currentJobId = jobId; // Simpan ke variabel global untuk UI Captcha
+        tulisLog(`✅ Permintaan diterima! ID Antrean: ${jobId}`, "success");
+        tulisLog(`Menunggu GitHub Actions terbangun...`, "warn");
         
-        const username = document.getElementById('botUser').value;
-        const password = document.getElementById('botPass').value;
-        const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
+        const interval = setInterval(() => {
+            fetch(`${GAS_URL}?action=check&jobId=${jobId}`)
+            .then(r => r.json())
+            .then(statusRes => {
+                tulisLog(`[Cek Status] Server menjawab: ${statusRes.status}...`, "info");
+              
+                // --- LOGIKA BARU CAPTCHA ---
+                if (statusRes.status === "CAPTCHA") {
+                    document.getElementById('captchaBox').style.display = 'block';
+                    document.getElementById('ui-captcha-img').src = statusRes.msg; 
+                    tulisLog(`⚠️ Server menunggu Captcha. Cek form di atas atau Telegram.`, "warn");
+                    return; 
+                } else if (statusRes.status === "CAPTCHA_ANSWER") {
+                    tulisLog(`⏳ Menunggu server membaca jawaban captcha...`, "info");
+                    return;
+                } else if (statusRes.status === "MEMPROSES") {
+                    document.getElementById('captchaBox').style.display = 'none';
+                    tulisLog(`🔄 Server sedang memproses login...`, "info");
+                    return;
+                }
+                // ---------------------------
 
-        if(!cookieVal) return tg.showAlert("🍪 Cookie wajib diisi! Gunakan /savecookie di bot atau isi manual.");
-
-        const btn = document.getElementById('btnEksekusi') || document.querySelector('.btn-dark');
-        btn.innerHTML = "⏳ MENGHUBUNGI MANAJER SERVER...";
-        btn.style.background = "#eab308"; 
-        btn.disabled = true;
-
-        tg.MainButton.showProgress();
-        tg.MainButton.disable();
-
-        document.getElementById('apiLogger').innerHTML = '';
-        tulisLog("Mempersiapkan paket data terenkripsi...", "info");
-        tulisLog("Menghubungi manajer server (Google Cloud)...", "warn");
-
-        fetch(GAS_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8", 
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password,
-                cookie: cookieVal,
-                jadwal: activityQueue,
-                tg_user_id: (tg.initDataUnsafe?.user?.id || null),
-                tg_chat_id: (tg.initDataUnsafe?.user?.id || null),
-                tg_username: (tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || null)
-            })
-        })
-        .then(async res => {
-            const textLengkap = await res.text();
-            try {
-                return JSON.parse(textLengkap); 
-            } catch (err) {
-                throw new Error("Izin Akses Google Salah! Google meminta login. Cek pengaturan 'Who has access: Anyone' di GAS.");
-            }
-        })
-        .then(res => {
-            const jobId = res.jobId;
-            tulisLog(`✅ Permintaan diterima! ID Antrean: ${jobId}`, "success");
-            tulisLog(`Menunggu GitHub Actions terbangun...`, "warn");
-            
-            const interval = setInterval(() => {
-                fetch(`${GAS_URL}?action=check&jobId=${jobId}`)
-                .then(r => r.json())
-                .then(statusRes => {
-                    tulisLog(`[Cek Status] Server menjawab: ${statusRes.status}...`, "info");
+                if (statusRes.status === "Success" || statusRes.status === "Error") {
+                    clearInterval(interval);
+                    tulisLog(`HASIL AKHIR: ${statusRes.msg}`, statusRes.status === "Success" ? "success" : "warn");
+         
+                    btn.innerHTML = statusRes.status === "Success" ? "✅ PROSES SELESAI!" : "❌ TERJADI ERROR";
+                    btn.style.background = statusRes.status === "Success" ? "#10b981" : "#dc2626";
+                    btn.disabled = false;
                     
-                    if (statusRes.status === "Success" || statusRes.status === "Error") {
-                        clearInterval(interval);
-                        tulisLog(`HASIL AKHIR: ${statusRes.msg}`, statusRes.status === "Success" ? "success" : "warn");
-                        
-                        btn.innerHTML = statusRes.status === "Success" ? "✅ PROSES SELESAI!" : "❌ TERJADI ERROR";
-                        btn.style.background = statusRes.status === "Success" ? "#10b981" : "#dc2626";
-                        btn.disabled = false;
-                        
-                        tg.MainButton.hideProgress();
-                        tg.MainButton.enable();
+                    tg.MainButton.hideProgress();
+                    tg.MainButton.enable();
 
-                        if (statusRes.status === "Success") {
-                            tg.showAlert("✅ Eksekusi Berhasil!\n" + statusRes.msg);
-                        } else {
-                            tg.showAlert("❌ Terjadi Error:\n" + statusRes.msg);
-                        }
+                    if (statusRes.status === "Success") {
+                        tg.showAlert("✅ Eksekusi Berhasil!\n" + statusRes.msg);
+                    } else {
+                        tg.showAlert("❌ Terjadi Error:\n" + statusRes.msg);
                     }
-                })
-                .catch(err => {
-                    console.log("Menunggu respon status..."); 
-                });
-            }, 5000);
-        })
-        .catch(error => {
-            tulisLog(`❌ KONEKSI GAGAL: ${error.message}`, "warn");
-            btn.innerHTML = "⚡ ULANGI EKSEKUSI";
-            btn.style.background = "#0f172a";
-            btn.disabled = false;
-        });
-    }
+                }
+            })
+            .catch(err => {
+                console.log("Menunggu respon status..."); 
+            });
+        }, 5000);
+    })
+    .catch(error => {
+        tulisLog(`❌ KONEKSI GAGAL: ${error.message}`, "warn");
+        btn.innerHTML = "⚡ ULANGI EKSEKUSI";
+        btn.style.background = "#0f172a";
+        btn.disabled = false;
+    });
+}
 </script>
 </body>
 </html>
