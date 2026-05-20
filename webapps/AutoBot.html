@@ -474,27 +474,27 @@ function submitCaptchaHTML() {
 
 // === FUNGSI CHECK STATUS ===
 function checkStatus() {
-    const username = document.getElementById('botUser').value;
-    const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
-    
-    // Hapus alert wajib cookie karena sekarang bisa login via Captcha
-    // if(!cookieVal) return alert("Cookie wajib diisi untuk pengecekan!");
+        const username = document.getElementById('botUser').value;
+        const password = document.getElementById('botPass').value; // 👈 TAMBAHKAN INI
+        const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
+        if(!cookieVal) return alert("Cookie wajib diisi untuk pengecekan!");
 
-    const btn = document.getElementById('btnCheck');
-    btn.innerHTML = "⏳ SEDANG MENGECEK...";
-    btn.disabled = true;
+        const btn = document.getElementById('btnCheck');
+        btn.innerHTML = "⏳ SEDANG MENGECEK...";
+        btn.disabled = true;
 
-    tulisLog("Memulai sesi pengecekan akun...", "warn");
-    fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-            action: "check_only", 
-            username: username,
-            cookie: cookieVal,
-            jadwal: [] 
+        tulisLog("Memulai sesi pengecekan akun...", "warn");
+        fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "check_only", 
+                username: username,
+                password: password, // 👈 TAMBAHKAN INI JUGA DI PAYLOAD
+                cookie: cookieVal,
+                jadwal: [] 
+            })
         })
-    })
     .then(res => res.json())
     .then(res => {
         const jobId = res.jobId;
@@ -562,26 +562,30 @@ function checkStatus() {
 
 // === FUNGSI EKSEKUSI REALISASI RENKIN ===
 function eksekusiRenkin() {
-    const username = document.getElementById('botUser').value;
-    const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
+        const username = document.getElementById('botUser').value;
+        const password = document.getElementById('botPass').value; // 👈 TAMBAHKAN INI
+        const cookieVal = document.getElementById('botCookie').value.replace(/[\r\n]+/g, "").trim();
+        if(!cookieVal) return alert("Cookie wajib diisi untuk eksekusi Renkin!");
 
-    const btn = document.getElementById('btnRenkin');
-    btn.innerHTML = "⏳ MENGHUBUNGI SERVER...";
-    btn.disabled = true;
+        const btn = document.getElementById('btnRenkin');
+        btn.innerHTML = "⏳ MENGHUBUNGI SERVER...";
+        btn.disabled = true;
 
-    tulisLog("Memulai eksekusi Realisasi Renkin otomatis...", "warn");
-    fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-            action: "realisasi_renkin", 
-            username: username,
-            cookie: cookieVal,
-            jadwal: [],
-            tg_user_id: (tg.initDataUnsafe?.user?.id || null),
-            tg_chat_id: (tg.initDataUnsafe?.user?.id || null)
+        tulisLog("Memulai eksekusi Realisasi Renkin otomatis...", "warn");
+        fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "realisasi_renkin", 
+                username: username,
+                password: password, // 👈 TAMBAHKAN INI JUGA DI PAYLOAD
+                cookie: cookieVal,
+                jadwal: [],
+                tg_user_id: (tg.initDataUnsafe?.user?.id || null),
+                tg_chat_id: (tg.initDataUnsafe?.user?.id || null)
+            })
         })
-    })
+        // ... (lanjutan kodenya tetap sama) ...
     .then(async res => {
         const textLengkap = await res.text();
         try { return JSON.parse(textLengkap); } 
