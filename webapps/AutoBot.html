@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <div class="flex-row" style="margin-top: 10px;">
                 <button id="btnCheck" class="btn btn-blue" style="background:#0f172a; flex:1;" onclick="checkStatus()">🔍 CEK STATUS</button>
-                <button id="btnRenkin" class="btn" style="background:#10b981; color:white; flex:1;" onclick="eksekusiRenkin()">🎯 RENKIN</button>
+                <button id="btnRenkin" class="btn" style="background:#10b981; color:white; flex:1;" onclick="eksekusiRenkin()">🎯AUTO REALISASI</button>
             </div>
         </div>
 
@@ -575,7 +575,7 @@ function eksekusiRenkin() {
     }).then(res => res.json()).then(res => {
         currentJobId = res.jobId;
         prosesPolling(res.jobId, btn, "✅ RENKIN SELESAI", () => {
-            tg.showAlert("✅ Proses Renkin Selesai!\nData berhasil diinput.");
+            tg.showAlert("✅ Proses Renkin Selesai!\nData berhasil direalisasikan.");
         });
     });
 }
