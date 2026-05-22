@@ -335,26 +335,32 @@ function loadQueue() {
     
     document.getElementById('monitorTable').innerHTML = '<tr><td colspan="4" style="text-align:center;">⏳ Memuat antrean dari database...</td></tr>';
     
-    fetch(`${GAS_URL}?action=get_queue&tg_user_id=${info.uid}`)
-        .then(async r => {
-            const rawText = await r.text(); // Ambil respons mentah dari Google
-            try {
-                return JSON.parse(rawText);
-            } catch (e) {
-                // Jika Google membalas dengan halaman HTML error (bukan JSON), tangkap di sini!
-                throw new Error("Server GAS Crash: " + rawText.substring(0, 100) + "...");
-            }
+    // MENGGUNAKAN METODE POST YANG JAUH LEBIH AMAN DAN STABIL
+    fetch(GAS_URL, {
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+            action: 'get_queue',
+            tg_user_id: info.uid
         })
-        .then(res => {
-            if (res && res.error) throw new Error("Error Code.gs: " + res.message);
-            activityQueue = res || []; 
-            renderTable();
-        })
-        .catch(err => {
-            console.error("Detail Error:", err);
-            // Cetak pesan error merah menyala langsung ke layar Anda
-            document.getElementById('monitorTable').innerHTML = `<tr><td colspan="4" style="background:#fee2e2; color:#dc2626; padding:15px; border-radius:8px;"><b>❌ DIAGNOSA ERROR:</b><br><code style="font-size:12px;">${err.message}</code><br><br><span style="font-size:11px; color:#991b1b;"><b>Saran:</b> Buka tab 'Executions/Eksekusi' di Google Apps Script untuk melihat baris yang rusak.</span></td></tr>`;
-        });
+    })
+    .then(async r => {
+        const rawText = await r.text();
+        try {
+            return JSON.parse(rawText);
+        } catch (e) {
+            throw new Error("Respons bukan JSON: " + rawText);
+        }
+    })
+    .then(res => {
+        if (res && res.error) throw new Error("Error Code.gs: " + res.message);
+        activityQueue = res || []; 
+        renderTable();
+    })
+    .catch(err => {
+        console.error("Detail Error:", err);
+        document.getElementById('monitorTable').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#dc2626;">❌ Gagal memuat data! (${err.message})</td></tr>`;
+    });
 }
 
 // Panggil fungsi ini saat HTML selesai dimuat (Taruh di dalam window.addEventListener('load', ...))
