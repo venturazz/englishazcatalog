@@ -317,6 +317,39 @@ function calcVolume() {
 
 function cleanText(text) { return text.replace(/\s\d+\smenit$/, "").trim(); }
 
+// ==========================================
+// SINKRONISASI DATABASE (SHEET)
+// ==========================================
+
+function getTgInfo() {
+    return {
+        uid: new URLSearchParams(window.location.search).get('tg_user_id'),
+        uname: tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || 'User'
+    };
+}
+
+// 1. MEMUAT ANTREAN DARI SHEET SAAT APLIKASI DIBUKA
+function loadQueue() {
+    const info = getTgInfo();
+    if (!info.uid) return;
+    
+    document.getElementById('monitorTable').innerHTML = '<tr><td colspan="4" style="text-align:center;">⏳ Memuat antrean dari database...</td></tr>';
+    
+    fetch(`${GAS_URL}?action=get_queue&tg_user_id=${info.uid}`)
+        .then(r => r.json())
+        .then(res => {
+            activityQueue = res; // Timpa array lokal dengan data asli dari Sheet
+            renderTable();
+        })
+        .catch(err => console.error("Gagal memuat antrean:", err));
+}
+
+// Panggil fungsi ini saat HTML selesai dimuat (Taruh di dalam window.addEventListener('load', ...))
+window.addEventListener('load', function() {
+    loadQueue(); // <--- Tambahkan baris ini di dalam event load Anda
+});
+
+// 2. MENGIRIM DATA BARU KE SHEET
 function addToTable() {
     const form = document.getElementById('myActivity');
     if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -330,8 +363,9 @@ function addToTable() {
     const indLabel = (jenisForm === 'Umum') ? 'TUGAS UMUM / TAMBAHAN' : indSelect.value;
     const cleanAct = cleanText(rawAct);
 
+    const newItems = [];
     dateQueue.forEach(tgl => {
-        activityQueue.push({
+        newItems.push({
             tgl: tgl, jenis: jenisForm, ind: indValue, indLabel: indLabel, 
             actRaw: rawAct, actClean: cleanAct, matchIndex: 0,
             jamM: document.getElementById('jamM').value, jamS: document.getElementById('jamS').value,
@@ -339,13 +373,61 @@ function addToTable() {
         });
     });
     
-    renderTable();
-    if (fpInstance) fpInstance.clear();
-    dateQueue = []; 
+    const info = getTgInfo();
+    const btnSubmit = document.querySelector('.btn-blue');
+    btnSubmit.innerHTML = "⏳ MENYIMPAN KE DATABASE...";
+    btnSubmit.disabled = true;
+
+    // Tembak langsung ke API add_queue
+    fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: 'add_queue',
+            tg_user_id: info.uid,
+            tg_username: info.uname,
+            items: newItems
+        })
+    }).then(r => r.json()).then(() => {
+        btnSubmit.innerHTML = "Simpan ke Antrean ➡️";
+        btnSubmit.disabled = false;
+        
+        loadQueue(); // Reload tabel otomatis dari Database
+        
+        if (fpInstance) fpInstance.clear();
+        dateQueue = []; 
+    }).catch(() => {
+        btnSubmit.innerHTML = "❌ GAGAL MENYIMPAN";
+        setTimeout(() => { btnSubmit.innerHTML = "Simpan ke Antrean ➡️"; btnSubmit.disabled = false; }, 3000);
+    });
 }
 
+// 3. MENGHAPUS DATA LANGSUNG DARI SHEET
+function hapusAntrean(rowId) {
+    if(!confirm("Yakin ingin menghapus jadwal ini?")) return;
+    
+    const info = getTgInfo();
+    document.getElementById('monitorTable').innerHTML = '<tr><td colspan="4" style="text-align:center;">🗑️ Menghapus data dari server...</td></tr>';
+    
+    fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: 'del_queue',
+            tg_user_id: info.uid,
+            rowId: rowId
+        })
+    }).then(() => {
+        loadQueue(); // Reload tabel setelah dihapus
+    });
+}
+
+// 4. RENDER UI TABLE
 function renderTable() {
-    document.getElementById('monitorTable').innerHTML = activityQueue.map((item, i) => `
+    if (activityQueue.length === 0) {
+        document.getElementById('monitorTable').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Tidak ada antrean aktivitas.</td></tr>';
+        return;
+    }
+
+    document.getElementById('monitorTable').innerHTML = activityQueue.map((item) => `
         <tr>
             <td data-label="📅 Tanggal">${item.tgl}</td>
             <td data-label="📌 Aktivitas & Indikator">
@@ -353,7 +435,9 @@ function renderTable() {
                 <span style="font-size:11px; color:#64748b;">${item.indLabel} <br> ${item.ket}</span>
             </td>
             <td data-label="⏰ Waktu & Volume">${item.jamM} - ${item.jamS}<br><b style="color:var(--accent);">Vol: ${item.vol}</b></td>
-            <td data-label="⚙️ Aksi"><button class="btn-hapus-mobile" onclick="activityQueue.splice(${i},1);renderTable()" style="background:#fee2e2; color:#dc2626; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">Hapus</button></td>
+            <td data-label="⚙️ Aksi">
+                <button class="btn-hapus-mobile" onclick="hapusAntrean(${item.rowId})" style="background:#fee2e2; color:#dc2626; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">Hapus</button>
+            </td>
         </tr>
     `).join('');
 }
