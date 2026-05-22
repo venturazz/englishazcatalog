@@ -122,16 +122,43 @@ window.addEventListener('load', function() {
     const params = new URLSearchParams(window.location.search);
     const tgUserId = params.get('tg_user_id');
 
+    // 1. Inisialisasi dasar Flatpickr (Otomatis blokir Sabtu & Minggu)
     fpInstance = flatpickr("#tglInput", {
         mode: "multiple",
         dateFormat: "Y-m-d", 
         appendTo: document.body, 
-        disableMobile: "true",   
+        disableMobile: "true",
+        disable: [
+            function(date) {
+                // Return true untuk mendisable hari Minggu (0) dan Sabtu (6)
+                return (date.getDay() === 0 || date.getDay() === 6);
+            }
+        ],
         onChange: function(selectedDates, dateStr) {
             dateQueue = dateStr ? dateStr.split(', ') : [];
             renderDates();
         }
     });
+
+    // 2. Tarik data Libur Nasional dari API dan suntikkan ke kalender
+    const currentYear = new Date().getFullYear();
+    fetch(`https://libur.deno.dev/api?year=${currentYear}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                // Ekstrak semua format tanggal dari API menjadi array ['YYYY-MM-DD', ...]
+                const liburNasional = data.map(item => item.date);
+                
+                // Update Flatpickr: Gabungkan aturan Weekend + Tanggal Libur Nasional
+                fpInstance.set('disable', [
+                    function(date) { 
+                        return (date.getDay() === 0 || date.getDay() === 6); 
+                    },
+                    ...liburNasional
+                ]);
+            }
+        })
+        .catch(err => console.log("Gagal memuat API libur ke kalender:", err));
 
     fetch(`${GAS_URL}?action=getconfig`)
         .then(res => res.json())
