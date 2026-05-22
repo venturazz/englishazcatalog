@@ -338,10 +338,14 @@ function loadQueue() {
     fetch(`${GAS_URL}?action=get_queue&tg_user_id=${info.uid}`)
         .then(r => r.json())
         .then(res => {
-            activityQueue = res; // Timpa array lokal dengan data asli dari Sheet
+            activityQueue = res; 
             renderTable();
         })
-        .catch(err => console.error("Gagal memuat antrean:", err));
+        .catch(err => {
+            console.error("Gagal memuat antrean:", err);
+            // 🔥 MENGATASI STUCK: Tampilkan pesan error agar pengguna tahu masalahnya
+            document.getElementById('monitorTable').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#dc2626; font-weight:bold;">❌ Gagal memuat data!<br><span style="font-size:11px; font-weight:normal; color:#64748b;">Pastikan Anda sudah "Deploy -> New Version" di GAS dan URL tidak berubah.</span></td></tr>';
+        });
 }
 
 // Panggil fungsi ini saat HTML selesai dimuat (Taruh di dalam window.addEventListener('load', ...))
