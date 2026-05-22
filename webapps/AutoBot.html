@@ -336,15 +336,24 @@ function loadQueue() {
     document.getElementById('monitorTable').innerHTML = '<tr><td colspan="4" style="text-align:center;">⏳ Memuat antrean dari database...</td></tr>';
     
     fetch(`${GAS_URL}?action=get_queue&tg_user_id=${info.uid}`)
-        .then(r => r.json())
+        .then(async r => {
+            const rawText = await r.text(); // Ambil respons mentah dari Google
+            try {
+                return JSON.parse(rawText);
+            } catch (e) {
+                // Jika Google membalas dengan halaman HTML error (bukan JSON), tangkap di sini!
+                throw new Error("Server GAS Crash: " + rawText.substring(0, 100) + "...");
+            }
+        })
         .then(res => {
-            activityQueue = res; 
+            if (res && res.error) throw new Error("Error Code.gs: " + res.message);
+            activityQueue = res || []; 
             renderTable();
         })
         .catch(err => {
-            console.error("Gagal memuat antrean:", err);
-            // 🔥 MENGATASI STUCK: Tampilkan pesan error agar pengguna tahu masalahnya
-            document.getElementById('monitorTable').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#dc2626; font-weight:bold;">❌ Gagal memuat data!<br><span style="font-size:11px; font-weight:normal; color:#64748b;">Pastikan Anda sudah "Deploy -> New Version" di GAS dan URL tidak berubah.</span></td></tr>';
+            console.error("Detail Error:", err);
+            // Cetak pesan error merah menyala langsung ke layar Anda
+            document.getElementById('monitorTable').innerHTML = `<tr><td colspan="4" style="background:#fee2e2; color:#dc2626; padding:15px; border-radius:8px;"><b>❌ DIAGNOSA ERROR:</b><br><code style="font-size:12px;">${err.message}</code><br><br><span style="font-size:11px; color:#991b1b;"><b>Saran:</b> Buka tab 'Executions/Eksekusi' di Google Apps Script untuk melihat baris yang rusak.</span></td></tr>`;
         });
 }
 
