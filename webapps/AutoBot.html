@@ -439,6 +439,28 @@ function loadQueue() {
         document.getElementById('monitorTable').innerHTML = `<tr><td colspan="5" style="text-align:center; background:#fee2e2; color:#dc2626; padding:20px; border-radius:8px;">❌ <b>Sistem Sedang Sibuk / Gangguan</b><br><span style="font-size:12px; color:#991b1b;">${err.message}</span></td></tr>`;
     });
 }
+function silentLoadQueue() {
+    const info = getTgInfo();
+    if (!info.uid) return;
+    
+    // Tarik data dari server tanpa merusak UI (tanpa menampilkan jam pasir)
+    fetch(GAS_URL, {
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: 'get_queue', tg_user_id: info.uid })
+    })
+    .then(async r => {
+        const rawText = await r.text();
+        return JSON.parse(rawText);
+    })
+    .then(res => {
+        if (!res.error) {
+            activityQueue = res || []; 
+            renderTable(); // Update tabel dengan ID asli dari server
+        }
+    })
+    .catch(err => console.log("Silent sync failed", err));
+}
 
 function addToTable() {
     const form = document.getElementById('myActivity');
@@ -465,31 +487,55 @@ function addToTable() {
             vol: volVal, ket: document.getElementById('ketInput').value
         });
     });
-    
+
     const info = getTgInfo();
     const btnSubmit = document.querySelector('.btn-blue');
-    btnSubmit.innerHTML = "⏳ MENYIMPAN...";
-    btnSubmit.disabled = true;
 
+    // ==========================================
+    // 🌟 FASE 1: OPTIMISTIC UI (0 Milidetik)
+    // ==========================================
+    
+    // 1. Suntikkan data langsung ke tabel lokal dengan ID sementara
+    newItems.forEach(item => {
+        activityQueue.push({
+            rowId: 'temp-' + Date.now(), // ID sementara agar tidak error saat render
+            ...item
+        });
+    });
+
+    // 2. Langsung render tabel dan bersihkan form TANPA nunggu server
+    renderTable();
+    if (fpInstance) fpInstance.clear();
+    dateQueue = []; 
+    document.getElementById('ketInput').value = '';
+    const volOutput = document.getElementById('volOutput');
+    volOutput.innerHTML = '<option value="" disabled selected>-</option>';
+
+    // 3. Beri efek visual instan
+    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    const originalText = btnSubmit.innerHTML;
+    btnSubmit.innerHTML = "✅ TERSIMPAN!";
+    btnSubmit.style.background = "var(--accent)";
+    
+    setTimeout(() => { 
+        btnSubmit.innerHTML = originalText; 
+        btnSubmit.style.background = "var(--blue)";
+    }, 1500);
+
+    // ==========================================
+    // 🌟 FASE 2: SILENT BACKGROUND SAVE
+    // ==========================================
+    
     fetch(GAS_URL, {
         method: "POST",
         body: JSON.stringify({ action: 'add_queue', tg_user_id: info.uid, tg_username: info.uname, items: newItems })
     }).then(r => r.json()).then(() => {
-        btnSubmit.innerHTML = "SIMPAN KE DATABASE ➡️";
-        btnSubmit.disabled = false;
-        
-        loadQueue(); 
-        if (fpInstance) fpInstance.clear();
-        dateQueue = []; 
-        document.getElementById('ketInput').value = '';
-        
-        const volOutput = document.getElementById('volOutput');
-        volOutput.innerHTML = '<option value="" disabled selected>-</option>';
-        
-        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        // Jika sukses di server, tarik ulang data secara diam-diam
+        // untuk mengganti 'temp-ID' dengan 'rowId' asli dari Google Sheets
+        silentLoadQueue();
     }).catch(() => {
-        btnSubmit.innerHTML = "❌ GAGAL MENYIMPAN";
-        setTimeout(() => { btnSubmit.innerHTML = "SIMPAN KE DATABASE ➡️"; btnSubmit.disabled = false; }, 3000);
+        console.error("Gagal sinkronisasi background");
+        tg.showAlert("⚠️ Koneksi tidak stabil. Beberapa data mungkin gagal tersimpan ke server.");
     });
 }
 
