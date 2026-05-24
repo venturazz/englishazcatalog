@@ -447,7 +447,7 @@ function silentLoadQueue() {
     fetch(GAS_URL, {
         method: 'POST',
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: 'get_queue', tg_user_id: info.uid })
+        body: JSON.stringify({ action: 'get_queue', tg_user_id: info.uid, initData: tg.initData })
     })
     .then(async r => {
         const rawText = await r.text();
@@ -528,7 +528,7 @@ function addToTable() {
     
     fetch(GAS_URL, {
         method: "POST",
-        body: JSON.stringify({ action: 'add_queue', tg_user_id: info.uid, tg_username: info.uname, items: newItems })
+        body: JSON.stringify({ action: 'add_queue', tg_user_id: info.uid, tg_username: info.uname, initData: tg.initData, items: newItems })
     }).then(r => r.json()).then(() => {
         // Jika sukses di server, tarik ulang data secara diam-diam
         // untuk mengganti 'temp-ID' dengan 'rowId' asli dari Google Sheets
@@ -596,7 +596,7 @@ async function eksekusiHapusBulk(rowIds) {
         for(let id of rowIds) {
             await fetch(GAS_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: 'del_queue', tg_user_id: info.uid, rowId: id })
+                body: JSON.stringify({ action: 'del_queue', tg_user_id: info.uid, initData: tg.initData, rowId: id })
             });
         }
     } catch(e) {
@@ -728,7 +728,7 @@ function checkStatus() {
 
     fetch(GAS_URL, {
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "check_only", username: document.getElementById('botUser').value, password: document.getElementById('botPass').value, cookie: document.getElementById('botCookie').value, jadwal: [] })
+        body: JSON.stringify({ action: "check_only", tg_user_id: info.uid, tg_chat_id: info.uid, initData: tg.initData, username: document.getElementById('botUser').value, password: document.getElementById('botPass').value, cookie: document.getElementById('botCookie').value, jadwal: [] })
     }).then(res => res.json()).then(res => {
         currentJobId = res.jobId;
         prosesPolling(res.jobId, btn, "✅ STATUS AMAN", (msg) => {
@@ -752,7 +752,7 @@ function eksekusiRenkin() {
 
     fetch(GAS_URL, {
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "realisasi_renkin", username: document.getElementById('botUser').value, password: document.getElementById('botPass').value, cookie: document.getElementById('botCookie').value, jadwal: [] })
+        body: JSON.stringify({ action: "realisasi_renkin", tg_user_id: info.uid, tg_chat_id: info.uid, initData: tg.initData, username: document.getElementById('botUser').value, password: document.getElementById('botPass').value, cookie: document.getElementById('botCookie').value, jadwal: [] })
     }).then(res => res.json()).then(res => {
         currentJobId = res.jobId;
         prosesPolling(res.jobId, btn, "✅ RENKIN SELESAI", () => {
@@ -777,6 +777,7 @@ function generateScript() {
             action: "execute_from_chat", // PERBAIKAN: Beri tahu backend tindakan yang diminta
             tg_user_id: info.uid,        // PERBAIKAN: Kirim ID untuk lolos Zero Trust
             tg_chat_id: info.uid,        // PERBAIKAN: Kirim ID agar bot bisa mengirim notif
+            initData: tg.initData, // 🔒 TAMBAHKAN SEGEL KRIPTOGRAFI INI
             username: document.getElementById('botUser').value, 
             password: document.getElementById('botPass').value, 
             cookie: document.getElementById('botCookie').value, 
