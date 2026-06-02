@@ -407,9 +407,13 @@ function cleanText(text) { return text.replace(/\s\d+\smenit$/, "").trim(); }
 // ==========================================
 
 function getTgInfo() {
+    // Membaca ID langsung dari mesin bawaan Telegram (Sangat Akurat & Tahan Potong)
+    const nativeUser = tg.initDataUnsafe?.user;
+    const urlUid = new URLSearchParams(window.location.search).get('tg_user_id');
+    
     return {
-        uid: new URLSearchParams(window.location.search).get('tg_user_id'),
-        uname: tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || 'User'
+        uid: (nativeUser && nativeUser.id) ? nativeUser.id : urlUid,
+        uname: (nativeUser && (nativeUser.username || nativeUser.first_name)) ? (nativeUser.username || nativeUser.first_name) : 'User'
     };
 }
 
