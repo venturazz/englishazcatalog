@@ -422,7 +422,7 @@ function loadQueue() {
     fetch(GAS_URL, {
         method: 'POST',
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: 'get_queue', tg_user_id: info.uid })
+        body: JSON.stringify({ action: 'get_queue', tg_user_id: info.uid, initData: tg.initData })
     })
     .then(async r => {
         const rawText = await r.text();
