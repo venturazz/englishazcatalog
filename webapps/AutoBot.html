@@ -118,9 +118,9 @@ window.addEventListener('load', function() {
     tg.MainButton.color = "#0f172a";
     tg.MainButton.show();
     tg.MainButton.onClick(() => generateScript());
-
-    const params = new URLSearchParams(window.location.search);
-    const tgUserId = params.get('tg_user_id');
+    // 👇 GANTI DENGAN BARIS BARU INI 👇
+    const info = getTgInfo();
+    const tgUserId = info.uid;
 
     // 1. Inisialisasi dasar Flatpickr (Otomatis blokir Sabtu & Minggu)
     fpInstance = flatpickr("#tglInput", {
