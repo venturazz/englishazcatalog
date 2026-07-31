@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleplay Scenario Randomizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            background-color: #16213e;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+            border: 2px solid #0f3460;
+        }
+        h1 {
+            color: #e94560;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .scenario-box {
+            background-color: #0f3460;
+            padding: 30px;
+            border-radius: 10px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        #scenario-title {
+            font-size: 2em;
+            font-weight: bold;
+            color: #43d8c9;
+            margin-bottom: 15px;
+        }
+        #scenario-desc {
+            font-size: 1.4em;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+        #scenario-tone {
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #e94560;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            align-self: center;
+        }
+        button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+        button:hover {
+            background-color: #ff5777;
+            transform: scale(1.05);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .hidden {
+            display: none !important;
+        }
+        .shuffling {
+            animation: pulse 0.1s infinite;
+            color: #f9a826 !important;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Select Your Quest</h1>
+        
+        <div class="scenario-box">
+            <div id="scenario-title">Ready for a Scenario?</div>
+            <div id="scenario-desc">Click the button below to draw a random situation for your roleplay.</div>
+            <div id="scenario-tone" class="hidden"></div>
+        </div>
+
+        <button id="draw-btn" onclick="drawScenario()">Draw Scenario</button>
+    </div>
+
+    <script>
+        const scenarios = [
+            { title: "The Printer Panic", desc: "Library printer jams 10 mins before class. Ask the busy librarian for help.", tone: "Formal" },
+            { title: "The New Student", desc: "A new student is lost looking for the Science lab. Offer them directions.", tone: "Informal" },
+            { title: "The Group Project", desc: "Struggling to edit a group video. Ask a tech-savvy classmate to show you how.", tone: "Informal" },
+            { title: "The Heavy Delivery", desc: "A teacher is carrying two heavy boxes of textbooks. Step in to offer assistance.", tone: "Formal" },
+            { title: "The Coding Bug", desc: "Code keeps throwing errors for a CS assignment. Ask a classmate to review it.", tone: "Informal" },
+            { title: "The English Translation", desc: "You don't understand an English idiom in a manga chapter. Ask your teacher.", tone: "Formal" },
+            { title: "The Dead Wi-Fi", desc: "School Wi-Fi dies before submitting an online quiz. Ask IT staff for backup.", tone: "Formal" },
+            { title: "The Extracurricular Form", desc: "Can't find the club registration link. Politely ask the club president for help.", tone: "Formal" },
+            { title: "The Spilled Drink", desc: "Knocked iced tea over the cafe table. Ask your friend for napkins and help cleaning.", tone: "Informal" },
+            { title: "The Flat Tire", desc: "Your motorcycle gets a flat tire riding home. Ask a neighbor to borrow a pump.", tone: "Formal" },
+            { title: "The Forgotten Item", desc: "Forgot your wallet at the minimarket. Ask your friend in line to cover payment.", tone: "Informal" },
+            { title: "The Difficult Recipe", desc: "Don't understand instructions for cooking meat. Call your older sibling for advice.", tone: "Informal" },
+            { title: "The Top Shelf", desc: "Can't reach a book on the top shelf at a store. Ask a tall stranger to grab it.", tone: "Formal" },
+            { title: "The Confusing Directions", desc: "GPS map to a clinic is confusing. Stop and ask a local shop owner for directions.", tone: "Formal" },
+            { title: "Public Transit Confusion", desc: "Think you boarded the wrong TransJakarta bus route. Ask the attendant for help.", tone: "Formal" },
+            { title: "The Stuck Zipper", desc: "Jacket zipper completely jams before a field trip. Ask your friend to help fix it.", tone: "Informal" },
+            { title: "The Mango Harvest", desc: "Fruit picker tool is broken while getting mangoes. Ask your neighbor for help.", tone: "Formal" },
+            { title: "The Broken Helmet", desc: "Motorcycle helmet strap snaps before riding. Ask a friend to borrow a spare.", tone: "Informal" },
+            { title: "The Lost Pet", desc: "Notice a distressed neighbor looking for their lost cat. Approach to offer help.", tone: "Formal" },
+            { title: "The E-Sport Tournament", desc: "Phone lags heavily at a gaming tournament. Ask your teammate to fix the network.", tone: "Informal" }
+        ];
+
+        let isShuffling = false;
+
+        function drawScenario() {
+            if (isShuffling) return;
+            
+            isShuffling = true;
+            const titleEl = document.getElementById("scenario-title");
+            const descEl = document.getElementById("scenario-desc");
+            const toneEl = document.getElementById("scenario-tone");
+            const btnEl = document.getElementById("draw-btn");
+
+            // Hide details during shuffle
+            descEl.innerHTML = "";
+            toneEl.classList.add("hidden");
+            titleEl.classList.add("shuffling");
+            btnEl.disabled = true;
+            btnEl.style.backgroundColor = "#555";
+
+            let shuffleCount = 0;
+            const maxShuffles = 20; // How many times it flashes before stopping
+            const shuffleSpeed = 80; // Milliseconds between flashes
+
+            const interval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * scenarios.length);
+                titleEl.innerHTML = scenarios[randomIndex].title;
+                shuffleCount++;
+
+                if (shuffleCount >= maxShuffles) {
+                    clearInterval(interval);
+                    finalizeDraw();
+                }
+            }, shuffleSpeed);
+        }
+
+        function finalizeDraw() {
+            const titleEl = document.getElementById("scenario-title");
+            const descEl = document.getElementById("scenario-desc");
+            const toneEl = document.getElementById("scenario-tone");
+            const btnEl = document.getElementById("draw-btn");
+
+            // Pick the final winner
+            const finalIndex = Math.floor(Math.random() * scenarios.length);
+            const winner = scenarios[finalIndex];
+
+            // Display results
+            titleEl.classList.remove("shuffling");
+            titleEl.innerHTML = winner.title;
+            descEl.innerHTML = winner.desc;
+            toneEl.innerHTML = "Tone: " + winner.tone;
+            toneEl.classList.remove("hidden");
+
+            // Reset button
+            btnEl.disabled = false;
+            btnEl.style.backgroundColor = "#e94560";
+            isShuffling = false;
+        }
+    </script>
+</body>
+</html>
