@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comprehensive Athlete Information Maker</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+  :root{
+    --primary: #059669;
+    --primary-dark: #047857;
+    --accent: #0f172a;
+  }
+  body{
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f1f5f9;
+  }
+  .fade-in{ animation: fadeIn .5s ease-in-out; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  .badge-pill{
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.35rem .85rem; border-radius:9999px; font-size:.78rem; font-weight:600;
+    background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;
+  }
+  .badge-pill.feature{ background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+
+  .fact-label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:#64748b; font-weight:700; }
+  .fact-value{ font-size:1rem; font-weight:700; color:#0f172a; }
+
+  input[type="checkbox"], input[type="radio"]{ accent-color: var(--primary); width:1.15rem; height:1.15rem; }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:#94a3b8; border-radius:8px; }
+
+  #photoPreviewWrap{ transition: all .2s ease; }
+
+  @media print{
+    body *{ visibility:hidden; }
+    #resultSection, #resultSection *{ visibility:visible; }
+    #resultSection{ position:absolute; left:0; top:0; width:100%; margin:0; padding:0; }
+    .no-print{ display:none !important; }
+    #factFileCard{ box-shadow:none !important; border:none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+  }
+
+  .section-card{
+    background:#fff; border-radius:1rem; border:1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+
+  .input-field{
+    width:100%; padding:.65rem .9rem; border-radius:.6rem; border:1.5px solid #cbd5e1;
+    font-size:.95rem; transition: border-color .15s, box-shadow .15s; background:#fff;
+  }
+  .input-field:focus{ outline:none; border-color: var(--primary); box-shadow:0 0 0 3px rgba(5,150,105,.15); }
+  .input-field.field-error{ border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,.12); }
+
+  .field-label{ display:block; font-size:.85rem; font-weight:600; color:#334155; margin-bottom:.3rem; }
+  .required-star{ color:#dc2626; margin-left:.15rem; }
+
+  .field-error-msg{ display:none; color:#dc2626; font-size:.72rem; margin-top:.25rem; font-weight:600; }
+  .field-error-msg.show{ display:block; }
+
+  .checkbox-tile{
+    display:flex; align-items:center; gap:.5rem; padding:.55rem .7rem; border-radius:.6rem;
+    border:1.5px solid #e2e8f0; cursor:pointer; transition: all .15s; background:#f8fafc;
+  }
+  .checkbox-tile:hover{ border-color: var(--primary); background:#ecfdf5; }
+  .checkbox-tile input:checked ~ span{ color: var(--primary-dark); font-weight:700; }
+
+  .group-error-ring{ border-radius:.75rem; box-shadow:0 0 0 2px #dc2626; padding:.5rem; }
+
+  .checkbox-tile.custom-tile{ position:relative; padding-right:2rem; }
+  .remove-tile-btn{
+    position:absolute; top:2px; right:2px; width:1.1rem; height:1.1rem; border-radius:9999px;
+    background:#fee2e2; color:#dc2626; font-size:.65rem; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; line-height:1;
+  }
+  .remove-tile-btn:hover{ background:#fca5a5; color:#fff; }
+
+  .add-tile-btn{
+    display:flex; align-items:center; justify-content:center; gap:.4rem; padding:.55rem .7rem; border-radius:.6rem;
+    border:1.5px dashed #10b981; cursor:pointer; transition: all .15s; background:#fff; color:#059669;
+    font-size:.85rem; font-weight:600;
+  }
+  .add-tile-btn:hover{ background:#ecfdf5; }
+
+  .divider-heading{
+    display:flex; align-items:center; gap:.6rem; margin-bottom:1.25rem;
+  }
+  .divider-heading .line{ flex:1; height:2px; background: linear-gradient(to right, #10b981, transparent); }
+
+  .photo-upload-label.field-error{ border-color:#dc2626 !important; background:#fef2f2 !important; color:#dc2626 !important; }
+
+  #formErrorBanner{ display:none; }
+  #formErrorBanner.show{ display:flex; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="bg-slate-900 text-white no-print">
+  <div class="max-w-5xl mx-auto px-4 py-5 flex items-center gap-3">
+    <div class="w-11 h-11 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0">
+      <i class="fa-solid fa-trophy text-lg"></i>
+    </div>
+    <div>
+      <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">Athlete Information Maker</h1>
+      <p class="text-slate-400 text-xs sm:text-sm"> English : Descriptive Writing Task</p>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-6 sm:py-10">
+
+  <!-- ============ FORM MODE ============ -->
+  <section id="formSection">
+
+    <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 text-sm flex gap-3">
+      <i class="fa-solid fa-circle-info mt-0.5"></i>
+      <p><strong>All fields are required.</strong> Every box, dropdown, checkbox group, and the photo must be completed before you can generate your Fact File. Fields marked <span class="required-star">*</span> need your attention.</p>
+    </div>
+
+    <div id="formErrorBanner" class="mb-6 bg-red-50 border border-red-300 text-red-700 rounded-xl p-4 text-sm gap-3 items-start">
+      <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+      <p>Please complete all required fields highlighted in red below before generating your Fact File.</p>
+    </div>
+
+    <form id="athleteForm" class="space-y-6" novalidate>
+
+      <!-- SECTION A -->
+      <fieldset class="section-card p-5 sm:p-6">
+        <div class="divider-heading">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-user-graduate text-emerald-600"></i> A. Student Information</h2>
+          <div class="line"></div>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label class="field-label">Student Full Name<span class="required-star">*</span></label>
+            <input type="text" id="studentName" class="input-field" placeholder="e.g., Siti Rahmawati" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Class / Grade<span class="required-star">*</span></label>
+            <select id="studentClass" class="input-field" required>
+              <option value="">Select grade</option>
+              <option>Grade 10</option>
+              <option>Grade 11</option>
+              <option>Grade 12</option>
+            </select>
+            <p class="field-error-msg">Please select a grade.</p>
+          </div>
+          <div>
+            <label class="field-label">Student Number<span class="required-star">*</span></label>
+            <input type="text" id="studentNumber" class="input-field" placeholder="e.g., 2425100123" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- SECTION B: Identity & Background -->
+      <fieldset class="section-card p-5 sm:p-6">
+        <div class="divider-heading">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-id-card text-emerald-600"></i> B. Identity & Background</h2>
+          <div class="line"></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="field-label">Full Name<span class="required-star">*</span></label>
+            <input type="text" id="athleteName" class="input-field" placeholder="e.g., Cristiano Ronaldo dos Santos Aveiro" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Nickname<span class="required-star">*</span></label>
+            <input type="text" id="nickname" class="input-field" placeholder="e.g., CR7" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Sport<span class="required-star">*</span></label>
+            <select id="sport" class="input-field" required>
+              <option value="">Select sport</option>
+              <option>Football</option>
+              <option>Basketball</option>
+              <option>Badminton</option>
+              <option>Tennis</option>
+              <option>Swimming</option>
+              <option>Athletics</option>
+              <option>E-Sports</option>
+              <option>Other</option>
+            </select>
+            <p class="field-error-msg">Please select a sport.</p>
+          </div>
+          <div>
+            <label class="field-label">Nationality<span class="required-star">*</span></label>
+            <input type="text" id="nationality" list="countryList" class="input-field" placeholder="e.g., Indonesian" required>
+            <datalist id="countryList">
+              <option value="Indonesian"></option>
+              <option value="American"></option>
+              <option value="Argentinian"></option>
+              <option value="Australian"></option>
+              <option value="Brazilian"></option>
+              <option value="British"></option>
+              <option value="Canadian"></option>
+              <option value="Chinese"></option>
+              <option value="Dutch"></option>
+              <option value="Egyptian"></option>
+              <option value="English"></option>
+              <option value="French"></option>
+              <option value="German"></option>
+              <option value="Indian"></option>
+              <option value="Italian"></option>
+              <option value="Japanese"></option>
+              <option value="South Korean"></option>
+              <option value="Malaysian"></option>
+              <option value="Mexican"></option>
+              <option value="Nigerian"></option>
+              <option value="Norwegian"></option>
+              <option value="Polish"></option>
+              <option value="Portuguese"></option>
+              <option value="Russian"></option>
+              <option value="Serbian"></option>
+              <option value="Singaporean"></option>
+              <option value="Spanish"></option>
+              <option value="Swedish"></option>
+              <option value="Thai"></option>
+              <option value="Vietnamese"></option>
+            </datalist>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Age<span class="required-star">*</span></label>
+            <input type="text" id="age" class="input-field" placeholder="e.g., 39 years old" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Date of Birth<span class="required-star">*</span></label>
+            <input type="text" id="dob" class="input-field" placeholder="e.g., 5 February 1985" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- SECTION C: Physical Appearance -->
+      <fieldset class="section-card p-5 sm:p-6">
+        <div class="divider-heading">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-person-half-dress text-emerald-600"></i> C. Physical Appearance</h2>
+          <div class="line"></div>
+        </div>
+
+        <div class="mb-5">
+          <label class="field-label">Upload Picture<span class="required-star">*</span></label>
+          <div class="flex items-center gap-4 flex-wrap">
+            <label for="photoInput" id="photoUploadLabel" class="photo-upload-label cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 text-white text-sm font-semibold hover:bg-slate-700 transition">
+              <i class="fa-solid fa-camera"></i> Choose Photo
+            </label>
+            <input type="file" id="photoInput" accept="image/*" class="hidden">
+            <div id="photoPreviewWrap" class="hidden">
+              <img id="photoPreview" class="w-20 h-20 object-cover rounded-xl border-2 border-emerald-500 shadow" alt="Preview">
+            </div>
+            <span id="photoFileName" class="text-xs text-slate-500"></span>
+          </div>
+          <p class="field-error-msg" id="photoErrorMsg">Please upload a photo of the athlete.</p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4 mb-5">
+          <div>
+            <label class="field-label">Height<span class="required-star">*</span></label>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="number" id="heightCm" class="input-field" placeholder="e.g., 187 (cm)" required>
+              <select id="heightDesc" class="input-field" required>
+                <option value="">Select descriptive</option>
+                <option>Very tall</option>
+                <option>Above average</option>
+                <option>Average</option>
+                <option>Short</option>
+              </select>
+            </div>
+            <p class="field-error-msg">Please provide both the height in cm and a description.</p>
+          </div>
+          <div>
+            <label class="field-label">Weight<span class="required-star">*</span></label>
+            <input type="text" id="weight" class="input-field" placeholder="e.g., 84 kg" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Hair<span class="required-star">*</span></label>
+            <input type="text" id="hair" class="input-field" placeholder="e.g., Short black hair" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Eyes<span class="required-star">*</span></label>
+            <input type="text" id="eyes" class="input-field" placeholder="e.g., Dark brown eyes" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Skin<span class="required-star">*</span></label>
+            <input type="text" id="skin" class="input-field" placeholder="e.g., Tan / olive skin" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Body Build<span class="required-star">*</span></label>
+            <select id="bodyBuild" class="input-field" required>
+              <option value="">Select build</option>
+              <option>Muscular</option>
+              <option>Athletic</option>
+              <option>Slender</option>
+              <option>Well-built</option>
+              <option>Stocky</option>
+            </select>
+            <p class="field-error-msg">Please select a body build.</p>
+          </div>
+        </div>
+
+        <div id="featuresBlock">
+          <label class="field-label mb-2">Distinguishing Features<span class="required-star">*</span> <span class="text-slate-400 font-normal normal-case">(select at least one, or "None")</span></label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="featuresGroup">
+            <label class="checkbox-tile"><input type="checkbox" value="Tattoos" class="feature-cb"><span>Tattoos</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Piercings" class="feature-cb"><span>Piercings</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Beard" class="feature-cb"><span>Beard</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Mustache" class="feature-cb"><span>Mustache</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Scars" class="feature-cb"><span>Scars</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Bright smile" class="feature-cb"><span>Bright smile</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="None" id="featureNone" class="feature-cb"><span>None</span></label>
+          </div>
+          <div id="customFeaturesWrap" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2"></div>
+          <button type="button" id="addFeatureBtn" class="add-tile-btn mt-2 w-full sm:w-auto sm:inline-flex">
+            <i class="fa-solid fa-plus"></i> Add another feature
+          </button>
+          <p class="field-error-msg" id="featuresErrorMsg">Please select at least one distinguishing feature (or "None").</p>
+        </div>
+      </fieldset>
+
+      <!-- SECTION D: Personality & Lifestyle -->
+      <fieldset class="section-card p-5 sm:p-6">
+        <div class="divider-heading">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-heart-pulse text-emerald-600"></i> D. Personality & Lifestyle</h2>
+          <div class="line"></div>
+        </div>
+
+        <div class="mb-5" id="traitsBlock">
+          <label class="field-label mb-2">Personality Traits<span class="required-star">*</span> <span class="text-slate-400 font-normal normal-case">(choose 1–3)</span></label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="traitsGroup">
+            <label class="checkbox-tile"><input type="checkbox" value="Hardworking" class="trait-cb"><span>Hardworking</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Humble" class="trait-cb"><span>Humble</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Charismatic" class="trait-cb"><span>Charismatic</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Energetic" class="trait-cb"><span>Energetic</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Determined" class="trait-cb"><span>Determined</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Calm" class="trait-cb"><span>Calm</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Aggressive" class="trait-cb"><span>Aggressive</span></label>
+            <label class="checkbox-tile"><input type="checkbox" value="Inspiring" class="trait-cb"><span>Inspiring</span></label>
+          </div>
+          <div id="customTraitsWrap" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2"></div>
+          <button type="button" id="addTraitBtn" class="add-tile-btn mt-2 w-full sm:w-auto sm:inline-flex">
+            <i class="fa-solid fa-plus"></i> Add another trait
+          </button>
+          <p id="traitWarning" class="text-xs text-rose-500 mt-2 hidden"><i class="fa-solid fa-triangle-exclamation"></i> You can select a maximum of 3 traits.</p>
+          <p class="field-error-msg" id="traitsErrorMsg">Please select at least 1 (up to 3) personality traits.</p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="field-label">Habits<span class="required-star">*</span></label>
+            <input type="text" id="habits" class="input-field" placeholder="e.g., Prays before every match" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Hobbies & Interests<span class="required-star">*</span></label>
+            <input type="text" id="hobbies" class="input-field" placeholder="e.g., Playing video games, fishing" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Family & Early Life<span class="required-star">*</span></label>
+            <textarea id="family" rows="3" class="input-field" placeholder="e.g., Grew up in a small town, married with two children." required></textarea>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Educational Background<span class="required-star">*</span></label>
+            <input type="text" id="education" class="input-field" placeholder="e.g., High School Graduate" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- SECTION E: Sports Career & Achievements -->
+      <fieldset class="section-card p-5 sm:p-6">
+        <div class="divider-heading">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-trophy text-emerald-600"></i> E. Sports Career & Achievements</h2>
+          <div class="line"></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="field-label">Current Team / Club<span class="required-star">*</span></label>
+            <input type="text" id="team" class="input-field" placeholder="e.g., Al Nassr FC" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div>
+            <label class="field-label">Position / Role<span class="required-star">*</span></label>
+            <input type="text" id="position" class="input-field" placeholder="e.g., Striker / Forward" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Playing Style<span class="required-star">*</span></label>
+            <input type="text" id="playingStyle" class="input-field" placeholder="e.g., Fast, powerful shots, clinical finisher" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Idol / Inspiration<span class="required-star">*</span></label>
+            <input type="text" id="idol" class="input-field" placeholder="e.g., Was inspired by Luís Figo growing up" required>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label">Major Achievements / Trophies<span class="required-star">*</span> <span class="text-slate-400 font-normal normal-case">(one per line)</span></label>
+            <textarea id="achievements" rows="4" class="input-field" placeholder="e.g.,&#10;5x Ballon d'Or winner&#10;Olympic Gold Medalist 2021&#10;World Champion 2019" required></textarea>
+            <p class="field-error-msg">Please list at least one achievement.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- SECTION F: Fun Facts & Student's Note -->
+      <fieldset class="section-card p-5 sm:p-6">
+        <div class="divider-heading">
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-lightbulb text-emerald-600"></i> F. Fun Facts & Student's Note</h2>
+          <div class="line"></div>
+        </div>
+        <div class="grid gap-4">
+          <div>
+            <label class="field-label">Fun Fact(s)<span class="required-star">*</span> <span class="text-slate-400 font-normal normal-case">(one per line — e.g., superstitions, records, quirky habits)</span></label>
+            <textarea id="funFacts" rows="4" class="input-field" placeholder="e.g.,&#10;Always enters the pitch with his right foot first&#10;Has scored over 900 career goals&#10;Sleeps in 5 short naps a day instead of one long sleep" required></textarea>
+            <p class="field-error-msg">Please list at least one fun fact.</p>
+          </div>
+          <div>
+            <label class="field-label">Student's Note: Why is this your favorite athlete?<span class="required-star">*</span></label>
+            <textarea id="studentNote" rows="4" class="input-field" placeholder="Write a short personal reflection..." required></textarea>
+            <p class="field-error-msg">This field is required.</p>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="flex justify-center pt-2 pb-10">
+        <button type="submit" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-lg shadow-emerald-600/25 transition">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Fact File
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ RESULT MODE ============ -->
+  <section id="resultSection" class="hidden fade-in">
+
+    <div class="flex flex-wrap gap-3 justify-between items-center mb-5 no-print">
+      <button id="backToFormBtn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold transition">
+        <i class="fa-solid fa-arrow-left"></i> Edit Form
+      </button>
+      <div class="flex gap-3">
+        <button id="printBtn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition">
+          <i class="fa-solid fa-print"></i> Print
+        </button>
+        <button id="downloadPdfBtn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md transition">
+          <i class="fa-solid fa-file-arrow-down"></i> Download as PDF
+        </button>
+      </div>
+    </div>
+
+    <div id="factFileCard" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+
+      <!-- Header -->
+      <div class="bg-slate-900 text-white p-6 sm:p-8 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 20% 20%, white 1px, transparent 1px); background-size:16px 16px;"></div>
+        <div class="relative flex flex-col sm:flex-row items-center sm:items-start gap-5">
+          <img id="outPhoto" src="" alt="Athlete Photo" class="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-emerald-500 shadow-lg shrink-0 hidden">
+          <div id="outPhotoPlaceholder" class="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl border-4 border-emerald-500 shadow-lg shrink-0 bg-slate-700 flex items-center justify-center">
+            <i class="fa-solid fa-user text-4xl text-slate-400"></i>
+          </div>
+          <div class="text-center sm:text-left">
+            <span class="inline-block bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide mb-2" id="outSport">Sport</span>
+            <h1 id="outName" class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">Athlete Name</h1>
+            <p id="outNickname" class="text-emerald-300 text-sm sm:text-base font-semibold mt-0.5 hidden"></p>
+            <p class="text-slate-300 text-sm sm:text-base mt-1 flex items-center justify-center sm:justify-start gap-2">
+              <i class="fa-solid fa-flag"></i> <span id="outNationality">Nationality</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-5 sm:p-8 space-y-8">
+
+        <!-- Fast Facts -->
+        <div>
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-bolt"></i> Fast Facts</h3>
+          <div id="fastFactsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-50 rounded-xl p-4 border border-slate-200"></div>
+        </div>
+
+        <!-- Physical -->
+        <div id="physicalSection">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-ruler-vertical"></i> Physical Appearance</h3>
+          <div id="physicalGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-50 rounded-xl p-4 border border-slate-200"></div>
+        </div>
+
+        <!-- Career -->
+        <div id="careerSection">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i> Sports Career</h3>
+          <ul id="careerList" class="space-y-2 text-slate-700 text-sm sm:text-base"></ul>
+        </div>
+
+        <!-- Personal Background -->
+        <div id="personalSection">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-house"></i> Personality & Lifestyle</h3>
+          <ul id="personalList" class="space-y-2 text-slate-700 text-sm sm:text-base"></ul>
+        </div>
+
+        <!-- Traits & Features -->
+        <div id="traitsFeaturesSection">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-tags"></i> Personality Traits & Distinguishing Features</h3>
+          <div class="flex flex-wrap gap-2" id="badgesWrap"></div>
+        </div>
+
+        <!-- Achievements -->
+        <div id="achievementsSection">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-medal"></i> Career Highlights</h3>
+          <ul id="achievementsList" class="space-y-2 text-slate-700 text-sm sm:text-base"></ul>
+        </div>
+
+        <!-- Fun Facts -->
+        <div id="funFactsSection">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-lightbulb"></i> Fun Facts</h3>
+          <ul id="funFactsList" class="space-y-2 text-slate-700 text-sm sm:text-base"></ul>
+        </div>
+
+        <!-- Student Note -->
+        <div id="noteSection">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-emerald-600 mb-3 flex items-center gap-2"><i class="fa-solid fa-quote-left"></i> Student's Note</h3>
+          <blockquote class="border-l-4 border-emerald-500 bg-emerald-50 rounded-r-xl p-4 italic text-slate-700 text-sm sm:text-base" id="noteText"></blockquote>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="bg-slate-100 border-t border-slate-200 px-5 sm:px-8 py-4 text-center sm:text-left">
+        <p class="text-xs sm:text-sm text-slate-500">
+          <i class="fa-solid fa-pen-nib mr-1"></i> Fact File compiled by <span id="footerStudent" class="font-bold text-slate-700">-</span> ·
+          <span id="footerClass" class="font-semibold text-slate-600">-</span> ·
+          Student No. <span id="footerNumber" class="font-semibold text-slate-600">-</span>
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="no-print text-center text-xs text-slate-400 pb-8">
+  Comprehensive Athlete Information Maker · Descriptive Tasks
+</footer>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+
+  let uploadedPhotoData = "";
+  let customFeatureCount = 0;
+  let customTraitCount = 0;
+
+  function showFieldError(inputEl){
+    if(!inputEl) return;
+    inputEl.classList.add('field-error');
+    const msg = inputEl.parentElement.querySelector('.field-error-msg');
+    if(msg) msg.classList.add('show');
+  }
+  function clearFieldError(inputEl){
+    if(!inputEl) return;
+    inputEl.classList.remove('field-error');
+    const msg = inputEl.parentElement.querySelector('.field-error-msg');
+    if(msg) msg.classList.remove('show');
+  }
+
+  // live-clear error state as the student types/selects
+  document.querySelectorAll('.input-field').forEach(el => {
+    const evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+    el.addEventListener(evt, function(){
+      if(this.value.trim() !== '') clearFieldError(this);
+    });
+  });
+
+  // ---- Photo upload preview ----
+  $('photoInput').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file){ return; }
+    if(!file.type.startsWith('image/')){
+      alert('Please upload a valid image file.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      uploadedPhotoData = ev.target.result;
+      $('photoPreview').src = uploadedPhotoData;
+      $('photoPreviewWrap').classList.remove('hidden');
+      $('photoFileName').textContent = file.name;
+      $('photoUploadLabel').classList.remove('field-error');
+      $('photoErrorMsg').classList.remove('show');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ---- Trait limit (max 3), works across default AND custom checkboxes ----
+  function enforceTraitLimit(cb){
+    const checked = document.querySelectorAll('.trait-cb:checked');
+    if(checked.length > 3){
+      cb.checked = false;
+      $('traitWarning').classList.remove('hidden');
+      setTimeout(()=> $('traitWarning').classList.add('hidden'), 2500);
+    }
+    if(document.querySelectorAll('.trait-cb:checked').length > 0){
+      $('traitsBlock').classList.remove('group-error-ring');
+      $('traitsErrorMsg').classList.remove('show');
+    }
+  }
+  document.querySelectorAll('.trait-cb').forEach(cb => {
+    cb.addEventListener('change', function(){ enforceTraitLimit(this); });
+  });
+
+  // ---- "None" exclusivity for distinctive features ----
+  function bindFeatureExclusivity(cb){
+    cb.addEventListener('change', function(){
+      const noneCb = $('featureNone');
+      if(this === noneCb && this.checked){
+        document.querySelectorAll('.feature-cb').forEach(other => { if(other !== noneCb) other.checked = false; });
+      } else if(this !== noneCb && this.checked){
+        if(noneCb) noneCb.checked = false;
+      }
+      if(document.querySelectorAll('.feature-cb:checked').length > 0){
+        $('featuresBlock').classList.remove('group-error-ring');
+        $('featuresErrorMsg').classList.remove('show');
+      }
+    });
+  }
+  document.querySelectorAll('.feature-cb').forEach(bindFeatureExclusivity);
+
+  // ---- Add custom distinguishing feature ----
+  $('addFeatureBtn').addEventListener('click', function(){
+    customFeatureCount++;
+    const uid = 'customFeature_' + customFeatureCount;
+    const wrap = document.createElement('div');
+    wrap.className = 'flex gap-2 items-center col-span-2 sm:col-span-4';
+    wrap.innerHTML = `
+      <input type="text" id="${uid}_text" class="input-field flex-1" placeholder="Type a custom feature (e.g., Left-handed)">
+      <label class="checkbox-tile custom-tile shrink-0" style="padding:.55rem .9rem;">
+        <input type="checkbox" class="feature-cb" id="${uid}_cb" data-custom="true"><span>Include</span>
+      </label>
+      <button type="button" class="remove-tile-btn" style="position:static; width:2rem; height:2rem;" data-remove="${uid}_wrap">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    `;
+    wrap.id = uid + '_wrap';
+    $('customFeaturesWrap').appendChild(wrap);
+
+    const newCb = $(uid + '_cb');
+    bindFeatureExclusivity(newCb);
+    newCb.dataset.customTextId = uid + '_text';
+
+    wrap.querySelector('[data-remove]').addEventListener('click', function(){
+      wrap.remove();
+    });
+  });
+
+  // ---- Add custom personality trait ----
+  $('addTraitBtn').addEventListener('click', function(){
+    customTraitCount++;
+    const uid = 'customTrait_' + customTraitCount;
+    const wrap = document.createElement('div');
+    wrap.className = 'flex gap-2 items-center col-span-2 sm:col-span-4';
+    wrap.innerHTML = `
+      <input type="text" id="${uid}_text" class="input-field flex-1" placeholder="Type a custom trait (e.g., Resilient)">
+      <label class="checkbox-tile custom-tile shrink-0" style="padding:.55rem .9rem;">
+        <input type="checkbox" class="trait-cb" id="${uid}_cb" data-custom="true"><span>Include</span>
+      </label>
+      <button type="button" class="remove-tile-btn" style="position:static; width:2rem; height:2rem;" data-remove="${uid}_wrap">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    `;
+    wrap.id = uid + '_wrap';
+    $('customTraitsWrap').appendChild(wrap);
+
+    const newCb = $(uid + '_cb');
+    newCb.dataset.customTextId = uid + '_text';
+    newCb.addEventListener('change', function(){ enforceTraitLimit(this); });
+
+    wrap.querySelector('[data-remove]').addEventListener('click', function(){
+      wrap.remove();
+    });
+  });
+
+  function getCheckedValues(selector){
+    const results = [];
+    document.querySelectorAll(selector).forEach(cb => {
+      if(!cb.checked) return;
+      if(cb.dataset.custom === 'true'){
+        const textInput = $(cb.dataset.customTextId);
+        const val = textInput ? textInput.value.trim() : '';
+        if(val) results.push(val);
+      } else {
+        results.push(cb.value);
+      }
+    });
+    return results;
+  }
+
+  function esc(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function buildFactItem(label, value, icon){
+    return `<div class="flex flex-col">
+        <span class="fact-label"><i class="fa-solid ${icon} mr-1 text-emerald-500"></i>${esc(label)}</span>
+        <span class="fact-value">${esc(value)}</span>
+      </div>`;
+  }
+
+  function iconForFeature(f){
+    const map = {
+      'Tattoos':'fa-paintbrush','Piercings':'fa-ring','Beard':'fa-user','Mustache':'fa-user',
+      'Scars':'fa-band-aid','Bright smile':'fa-face-smile-beam','None':'fa-ban'
+    };
+    return map[f] || 'fa-star-of-life';
+  }
+
+  // ---- Full form validation ----
+  function validateForm(){
+    let isValid = true;
+    let firstErrorEl = null;
+
+    const requiredTextFields = [
+      'studentName','studentClass','studentNumber',
+      'athleteName','nickname','sport','nationality','age','dob',
+      'heightCm','heightDesc','weight','hair','eyes','skin','bodyBuild',
+      'habits','hobbies','family','education',
+      'team','position','playingStyle','idol','achievements',
+      'funFacts','studentNote'
+    ];
+
+    requiredTextFields.forEach(id => {
+      const el = $(id);
+      if(!el) return;
+      if(el.value.trim() === ''){
+        showFieldError(el);
+        isValid = false;
+        if(!firstErrorEl) firstErrorEl = el;
+      } else {
+        clearFieldError(el);
+      }
+    });
+
+    // Photo required
+    if(!uploadedPhotoData){
+      $('photoUploadLabel').classList.add('field-error');
+      $('photoErrorMsg').classList.add('show');
+      isValid = false;
+      if(!firstErrorEl) firstErrorEl = $('photoUploadLabel');
+    } else {
+      $('photoUploadLabel').classList.remove('field-error');
+      $('photoErrorMsg').classList.remove('show');
+    }
+
+    // Distinguishing features: at least one checked (including "None")
+    const featuresChecked = document.querySelectorAll('.feature-cb:checked').length;
+    if(featuresChecked === 0){
+      $('featuresBlock').classList.add('group-error-ring');
+      $('featuresErrorMsg').classList.add('show');
+      isValid = false;
+      if(!firstErrorEl) firstErrorEl = $('featuresBlock');
+    } else {
+      $('featuresBlock').classList.remove('group-error-ring');
+      $('featuresErrorMsg').classList.remove('show');
+    }
+
+    // Personality traits: at least 1, max 3 (already enforced live)
+    const traitsChecked = document.querySelectorAll('.trait-cb:checked').length;
+    if(traitsChecked === 0){
+      $('traitsBlock').classList.add('group-error-ring');
+      $('traitsErrorMsg').classList.add('show');
+      isValid = false;
+      if(!firstErrorEl) firstErrorEl = $('traitsBlock');
+    } else {
+      $('traitsBlock').classList.remove('group-error-ring');
+      $('traitsErrorMsg').classList.remove('show');
+    }
+
+    return { isValid, firstErrorEl };
+  }
+
+  $('athleteForm').addEventListener('submit', function(e){
+    e.preventDefault();
+
+    const { isValid, firstErrorEl } = validateForm();
+
+    if(!isValid){
+      $('formErrorBanner').classList.add('show');
+      if(firstErrorEl){
+        firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if(typeof firstErrorEl.focus === 'function') firstErrorEl.focus();
+      }
+      return;
+    } else {
+      $('formErrorBanner').classList.remove('show');
+    }
+
+    // ---- Section A ----
+    const studentName = $('studentName').value.trim();
+    const studentClass = $('studentClass').value.trim();
+    const studentNumber = $('studentNumber').value.trim();
+
+    // ---- Section B: Identity & Background ----
+    const athleteName = $('athleteName').value.trim();
+    const nickname = $('nickname').value.trim();
+    const sport = $('sport').value.trim();
+    const nationality = $('nationality').value.trim();
+    const age = $('age').value.trim();
+    const dob = $('dob').value.trim();
+
+    // ---- Section C: Physical Appearance ----
+    const heightCm = $('heightCm').value.trim();
+    const heightDesc = $('heightDesc').value.trim();
+    const weight = $('weight').value.trim();
+    const hair = $('hair').value.trim();
+    const eyes = $('eyes').value.trim();
+    const skin = $('skin').value.trim();
+    const bodyBuild = $('bodyBuild').value.trim();
+    const allFeatures = getCheckedValues('.feature-cb');
+    const features = allFeatures.includes('None') && allFeatures.length > 1
+      ? allFeatures.filter(f => f !== 'None')
+      : allFeatures;
+
+    // ---- Section D: Personality & Lifestyle ----
+    const traits = getCheckedValues('.trait-cb');
+    const habits = $('habits').value.trim();
+    const hobbies = $('hobbies').value.trim();
+    const family = $('family').value.trim();
+    const education = $('education').value.trim();
+
+    // ---- Section E: Sports Career & Achievements ----
+    const team = $('team').value.trim();
+    const position = $('position').value.trim();
+    const playingStyle = $('playingStyle').value.trim();
+    const idol = $('idol').value.trim();
+    const achievementsRaw = $('achievements').value.trim();
+
+    // ---- Section F: Fun Facts & Note ----
+    const funFactsRaw = $('funFacts').value.trim();
+    const studentNote = $('studentNote').value.trim();
+
+    // ================= HEADER =================
+    $('outName').textContent = athleteName;
+    $('outSport').textContent = sport;
+    $('outNationality').textContent = nationality;
+    $('outNickname').textContent = '"' + nickname + '"';
+    $('outNickname').classList.remove('hidden');
+
+    $('outPhoto').src = uploadedPhotoData;
+    $('outPhoto').classList.remove('hidden');
+    $('outPhotoPlaceholder').classList.add('hidden');
+
+    // ================= FAST FACTS =================
+    let fastFactsHtml = '';
+    fastFactsHtml += buildFactItem('Age', age, 'fa-cake-candles');
+    fastFactsHtml += buildFactItem('Date of Birth', dob, 'fa-calendar-days');
+    fastFactsHtml += buildFactItem('Team / Club', team, 'fa-shield-halved');
+    fastFactsHtml += buildFactItem('Position', position, 'fa-crosshairs');
+    fastFactsHtml += buildFactItem('Height', heightCm + ' cm (' + heightDesc + ')', 'fa-ruler-vertical');
+    fastFactsHtml += buildFactItem('Weight', weight, 'fa-weight-scale');
+    fastFactsHtml += buildFactItem('Body Build', bodyBuild, 'fa-dumbbell');
+    $('fastFactsGrid').innerHTML = fastFactsHtml;
+
+    // ================= PHYSICAL APPEARANCE =================
+    let physicalHtml = '';
+    physicalHtml += buildFactItem('Hair', hair, 'fa-scissors');
+    physicalHtml += buildFactItem('Eyes', eyes, 'fa-eye');
+    physicalHtml += buildFactItem('Skin', skin, 'fa-hand');
+    physicalHtml += buildFactItem('Build', bodyBuild, 'fa-dumbbell');
+    physicalHtml += buildFactItem('Height', heightCm + ' cm — ' + heightDesc, 'fa-ruler-vertical');
+    physicalHtml += buildFactItem('Weight', weight, 'fa-weight-scale');
+    $('physicalSection').classList.remove('hidden');
+    $('physicalGrid').innerHTML = physicalHtml;
+
+    // ================= CAREER =================
+    let careerHtml = '';
+    careerHtml += `<li class="flex gap-2"><i class="fa-solid fa-shield-halved text-emerald-500 mt-1"></i><span><strong>Team / Club:</strong> ${esc(team)}</span></li>`;
+    careerHtml += `<li class="flex gap-2"><i class="fa-solid fa-crosshairs text-emerald-500 mt-1"></i><span><strong>Position / Role:</strong> ${esc(position)}</span></li>`;
+    careerHtml += `<li class="flex gap-2"><i class="fa-solid fa-bolt text-emerald-500 mt-1"></i><span><strong>Playing Style:</strong> ${esc(playingStyle)}</span></li>`;
+    careerHtml += `<li class="flex gap-2"><i class="fa-solid fa-star text-emerald-500 mt-1"></i><span><strong>Idol / Inspiration:</strong> ${esc(idol)}</span></li>`;
+    $('careerSection').classList.remove('hidden');
+    $('careerList').innerHTML = careerHtml;
+
+    // ================= PERSONALITY & LIFESTYLE =================
+    let personalHtml = '';
+    personalHtml += `<li class="flex gap-2"><i class="fa-solid fa-repeat text-emerald-500 mt-1"></i><span><strong>Habits:</strong> ${esc(habits)}</span></li>`;
+    personalHtml += `<li class="flex gap-2"><i class="fa-solid fa-gamepad text-emerald-500 mt-1"></i><span><strong>Hobbies & Interests:</strong> ${esc(hobbies)}</span></li>`;
+    personalHtml += `<li class="flex gap-2"><i class="fa-solid fa-people-roof text-emerald-500 mt-1"></i><span><strong>Family & Early Life:</strong> ${esc(family)}</span></li>`;
+    personalHtml += `<li class="flex gap-2"><i class="fa-solid fa-graduation-cap text-emerald-500 mt-1"></i><span><strong>Education:</strong> ${esc(education)}</span></li>`;
+    $('personalSection').classList.remove('hidden');
+    $('personalList').innerHTML = personalHtml;
+
+    // ================= TRAITS & FEATURES BADGES =================
+    let badgesHtml = '';
+    traits.forEach(t => {
+      badgesHtml += `<span class="badge-pill"><i class="fa-solid fa-star"></i>${esc(t)}</span>`;
+    });
+    features.forEach(f => {
+      badgesHtml += `<span class="badge-pill feature"><i class="fa-solid ${iconForFeature(f)}"></i>${esc(f)}</span>`;
+    });
+    $('traitsFeaturesSection').classList.remove('hidden');
+    $('badgesWrap').innerHTML = badgesHtml;
+
+    // ================= ACHIEVEMENTS =================
+    let achievementsHtml = '';
+    const achLines = achievementsRaw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    achLines.forEach(line => {
+      const clean = line.replace(/^[-•*]\s*/, '');
+      achievementsHtml += `<li class="flex gap-2"><i class="fa-solid fa-medal text-amber-500 mt-1"></i><span>${esc(clean)}</span></li>`;
+    });
+    $('achievementsSection').classList.remove('hidden');
+    $('achievementsList').innerHTML = achievementsHtml;
+
+    // ================= FUN FACTS =================
+    let funFactsHtml = '';
+    const funLines = funFactsRaw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    funLines.forEach(line => {
+      const clean = line.replace(/^[-•*]\s*/, '');
+      funFactsHtml += `<li class="flex gap-2"><i class="fa-solid fa-lightbulb text-emerald-500 mt-1"></i><span>${esc(clean)}</span></li>`;
+    });
+    $('funFactsSection').classList.remove('hidden');
+    $('funFactsList').innerHTML = funFactsHtml;
+
+    // ================= STUDENT NOTE =================
+    $('noteSection').classList.remove('hidden');
+    $('noteText').textContent = studentNote;
+
+    // ================= FOOTER =================
+    $('footerStudent').textContent = studentName;
+    $('footerClass').textContent = studentClass;
+    $('footerNumber').textContent = studentNumber;
+
+    // ---- Switch views ----
+    $('formSection').classList.add('hidden');
+    $('resultSection').classList.remove('hidden');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+
+  // ---- Back to form ----
+  $('backToFormBtn').addEventListener('click', function(){
+    $('resultSection').classList.add('hidden');
+    $('formSection').classList.remove('hidden');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+
+  // ---- Print ----
+  $('printBtn').addEventListener('click', function(){
+    window.print();
+  });
+
+  // ---- Download PDF ----
+  $('downloadPdfBtn').addEventListener('click', function(){
+    const btn = this;
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+    const element = $('factFileCard');
+    const athleteNameForFile = ($('outName').textContent || 'Athlete').replace(/[^a-z0-9]/gi, '_');
+
+    const opt = {
+      margin: [0.3, 0.3, 0.3, 0.3],
+      filename: `Athlete_Fact_File_${athleteNameForFile}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(element).save().then(function(){
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }).catch(function(){
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+      alert('Something went wrong generating the PDF. Please try the Print option instead.');
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
