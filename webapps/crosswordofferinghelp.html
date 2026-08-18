@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awesome Vocabulary Crossword</title>
+    <!-- Import html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Import a fun, student-friendly font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #8e44ad;
+            --accent: #0984e3;
+            --highlight: #ffeaa7;
+            --correct: #00b894;
+            --incorrect: #d63031;
+            --warning: #fdcb6e;
+            --bg-gradient: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Nunito', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--primary);
+            margin: 0;
+            padding: 30px 15px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px dashed #dfe6e9;
+        }
+
+        .header h1 {
+            font-weight: 900;
+            font-size: 2.5em;
+            color: var(--secondary);
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #636e72;
+            margin: 0;
+        }
+
+        /* Student Info Card */
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: #f1f2f6;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 6px solid var(--accent);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .input-group label {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: var(--primary);
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #ced6e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Nunito', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.2);
+        }
+
+        .locked-input {
+            background-color: #e2e6ea !important;
+            color: #7f8c8d !important;
+            cursor: not-allowed;
+            border-color: #dcdde1 !important;
+            box-shadow: none !important;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 16px;
+            font-family: 'Nunito', sans-serif;
+            color: white;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
+        
+        .btn-lock { background-color: var(--warning); color: #2d3436; flex: 0.5; min-width: 130px; height: 48px; }
+        .btn-lock:hover { background-color: #f1c40f; }
+        
+        .btn-check { background-color: var(--correct); flex: 1; }
+        .btn-check:hover { background-color: #00a885; }
+        
+        .btn-pdf { background-color: var(--accent); flex: 1; }
+        .btn-pdf:hover { background-color: #0773c5; }
+
+        /* Controls Panel */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 2px solid #f1f2f6;
+        }
+
+        .grade-box {
+            font-size: 24px;
+            font-weight: 900;
+            padding: 10px 25px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 3px dashed #b2bec3;
+            text-align: center;
+            color: #636e72;
+            flex: 1;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        #loading {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            background: var(--secondary);
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* Crossword Grid styling */
+        .crossword-wrapper {
+            width: 100%;
+            overflow-x: auto; 
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+        
+        table {
+            border-collapse: collapse; 
+            margin: auto;
+            background: #2c3e50; /* Thick outer/inner borders */
+            border: 4px solid #2c3e50;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.1);
+        }
+        
+        td {
+            width: 38px;
+            height: 38px;
+            position: relative;
+            padding: 0;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .empty { background-color: transparent; border: 1px solid transparent; }
+        
+        .letter-cell {
+            background-color: white;
+            border: 1px solid #2c3e50; 
+        }
+        
+        .letter-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 20px; 
+            text-transform: uppercase;
+            font-weight: 900;
+            font-family: 'Nunito', sans-serif;
+            color: var(--primary);
+            box-sizing: border-box;
+            outline: none;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            transition: background-color 0.15s, color 0.15s;
+        }
+
+        .letter-input:focus {
+            background-color: var(--highlight); 
+            z-index: 5;
+            position: relative;
+        }
+        
+        .highlighted-word { background-color: #fff3cd; }
+        
+        .number-label {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--primary);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Clues styling */
+        .clues-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .clues-column {
+            flex: 1;
+            min-width: 280px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .clues-column h3 {
+            font-size: 1.5em;
+            color: var(--secondary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .clue-item {
+            margin-bottom: 15px;
+            line-height: 1.5;
+            font-size: 16px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border-left: 4px solid var(--highlight);
+        }
+        
+        .clue-item strong {
+            color: var(--accent);
+            font-size: 1.1em;
+            margin-right: 5px;
+        }
+
+        /* Validation Colors */
+        .correct { background-color: var(--correct) !important; color: white !important; text-shadow: 1px 1px 0px rgba(0,0,0,0.2); }
+        .incorrect { background-color: var(--incorrect) !important; color: white !important; }
+        
+        /* PDF specific tweaks */
+        .pdf-hide { display: none !important; }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 20px; border-radius: 10px; }
+            .clues-container { flex-direction: column; gap: 20px; }
+            td { width: 32px; height: 32px; }
+            .letter-input { font-size: 16px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="printableArea">
+    <div class="header">
+        <h1>🧩 Vocab Challenge</h1>
+        <p>Read the clues, fill in the grid, and test your knowledge!</p>
+    </div>
+
+    <!-- STUDENT INFO SECTION WITH LOCK BUTTON -->
+    <div class="student-info">
+        <div class="input-group">
+            <label for="studentName">👤 Full Name:</label>
+            <input type="text" id="studentName" placeholder="Enter your name">
+        </div>
+        <div class="input-group">
+            <label for="studentClass">🏫 Class:</label>
+            <input type="text" id="studentClass" placeholder="Enter your class">
+        </div>
+        <div class="input-group">
+            <label for="studentNumber">🔢 Number:</label>
+            <input type="text" id="studentNumber" placeholder="Enter your number">
+        </div>
+        <button class="btn btn-lock" id="lockInfoBtn" onclick="lockStudentInfo()">🔒 Lock Info</button>
+    </div>
+
+    <div class="controls" id="controlPanel" style="display: none;">
+        <button class="btn btn-check" onclick="checkAnswers()">✅ Check Answers</button>
+        <div class="grade-box" id="gradeBox">Score: -- / 100</div>
+        <button class="btn btn-pdf" onclick="downloadPDF()">📄 Download PDF</button>
+    </div>
+
+    <div id="loading">🚀 Engine running... Building your custom puzzle grid! <br><br>Please wait just a moment...</div>
+
+    <div class="crossword-wrapper">
+        <div id="crosswordGrid"></div>
+    </div>
+
+    <div class="clues-container" style="display: none;" id="cluesSection">
+        <div class="clues-column" id="acrossClues">
+            <h3>➡️ Across</h3>
+            <div id="acrossList"></div>
+        </div>
+        <div class="clues-column" id="downClues">
+            <h3>⬇️ Down</h3>
+            <div id="downList"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const wordList = [
+        { word: "HELP", clue: "\"Can I ___ you?\" (A basic and polite way to offer assistance)" },
+        { word: "WOULD", clue: "\"___ you like me to open the door?\" (A polite and formal word to start an offer)" },
+        { word: "HAND", clue: "\"Let me give you a ___ with those bags.\" (A common English idiom meaning to help)" },
+        { word: "PLEASE", clue: "\"Yes, ___, that would be great.\" (The standard polite word used when accepting help)" },
+        { word: "APPRECIATE", clue: "\"Thank you, I really ___ your help.\" (A formal and polite way to show gratitude)" },
+        { word: "FINE", clue: "\"No thanks, I am ___.\" (A polite way to say you do not need help)" },
+        { word: "MANAGE", clue: "\"It is okay, I can ___ by myself.\" (A polite way to refuse help and show independence)" },
+        { word: "WANT", clue: "\"Do you ___ me to carry that?\" (A casual way to offer assistance to a friend)" },
+        { word: "MIND", clue: "\"Would you ___ if I helped you?\" (A very polite way to ask for permission to help)" },
+        { word: "SURE", clue: "\"___, thank you!\" (A casual but polite and friendly way to accept help)" },
+        { word: "ASSIST", clue: "To give support or aid to someone in a task." },
+        { word: "GRATEFUL", clue: "Feeling or showing appreciation for something done or received." },
+        { word: "WELCOME", clue: "\"You are ___!\" (The standard polite reply to 'Thank you')" },
+        { word: "SUPPORT", clue: "To bear all or part of the weight of; hold up, or give assistance to." },
+        { word: "KINDNESS", clue: "The quality of being friendly, generous, and considerate." },
+        { word: "FAVOR", clue: "\"Could you do me a ___?\" (Asking someone for a helpful act)" },
+        { word: "GENEROUS", clue: "Showing a readiness to give more of something, like time or help, than is strictly necessary." },
+        { word: "OBLIGE", clue: "To make someone legally or morally bound to an action, or to do as someone asks in order to help them." },
+        { word: "COOPERATE", clue: "To work jointly toward the same end." },
+        { word: "THANK", clue: "\"___ you so much for your time.\" (Expressing gratitude)" }
+    ];
+
+    let placements = [];
+    let grid = [];
+    const maxGridSize = 80; 
+    let activePlacement = null;
+
+    window.onload = function() {
+        if(wordList.length === 0) {
+            document.getElementById('loading').innerHTML = "Please add words to the wordList.";
+            return;
+        }
+        setTimeout(runEngine, 50); 
+    };
+
+    function lockStudentInfo() {
+        let nameInput = document.getElementById('studentName');
+        let classInput = document.getElementById('studentClass');
+        let numberInput = document.getElementById('studentNumber');
+        let btn = document.getElementById('lockInfoBtn');
+
+        if(nameInput.value.trim() === "") {
+            alert("Please enter your name before locking your information.");
+            nameInput.focus();
+            return;
+        }
+
+        nameInput.readOnly = true;
+        classInput.readOnly = true;
+        numberInput.readOnly = true;
+
+        nameInput.classList.add('locked-input');
+        classInput.classList.add('locked-input');
+        numberInput.classList.add('locked-input');
+
+        btn.innerHTML = "🔒 Locked";
+        btn.disabled = true;
+        btn.style.backgroundColor = "#b2bec3";
+        btn.style.boxShadow = "none";
+        btn.style.cursor = "not-allowed";
+        
+        btn.classList.add('pdf-hide');
+    }
+
+    function runEngine() {
+        let bestScore = -999999;
+        let bestPlacements = [];
+        let bestGrid = [];
+        let bestUnplaced = [];
+
+        let startTime = Date.now();
+        let timeLimit = 1500; 
+
+        while (Date.now() - startTime < timeLimit) {
+            let currentGrid = Array.from({length: maxGridSize}, () => Array(maxGridSize).fill(null));
+            let currentPlacements = [];
+            
+            let unplaced = [...wordList].sort(() => Math.random() - 0.5);
+            unplaced.sort((a, b) => b.word.length - a.word.length + (Math.random() > 0.5 ? 1 : -1));
+
+            let firstWord = unplaced.shift();
+            let startX = Math.floor(maxGridSize / 2 - firstWord.word.length / 2);
+            let startY = Math.floor(maxGridSize / 2);
+            let isHoriz = Math.random() > 0.5;
+            placeWordOnGrid(currentGrid, currentPlacements, firstWord, startX, startY, isHoriz);
+
+            let progress = true;
+            while (progress && unplaced.length > 0) {
+                progress = false;
+                
+                for (let i = 0; i < unplaced.length; i++) {
+                    let wordObj = unplaced[i];
+                    let bestFit = findBestIntersection(currentGrid, wordObj.word);
+                    
+                    if (bestFit) {
+                        placeWordOnGrid(currentGrid, currentPlacements, wordObj, bestFit.x, bestFit.y, bestFit.isHoriz);
+                        unplaced.splice(i, 1);
+                        progress = true;
+                        break; 
+                    }
+                }
+            }
+
+            let score = evaluateGrid(currentPlacements, unplaced.length);
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestPlacements = currentPlacements.map(p => ({...p}));
+                bestGrid = currentGrid.map(row => [...row]);
+                bestUnplaced = unplaced.map(u => ({...u}));
+            }
+        }
+
+        if (bestUnplaced.length > 0) {
+            for (let wordObj of bestUnplaced) {
+                let fallback = getFallbackPlacement(bestPlacements, wordObj.word);
+                placeWordOnGrid(bestGrid, bestPlacements, wordObj, fallback.x, fallback.y, true);
+            }
+        }
+
+        placements = bestPlacements;
+        grid = bestGrid;
+        
+        assignNumbers();
+        renderCrossword();
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('controlPanel').style.display = 'flex';
+        document.getElementById('cluesSection').style.display = 'flex';
+    }
+
+    function evaluateGrid(placements, unplacedCount) {
+        if (placements.length === 0) return -999999;
+        
+        let minX = maxGridSize, minY = maxGridSize, maxX = 0, maxY = 0;
+        let intersections = 0;
+
+        for (let p of placements) {
+            let endX = p.isHoriz ? p.x + p.word.length - 1 : p.x;
+            let endY = p.isHoriz ? p.y : p.y + p.word.length - 1;
+            if (p.x < minX) minX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (endX > maxX) maxX = endX;
+            if (endY > maxY) maxY = endY;
+        }
+
+        let area = (maxX - minX + 1) * (maxY - minY + 1);
+
+        let gridCoords = new Set();
+        for (let p of placements) {
+            for (let i = 0; i < p.word.length; i++) {
+                let x = p.isHoriz ? p.x + i : p.x;
+                let y = p.isHoriz ? p.y : p.y + i;
+                let coord = `${x},${y}`;
+                if (gridCoords.has(coord)) intersections++;
+                else gridCoords.add(coord);
+            }
+        }
+
+        return (placements.length * 10000) + (intersections * 500) - area;
+    }
+
+    function findBestIntersection(grid, word) {
+        let bestPlacement = null;
+        let bestScore = -1;
+
+        for (let y = 0; y < maxGridSize; y++) {
+            for (let x = 0; x < maxGridSize; x++) {
+                let hIntersections = checkValidPlacement(grid, word, x, y, true);
+                if (hIntersections > 0) {
+                    let score = (hIntersections * 100) - getDistanceFromCenter(x, y, word.length, true);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestPlacement = { x, y, isHoriz: true };
+                    }
+                }
+                
+                let vIntersections = checkValidPlacement(grid, word, x, y, false);
+                if (vIntersections > 0) {
+                    let score = (vIntersections * 100) - getDistanceFromCenter(x, y, word.length, false);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestPlacement = { x, y, isHoriz: false };
+                    }
+                }
+            }
+        }
+        return bestPlacement;
+    }
+
+    function getDistanceFromCenter(x, y, len, isHoriz) {
+        let cx = isHoriz ? x + len/2 : x;
+        let cy = isHoriz ? y : y + len/2;
+        return Math.abs(cx - (maxGridSize/2)) + Math.abs(cy - (maxGridSize/2));
+    }
+
+    function checkValidPlacement(grid, word, x, y, isHoriz) {
+        let intersections = 0;
+        
+        if (x < 0 || y < 0) return -1;
+        if (isHoriz && x + word.length >= maxGridSize) return -1;
+        if (!isHoriz && y + word.length >= maxGridSize) return -1;
+
+        if (isHoriz) {
+            if (x - 1 >= 0 && grid[y][x - 1] !== null) return -1;
+            if (x + word.length < maxGridSize && grid[y][x + word.length] !== null) return -1;
+        } else {
+            if (y - 1 >= 0 && grid[y - 1][x] !== null) return -1;
+            if (y + word.length < maxGridSize && grid[y + word.length][x] !== null) return -1;
+        }
+
+        for (let i = 0; i < word.length; i++) {
+            let cx = isHoriz ? x + i : x;
+            let cy = isHoriz ? y : y + i;
+
+            if (grid[cy][cx] !== null) {
+                if (grid[cy][cx] !== word[i]) return -1;
+                intersections++;
+            } else {
+                if (isHoriz) {
+                    if (cy - 1 >= 0 && grid[cy - 1][cx] !== null) return -1;
+                    if (cy + 1 < maxGridSize && grid[cy + 1][cx] !== null) return -1;
+                } else {
+                    if (cx - 1 >= 0 && grid[cy][cx - 1] !== null) return -1;
+                    if (cx + 1 < maxGridSize && grid[cy][cx + 1] !== null) return -1;
+                }
+            }
+        }
+        return intersections;
+    }
+
+    function placeWordOnGrid(grid, placements, wordObj, x, y, isHoriz) {
+        placements.push({ ...wordObj, x, y, isHoriz });
+        for (let i = 0; i < wordObj.word.length; i++) {
+            let cx = isHoriz ? x + i : x;
+            let cy = isHoriz ? y : y + i;
+            grid[cy][cx] = wordObj.word[i];
+        }
+    }
+
+    function getFallbackPlacement(currentPlacements, word) {
+        let maxY = 0;
+        let minX = maxGridSize, maxX = 0;
+        for (let p of currentPlacements) {
+            let bottom = p.isHoriz ? p.y : p.y + p.word.length - 1;
+            if (bottom > maxY) maxY = bottom;
+            if (p.x < minX) minX = p.x;
+            if (p.x + p.word.length > maxX) maxX = p.x + p.word.length;
+        }
+        let x = Math.max(0, Math.floor((minX + maxX) / 2 - word.length / 2));
+        return { x: x, y: maxY + 2, isHoriz: true };
+    }
+
+    function assignNumbers() {
+        placements.sort((a, b) => {
+            if (a.y !== b.y) return a.y - b.y;
+            return a.x - b.x;
+        });
+        let counter = 1;
+        for (let i = 0; i < placements.length; i++) {
+            let p = placements[i];
+            let shared = placements.find(other => other !== p && other.x === p.x && other.y === p.y);
+            if (shared && shared.number) {
+                p.number = shared.number;
+            } else {
+                p.number = counter++;
+            }
+        }
+    }
+
+    function getCovers(r, c) {
+        return placements.filter(p => {
+            if (p.isHoriz) return r === p.y && c >= p.x && c < p.x + p.word.length;
+            else return c === p.x && r >= p.y && r < p.y + p.word.length;
+        });
+    }
+
+    function highlightActiveWord() {
+        document.querySelectorAll('.letter-input').forEach(inp => inp.classList.remove('highlighted-word'));
+        if (!activePlacement) return;
+        for (let i = 0; i < activePlacement.word.length; i++) {
+            let cx = activePlacement.isHoriz ? activePlacement.x + i : activePlacement.x;
+            let cy = activePlacement.isHoriz ? activePlacement.y : activePlacement.y + i;
+            let input = document.querySelector(`input[data-r="${cy}"][data-c="${cx}"]`);
+            if (input) input.classList.add('highlighted-word');
+        }
+    }
+
+    function renderCrossword() {
+        let minX = maxGridSize, minY = maxGridSize, maxX = 0, maxY = 0;
+        for (let p of placements) {
+            if (p.x < minX) minX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.isHoriz) {
+                if (p.x + p.word.length - 1 > maxX) maxX = p.x + p.word.length - 1;
+                if (p.y > maxY) maxY = p.y;
+            } else {
+                if (p.x > maxX) maxX = p.x;
+                if (p.y + p.word.length - 1 > maxY) maxY = p.y + p.word.length - 1;
+            }
+        }
+
+        let table = document.createElement('table');
+        for (let r = minY; r <= maxY; r++) {
+            let tr = document.createElement('tr');
+            for (let c = minX; c <= maxX; c++) {
+                let td = document.createElement('td');
+                if (grid[r][c] !== null) {
+                    td.className = 'letter-cell';
+                    let input = document.createElement('input');
+                    input.type = 'text';
+                    input.maxLength = 1;
+                    input.className = 'letter-input';
+                    input.setAttribute('autocomplete', 'off');
+                    input.setAttribute('autocorrect', 'off');
+                    input.setAttribute('autocapitalize', 'characters');
+                    input.setAttribute('spellcheck', 'false');
+                    input.dataset.r = r;
+                    input.dataset.c = c;
+                    
+                    input.addEventListener('click', function() {
+                        let covers = getCovers(parseInt(this.dataset.r), parseInt(this.dataset.c));
+                        if (covers.length > 1) {
+                            activePlacement = (activePlacement && activePlacement.word === covers[0].word) ? covers[1] : covers[0];
+                        } else if (covers.length === 1) {
+                            activePlacement = covers[0];
+                        }
+                        highlightActiveWord();
+                    });
+
+                    input.addEventListener('focus', function() {
+                        let covers = getCovers(parseInt(this.dataset.r), parseInt(this.dataset.c));
+                        if (!activePlacement || !covers.includes(activePlacement)) activePlacement = covers[0];
+                        highlightActiveWord();
+                    });
+                    
+                    input.addEventListener('input', function(e) {
+                        this.value = this.value.toUpperCase();
+                        this.setAttribute('value', this.value); 
+                        if (this.value.length === 1 && activePlacement) {
+                            let nextR = activePlacement.isHoriz ? parseInt(this.dataset.r) : parseInt(this.dataset.r) + 1;
+                            let nextC = activePlacement.isHoriz ? parseInt(this.dataset.c) + 1 : parseInt(this.dataset.c);
+                            let nextInput = document.querySelector(`input[data-r="${nextR}"][data-c="${nextC}"]`);
+                            if (nextInput) nextInput.focus();
+                        }
+                    });
+
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Backspace' && this.value === '' && activePlacement) {
+                            let prevR = activePlacement.isHoriz ? parseInt(this.dataset.r) : parseInt(this.dataset.r) - 1;
+                            let prevC = activePlacement.isHoriz ? parseInt(this.dataset.c) - 1 : parseInt(this.dataset.c);
+                            let prevInput = document.querySelector(`input[data-r="${prevR}"][data-c="${prevC}"]`);
+                            if (prevInput) { prevInput.focus(); e.preventDefault(); }
+                        }
+                    });
+
+                    let startingWord = placements.find(p => p.x === c && p.y === r);
+                    if (startingWord) {
+                        let span = document.createElement('span');
+                        span.className = 'number-label';
+                        span.innerText = startingWord.number;
+                        td.appendChild(span);
+                    }
+                    td.appendChild(input);
+                } else {
+                    td.className = 'empty';
+                }
+                tr.appendChild(td);
+            }
+            table.appendChild(tr);
+        }
+
+        document.getElementById('crosswordGrid').innerHTML = '';
+        document.getElementById('crosswordGrid').appendChild(table);
+
+        let acrossHtml = '', downHtml = '';
+        placements.forEach(p => {
+            let clueText = `<div class="clue-item"><strong>${p.number}.</strong> ${p.clue}</div>`;
+            if (p.isHoriz) acrossHtml += clueText;
+            else downHtml += clueText;
+        });
+
+        document.getElementById('acrossList').innerHTML = acrossHtml;
+        document.getElementById('downList').innerHTML = downHtml;
+    }
+
+    function checkAnswers() {
+        let score = 0;
+        let inputs = document.querySelectorAll('.letter-input');
+        inputs.forEach(input => input.classList.remove('correct', 'incorrect'));
+
+        placements.forEach(p => {
+            let wordCorrect = true;
+            let wordInputs = [];
+            for (let i = 0; i < p.word.length; i++) {
+                let x = p.isHoriz ? p.x + i : p.x;
+                let y = p.isHoriz ? p.y : p.y + i;
+                let input = document.querySelector(`input[data-r="${y}"][data-c="${x}"]`);
+                wordInputs.push(input);
+                if (!input.value || input.value.toUpperCase() !== p.word[i]) wordCorrect = false;
+            }
+            if (wordCorrect) {
+                score++;
+                wordInputs.forEach(input => input.classList.add('correct'));
+            } else {
+                wordInputs.forEach(input => { if (input.value) input.classList.add('incorrect'); });
+            }
+        });
+
+        let finalGrade = Math.round((score / placements.length) * 100);
+        let gradeBox = document.getElementById('gradeBox');
+        gradeBox.innerText = `Score: ${finalGrade} / 100`;
+        
+        if(finalGrade === 100) {
+            gradeBox.style.color = 'var(--correct)';
+            gradeBox.style.borderColor = 'var(--correct)';
+            gradeBox.style.backgroundColor = '#e8f8f5';
+        } else {
+            gradeBox.style.color = 'var(--incorrect)';
+            gradeBox.style.borderColor = 'var(--incorrect)';
+            gradeBox.style.backgroundColor = '#fdf0ed';
+        }
+    }
+
+    function downloadPDF() {
+        // Remove text highlights
+        document.querySelectorAll('.letter-input').forEach(inp => inp.classList.remove('highlighted-word'));
+        
+        // Ensure typed values are embedded in the DOM for html2canvas
+        ['studentName', 'studentClass', 'studentNumber'].forEach(id => {
+            let el = document.getElementById(id);
+            el.setAttribute('value', el.value);
+        });
+        
+        let controlPanel = document.getElementById('controlPanel');
+        let element = document.getElementById('printableArea');
+        
+        // Temporarily hide UI buttons and drop shadows for a cleaner, flatter PDF
+        controlPanel.classList.add('pdf-hide');
+        let originalShadow = element.style.boxShadow;
+        element.style.boxShadow = 'none'; 
+        
+        // Get the exact dimensions of the container
+        let opt = {
+            margin:       0, // 0 margin prevents the extra page break
+            filename:     'Vocab_Crossword_Challenge.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true, 
+                backgroundColor: '#ffffff'
+            },
+            jsPDF: { 
+                unit: 'px', 
+                // Set the PDF page size to be EXACTLY the size of the HTML container
+                format: [Math.ceil(element.offsetWidth), Math.ceil(element.offsetHeight)], 
+                orientation: element.offsetHeight > element.offsetWidth ? 'portrait' : 'landscape' 
+            }
+        };
+        
+        html2pdf().set(opt).from(element).save().then(() => {
+            // Restore UI after download
+            controlPanel.classList.remove('pdf-hide');
+            element.style.boxShadow = originalShadow;
+        });
+    }
+</script>
+
+</body>
+</html>
