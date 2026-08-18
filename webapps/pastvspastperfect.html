@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past vs. Past Perfect Worksheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom styles for select dropdowns to make them look uniform on iOS/Android */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1em;
+            padding-right: 2rem !important;
+        }
+        
+        /* PDF specific styles to ensure the hidden generation div looks good */
+        #pdf-report-container {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.5;
+        }
+        #pdf-report-container h1 { color: #4338ca; }
+        .pdf-question { margin-bottom: 12px; font-size: 14px; }
+        .pdf-correct { color: #16a34a; font-weight: bold; }
+        .pdf-wrong { color: #dc2626; font-weight: bold; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="bg-indigo-600 rounded-xl p-6 text-white shadow-lg text-center">
+            <h1 class="text-3xl font-bold mb-2">English Grammar Worksheet</h1>
+            <p class="text-indigo-100 text-lg">Simple Past vs. Past Perfect Tense</p>
+        </header>
+
+        <!-- Student Information -->
+        <section class="bg-white rounded-xl p-6 shadow-md border border-gray-100">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Student Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="studentName" class="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
+                    <input type="text" id="studentName" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200" placeholder="e.g. John Doe" required>
+                </div>
+                <div>
+                    <label for="studentClass" class="block text-sm font-medium text-gray-600 mb-1">Class</label>
+                    <input type="text" id="studentClass" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200" placeholder="e.g. 10 Science A" required>
+                </div>
+                <div>
+                    <label for="studentNumber" class="block text-sm font-medium text-gray-600 mb-1">Student Number</label>
+                    <input type="number" id="studentNumber" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200" placeholder="e.g. 15" required>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end">
+                <button id="saveInfoBtn" onclick="saveStudentInfo()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-8 rounded-lg shadow transition">
+                    Save Information
+                </button>
+            </div>
+            <p id="infoError" class="text-red-500 text-sm mt-3 hidden text-center md:text-right font-medium">Please fill out your Name, Class, and Student Number before saving.</p>
+        </section>
+
+        <!-- Grammar Explanation -->
+        <section class="bg-blue-50 rounded-xl p-6 shadow-md border border-blue-100">
+            <h2 class="text-xl font-semibold mb-3 text-blue-800">Grammar Focus: Past vs. Past Perfect</h2>
+            <div class="text-blue-900 space-y-3 text-sm md:text-base leading-relaxed">
+                <p><strong>Simple Past (Verb-2 / -ed):</strong> Used for a completed action in the past, or a sequence of past events happening one right after another.</p>
+                <p><strong>Past Perfect (had + Past Participle / Verb-3):</strong> Used to show that an action happened <strong>before</strong> another action in the past. It helps clarify the order of events.</p>
+                <ul class="list-disc pl-5 space-y-2 mt-2">
+                    <li><em>Sequence (Both Simple Past):</em> "When she <strong>heard</strong> the loud noise, she <strong>dropped</strong> her bag." (Immediate reaction)</li>
+                    <li><em>Out of Order (Past Perfect + Simple Past):</em> "By the time we <strong>arrived</strong>, the train <strong>had left</strong>." (The train leaving happened FIRST).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Worksheet Questions -->
+        <section class="bg-white rounded-xl p-6 shadow-md border border-gray-100">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Worksheet</h2>
+            <p class="text-gray-600 mb-6 italic">Fill in <strong>both verbs</strong> for every sentence by selecting the correct tense from the dropdowns.</p>
+            
+            <div id="questionsContainer" class="space-y-8">
+                <!-- Questions injected by JS -->
+            </div>
+        </section>
+
+        <!-- Grading & Action Buttons -->
+        <section class="bg-gray-50 rounded-xl p-6 shadow-md border border-gray-200">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex gap-4 w-full md:w-auto">
+                    <button onclick="checkAnswers()" id="checkBtn" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow transition transform hover:-translate-y-0.5">
+                        Check Answers
+                    </button>
+                    <button onclick="downloadPDF()" id="downloadBtn" class="hidden flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg shadow transition flex justify-center items-center gap-2">
+                        <span>Download PDF</span>
+                        <svg id="pdfSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Grade Box -->
+                <div id="gradeBox" class="hidden flex flex-col items-center bg-white px-6 py-3 rounded-lg border-2 border-indigo-200 shadow-sm w-full md:w-48 text-center">
+                    <span class="text-gray-500 text-sm font-semibold uppercase tracking-wider">Your Score</span>
+                    <div class="text-4xl font-extrabold text-indigo-600">
+                        <span id="scoreDisplay">0</span><span class="text-xl text-gray-400">/100</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Complex Data Structure for Questions with 2 Blanks
+        const worksheetData = [
+            {
+                section: "Part 1: The Legend of N’daung Snake",
+                questions: [
+                    { 
+                        id: "q1", 
+                        text1: "The youngest daughter ", 
+                        blank1: { id: "q1_1", options: ["went", "had gone", "goes"], answer: "went" },
+                        text2: " to the mountain after the shaman ",
+                        blank2: { id: "q1_2", options: ["told", "had told", "tells"], answer: "had told" },
+                        text3: " her about the magic flower.",
+                        hint: "The shaman told her FIRST (Past Perfect), then she went SECOND (Simple Past)."
+                    },
+                    { 
+                        id: "q2", 
+                        text1: "By the time the youngest daughter ", 
+                        blank1: { id: "q2_1", options: ["arrived", "had arrived", "arrives"], answer: "arrived" },
+                        text2: " at the cave, she ",
+                        blank2: { id: "q2_2", options: ["walked", "had walked", "walks"], answer: "had walked" },
+                        text3: " for three whole days.",
+                        hint: "The walking happened BEFORE she finally arrived."
+                    },
+                    { 
+                        id: "q3", 
+                        text1: "When the mother ", 
+                        blank1: { id: "q3_1", options: ["got", "had got", "gets"], answer: "got" },
+                        text2: " a severe pain, her daughters ",
+                        blank2: { id: "q3_2", options: ["called", "had called", "call"], answer: "called" },
+                        text3: " a shaman immediately.",
+                        hint: "These are consecutive actions. The pain started, and immediately after, they called."
+                    },
+                    { 
+                        id: "q4", 
+                        text1: "The prince ", 
+                        blank1: { id: "q4_1", options: ["thanked", "had thanked", "thanks"], answer: "thanked" },
+                        text2: " the youngest daughter in the morning because her jealous sisters ",
+                        blank2: { id: "q4_2", options: ["burned", "had burned", "burn"], answer: "had burned" },
+                        text3: " his snake skin during the night.",
+                        hint: "They burned it at night (first), he thanked her in the morning (second)."
+                    },
+                    { 
+                        id: "q5", 
+                        text1: "When she ", 
+                        blank1: { id: "q5_1", options: ["heard", "had heard", "hears"], answer: "heard" },
+                        text2: " a loud and terrifying hiss, the youngest daughter ",
+                        blank2: { id: "q5_2", options: ["dropped", "had dropped", "drops"], answer: "dropped" },
+                        text3: " the magic flower in fear.",
+                        hint: "A direct consecutive reaction: she heard it, and instantly dropped it."
+                    },
+                    { 
+                        id: "q6", 
+                        text1: "The youngest daughter ", 
+                        blank1: { id: "q6_1", options: ["fell", "had fallen", "falls"], answer: "fell" },
+                        text2: " on her knees and cried after the snake ",
+                        blank2: { id: "q6_2", options: ["threatened", "had threatened", "threatens"], answer: "had threatened" },
+                        text3: " to eat her for breakfast.",
+                        hint: "The snake threatened FIRST, causing her to fall and cry AFTER."
+                    },
+                    { 
+                        id: "q7", 
+                        text1: "After the youngest daughter ", 
+                        blank1: { id: "q7_1", options: ["gave", "had given", "gives"], answer: "had given" },
+                        text2: " the magic pot to the shaman, she ",
+                        blank2: { id: "q7_2", options: ["returned", "had returned", "returns"], answer: "returned" },
+                        text3: " back to the mountain.",
+                        hint: "She gave it first (Past Perfect), then she returned (Simple Past)."
+                    },
+                    { 
+                        id: "q8", 
+                        text1: "The prince ", 
+                        blank1: { id: "q8_1", options: ["was", "had been", "is"], answer: "had been" },
+                        text2: " a snake for a long time before his uncle's wicked curse ",
+                        blank2: { id: "q8_2", options: ["was", "had been", "is"], answer: "was" },
+                        text3: " finally broken.",
+                        hint: "He was a snake for a duration BEFORE the curse broke."
+                    },
+                    { 
+                        id: "q9", 
+                        text1: "The terrifying snake ", 
+                        blank1: { id: "q9_1", options: ["shed", "had shed", "sheds"], answer: "shed" },
+                        text2: " tears when he ",
+                        blank2: { id: "q9_2", options: ["heard", "had heard", "hears"], answer: "heard" },
+                        text3: " the youngest daughter's sad story.",
+                        hint: "Simultaneous/Consecutive: He heard it, and as a direct result, he shed tears."
+                    },
+                    { 
+                        id: "q10", 
+                        text1: "The sisters ", 
+                        blank1: { id: "q10_1", options: ["put", "had put", "puts"], answer: "put" },
+                        text2: " the ashes next to the youngest daughter only after they ",
+                        blank2: { id: "q10_2", options: ["destroyed", "had destroyed", "destroy"], answer: "had destroyed" },
+                        text3: " the magical skin completely.",
+                        hint: "They destroyed it FIRST, then placed the ashes."
+                    }
+                ]
+            },
+            {
+                section: "Part 2: The Legend of The Holy Stone",
+                questions: [
+                    { 
+                        id: "q11", 
+                        text1: "God Iriwonawani ", 
+                        blank1: { id: "q11_1", options: ["was", "had been", "is"], answer: "was" },
+                        text2: " very angry because the Kamboi people ",
+                        blank2: { id: "q11_2", options: ["cut", "had cut", "cuts"], answer: "had cut" },
+                        text3: " the sago trees without planting new ones.",
+                        hint: "They cut trees FIRST, causing the God to be angry AFTER."
+                    },
+                    { 
+                        id: "q12", 
+                        text1: "Irimiami and Isoray ", 
+                        blank1: { id: "q12_1", options: ["decided", "had decided", "decide"], answer: "decided" },
+                        text2: " to rest under a tree because they ",
+                        blank2: { id: "q12_2", options: ["hunted", "had hunted", "hunt"], answer: "had hunted" },
+                        text3: " in the jungle all day.",
+                        hint: "They had hunted all day (first), so they decided to rest (second)."
+                    },
+                    { 
+                        id: "q13", 
+                        text1: "Isoray suddenly ", 
+                        blank1: { id: "q13_1", options: ["jumped", "had jumped", "jumps"], answer: "jumped" },
+                        text2: " off the large stone because it ",
+                        blank2: { id: "q13_2", options: ["almost burned", "had almost burned", "almost burns"], answer: "had almost burned" },
+                        text3: " her skin.",
+                        hint: "The burning happened BEFORE/CAUSED her to jump."
+                    },
+                    { 
+                        id: "q14", 
+                        text1: "After they ", 
+                        blank1: { id: "q14_1", options: ["tested", "had tested", "test"], answer: "had tested" },
+                        text2: " the stone's heat with venison, they ",
+                        blank2: { id: "q14_2", options: ["continued", "had continued", "continue"], answer: "continued" },
+                        text3: " testing it with bamboo and grass.",
+                        hint: "They tested it first (Past Perfect), then continued testing."
+                    },
+                    { 
+                        id: "q15", 
+                        text1: "The couple ", 
+                        blank1: { id: "q15_1", options: ["ran", "had run", "runs"], answer: "ran" },
+                        text2: " to God Iriwonawani for help after they ",
+                        blank2: { id: "q15_2", options: ["realized", "had realized", "realize"], answer: "had realized" },
+                        text3: " that they couldn't stop the fire themselves.",
+                        hint: "They realized the danger FIRST, then ran for help AFTER."
+                    },
+                    { 
+                        id: "q16", 
+                        text1: "By the time God Iriwonawani ", 
+                        blank1: { id: "q16_1", options: ["arrived", "had arrived", "arrives"], answer: "arrived" },
+                        text2: " to stop the second fire, it ",
+                        blank2: { id: "q16_2", options: ["burned", "had burned", "burns"], answer: "had burned" },
+                        text3: " for seven days and nights.",
+                        hint: "The fire burned BEFORE the God arrived."
+                    },
+                    { 
+                        id: "q17", 
+                        text1: "Because they ", 
+                        blank1: { id: "q17_1", options: ["were", "had been", "are"], answer: "were" },
+                        text2: " scared of God Iriwonawani's anger, the Kamboi people ",
+                        blank2: { id: "q17_2", options: ["moved", "had moved", "move"], answer: "moved" },
+                        text3: " to the coastal area.",
+                        hint: "Consecutive events: being scared caused them to move."
+                    },
+                    { 
+                        id: "q18", 
+                        text1: "Irimiami and Isoray ", 
+                        blank1: { id: "q18_1", options: ["broke", "had broken", "break"], answer: "broke" },
+                        text2: " the promise that they ",
+                        blank2: { id: "q18_2", options: ["made", "had made", "make"], answer: "had made" },
+                        text3: " to God Iriwonawani.",
+                        hint: "They made the promise BEFORE they broke it."
+                    },
+                    { 
+                        id: "q19", 
+                        text1: "When the villagers finally ", 
+                        blank1: { id: "q19_1", options: ["returned", "had returned", "return"], answer: "returned" },
+                        text2: " to the mountain, they ",
+                        blank2: { id: "q19_2", options: ["witnessed", "had witnessed", "witness"], answer: "witnessed" },
+                        text3: " the burning forest which was extinguished.",
+                        hint: "Consecutive/Simultaneous action happening when they returned."
+                    },
+                    { 
+                        id: "q20", 
+                        text1: "They ", 
+                        blank1: { id: "q20_1", options: ["held", "had held", "hold"], answer: "held" },
+                        text2: " a traditional feast to celebrate because God Iriwonawani ",
+                        blank2: { id: "q20_2", options: ["saved", "had saved", "saves"], answer: "had saved" },
+                        text3: " them from a terrible disaster.",
+                        hint: "The God saved them FIRST, so they held a feast AFTER."
+                    }
+                ]
+            }
+        ];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function saveStudentInfo() {
+            const name = document.getElementById('studentName');
+            const cls = document.getElementById('studentClass');
+            const num = document.getElementById('studentNumber');
+            const btn = document.getElementById('saveInfoBtn');
+            const err = document.getElementById('infoError');
+
+            if (!name.value.trim() || !cls.value.trim() || !num.value.trim()) {
+                err.textContent = "Please fill out your Name, Class, and Student Number before saving.";
+                err.classList.remove('hidden');
+                return;
+            }
+            err.classList.add('hidden');
+            
+            // Disable inputs to secure them
+            name.disabled = true;
+            cls.disabled = true;
+            num.disabled = true;
+            
+            // Update button visual state
+            btn.innerHTML = "✓ Information Saved";
+            btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+            btn.classList.add('bg-emerald-600', 'cursor-not-allowed');
+            btn.onclick = null; // Disable clicking again
+        }
+
+        function renderWorksheet() {
+            const container = document.getElementById('questionsContainer');
+            let globalIndex = 1; // Used for sequential numbering across parts
+            
+            worksheetData.forEach((part, index) => {
+                // Section Title
+                const sectionTitle = document.createElement('h3');
+                sectionTitle.className = "text-xl font-bold text-indigo-700 mt-8 mb-4 border-b-2 border-indigo-100 pb-2";
+                if(index === 0) sectionTitle.classList.remove('mt-8');
+                sectionTitle.textContent = part.section;
+                container.appendChild(sectionTitle);
+
+                const questionsList = document.createElement('div');
+                questionsList.className = "space-y-6 pl-2 md:pl-4";
+
+                part.questions.forEach(q => {
+                    const qDiv = document.createElement('div');
+                    qDiv.className = "p-4 bg-gray-50 rounded-xl transition duration-300 border border-gray-200";
+                    qDiv.id = `container-${q.id}`;
+
+                    // Helper function to build options
+                    const buildOptions = (options) => {
+                        let html = `<option value="" disabled selected>...</option>`;
+                        options.forEach(opt => html += `<option value="${opt}">${opt}</option>`);
+                        return html;
+                    };
+
+                    // Note: Using leading-loose and flex-wrap for mobile responsiveness
+                    qDiv.innerHTML = `
+                        <div class="text-base md:text-lg text-gray-800 leading-loose md:leading-10">
+                            <span><strong>${globalIndex}.</strong> ${q.text1}</span>
+                            <select id="${q.blank1.id}" class="inline-block align-middle mx-1 p-1.5 border-2 border-indigo-300 rounded-md bg-white text-indigo-700 font-bold focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm transition">
+                                ${buildOptions(q.blank1.options)}
+                            </select>
+                            <span>${q.text2}</span>
+                            <select id="${q.blank2.id}" class="inline-block align-middle mx-1 p-1.5 border-2 border-indigo-300 rounded-md bg-white text-indigo-700 font-bold focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm transition">
+                                ${buildOptions(q.blank2.options)}
+                            </select>
+                            <span>${q.text3}</span>
+                        </div>
+                        <div id="feedback-${q.id}" class="mt-3 p-3 rounded-lg text-sm font-medium hidden"></div>
+                    `;
+                    questionsList.appendChild(qDiv);
+                    globalIndex++; // Increment for next question
+                });
+
+                container.appendChild(questionsList);
+            });
+        }
+
+        function checkAnswers() {
+            const nameEl = document.getElementById('studentName');
+            const errorMsg = document.getElementById('infoError');
+
+            if (!nameEl.disabled) {
+                errorMsg.textContent = "Please save your Student Information first.";
+                errorMsg.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+            errorMsg.classList.add('hidden');
+
+            let correctCount = 0;
+            const totalBlanks = 40; // 20 questions * 2 blanks
+
+            worksheetData.forEach(part => {
+                part.questions.forEach(q => {
+                    const sel1 = document.getElementById(q.blank1.id);
+                    const sel2 = document.getElementById(q.blank2.id);
+                    const containerEl = document.getElementById(`container-${q.id}`);
+                    const feedbackEl = document.getElementById(`feedback-${q.id}`);
+                    
+                    const ans1 = sel1.value;
+                    const ans2 = sel2.value;
+                    
+                    const isCorrect1 = ans1 === q.blank1.answer;
+                    const isCorrect2 = ans2 === q.blank2.answer;
+
+                    // Style selects based on correctness
+                    sel1.disabled = true;
+                    sel2.disabled = true;
+                    sel1.className = `inline-block align-middle mx-1 p-1.5 border-2 rounded-md font-bold text-white shadow-sm transition ${isCorrect1 ? 'bg-green-500 border-green-600' : 'bg-red-500 border-red-600'}`;
+                    sel2.className = `inline-block align-middle mx-1 p-1.5 border-2 rounded-md font-bold text-white shadow-sm transition ${isCorrect2 ? 'bg-green-500 border-green-600' : 'bg-red-500 border-red-600'}`;
+
+                    if (isCorrect1) correctCount++;
+                    if (isCorrect2) correctCount++;
+
+                    // Format Feedback
+                    feedbackEl.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800');
+                    
+                    if (isCorrect1 && isCorrect2) {
+                        feedbackEl.classList.add('bg-green-100', 'text-green-800');
+                        feedbackEl.innerHTML = `✅ <strong>Perfect!</strong><br><span class="text-xs text-green-700 block mt-1">${q.hint}</span>`;
+                        containerEl.className = "p-4 bg-green-50 rounded-xl border border-green-200 transition duration-300";
+                    } else if (!isCorrect1 && !isCorrect2) {
+                        feedbackEl.classList.add('bg-red-100', 'text-red-800');
+                        feedbackEl.innerHTML = `❌ <strong>Both incorrect.</strong> Correct answers: [ <b>${q.blank1.answer}</b> ] and [ <b>${q.blank2.answer}</b> ].<br><span class="text-xs text-red-700 block mt-1">Hint: ${q.hint}</span>`;
+                        containerEl.className = "p-4 bg-red-50 rounded-xl border border-red-200 transition duration-300";
+                    } else {
+                        feedbackEl.classList.add('bg-yellow-100', 'text-yellow-800');
+                        feedbackEl.innerHTML = `⚠️ <strong>Partially correct.</strong> Correct answers: [ <b>${q.blank1.answer}</b> ] and [ <b>${q.blank2.answer}</b> ].<br><span class="text-xs text-yellow-700 block mt-1">Hint: ${q.hint}</span>`;
+                        containerEl.className = "p-4 bg-yellow-50 rounded-xl border border-yellow-200 transition duration-300";
+                    }
+                });
+            });
+
+            // Update Score out of 100
+            const score = (correctCount / totalBlanks) * 100;
+            document.getElementById('scoreDisplay').textContent = Math.round(score);
+            document.getElementById('gradeBox').classList.remove('hidden');
+            document.getElementById('downloadBtn').classList.remove('hidden');
+            document.getElementById('checkBtn').classList.add('hidden'); // Hide check button to prevent re-clicks
+
+            // Scroll down
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function downloadPDF() {
+            const btn = document.getElementById('downloadBtn');
+            const spinner = document.getElementById('pdfSpinner');
+            
+            // UI state
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            spinner.classList.remove('hidden');
+
+            const name = document.getElementById('studentName').value.trim() || 'Student';
+            const cls = document.getElementById('studentClass').value.trim() || 'Class';
+            const num = document.getElementById('studentNumber').value.trim() || '0';
+            const score = document.getElementById('scoreDisplay').textContent;
+            const date = new Date().toLocaleDateString();
+
+            // Use a short timeout to allow the UI to show the spinner before freezing during PDF generation
+            setTimeout(() => {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Fonts and Colors
+                    doc.setFont("helvetica");
+                    
+                    // Title
+                    doc.setFontSize(20);
+                    doc.setTextColor(67, 56, 202); // Indigo 700
+                    doc.text("English Grammar Worksheet Result", 105, 20, { align: "center" });
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text("Simple Past vs. Past Perfect", 105, 28, { align: "center" });
+                    
+                    // Student Info Box
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(20, 35, 190, 35);
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Name:", 20, 43);
+                    doc.text("Class:", 20, 51);
+                    doc.text("Number:", 20, 59);
+                    
+                    doc.setFont("helvetica", "normal");
+                    doc.text(name, 45, 43);
+                    doc.text(cls, 45, 51);
+                    doc.text(num, 45, 59);
+                    
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Date:", 140, 43);
+                    doc.text("Score:", 140, 51);
+                    
+                    doc.setFont("helvetica", "normal");
+                    doc.text(date, 155, 43);
+                    
+                    doc.setFontSize(16);
+                    doc.setTextColor(22, 163, 74); // Green score
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`${score} / 100`, 155, 52);
+                    
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(20, 65, 190, 65);
+                    
+                    // Questions
+                    let yPos = 75;
+                    let globalPdfIndex = 1;
+                    
+                    worksheetData.forEach(part => {
+                        // Page Break Check for Section Title
+                        if (yPos > 260) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        
+                        doc.setFontSize(14);
+                        doc.setFont("helvetica", "bold");
+                        doc.setTextColor(55, 48, 163); // Indigo 800
+                        doc.text(part.section, 20, yPos);
+                        yPos += 8;
+                        
+                        part.questions.forEach(q => {
+                            const sel1 = document.getElementById(q.blank1.id);
+                            const sel2 = document.getElementById(q.blank2.id);
+                            
+                            const ans1 = sel1.value || "___";
+                            const ans2 = sel2.value || "___";
+                            
+                            const isCorrect1 = ans1 === q.blank1.answer;
+                            const isCorrect2 = ans2 === q.blank2.answer;
+                            
+                            // Construct the full sentence text
+                            const sentenceText = `${globalPdfIndex}. ${q.text1}[${ans1}]${q.text2}[${ans2}]${q.text3}`;
+                            
+                            doc.setFontSize(11);
+                            doc.setFont("helvetica", "normal");
+                            doc.setTextColor(0, 0, 0);
+                            
+                            // Wrap text to fit page width
+                            const splitText = doc.splitTextToSize(sentenceText, 170);
+                            
+                            // Page Break Check for Question
+                            if (yPos + (splitText.length * 6) > 275) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                            
+                            doc.text(splitText, 20, yPos);
+                            yPos += (splitText.length * 6);
+                            
+                            // Add correction if wrong
+                            if (!isCorrect1 || !isCorrect2) {
+                                doc.setFontSize(10);
+                                doc.setFont("helvetica", "italic");
+                                doc.setTextColor(220, 38, 38); // Red
+                                doc.text(`Correction: [ ${q.blank1.answer} ] and [ ${q.blank2.answer} ]`, 25, yPos);
+                                yPos += 6;
+                            }
+                            
+                            yPos += 3; // Gap between questions
+                            globalPdfIndex++;
+                        });
+                        
+                        yPos += 6; // Gap between sections
+                    });
+                    
+                    // Save Document
+                    doc.save(`${name.replace(/\s+/g, '_')}_Grammar_Result.pdf`);
+                    
+                    // Restore UI
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    spinner.classList.add('hidden');
+                } catch (err) {
+                    console.error("PDF Generation failed:", err);
+                    alert("There was an error generating the PDF.");
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    spinner.classList.add('hidden');
+                }
+            }, 100);
+        }
+
+        // Initialize App
+        window.onload = function() {
+            worksheetData.forEach(part => shuffleArray(part.questions));
+            renderWorksheet();
+        };
+    </script>
+</body>
+</html>
