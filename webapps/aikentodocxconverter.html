@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aiken → DOCX Converter</title>
+<title>Aiken → DOCX Converter (Template Baru)</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
@@ -17,6 +16,8 @@
   .format-box{background:#f8f9ff;border:1px solid #d0d7ff;border-radius:8px;padding:14px 16px;font-family:'Courier New',monospace;font-size:.8rem;color:#444;line-height:1.8}
   .note{font-size:.78rem;color:#777;margin-top:10px;line-height:1.6}
   label{font-size:.88rem;font-weight:600;color:#555;display:block;margin-bottom:8px}
+  input[type="text"]{width:100%;padding:10px 14px;font-family:'Segoe UI',sans-serif;font-size:.85rem;border:1.5px solid #d1d5db;border-radius:8px;outline:none;transition:border-color .2s;margin-bottom:14px;}
+  input[type="text"]:focus{border-color:#1a73e8}
   textarea{width:100%;height:280px;padding:14px;font-family:'Courier New',monospace;font-size:.85rem;border:1.5px solid #d1d5db;border-radius:8px;resize:vertical;outline:none;transition:border-color .2s;line-height:1.7}
   textarea:focus{border-color:#1a73e8}
   .btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
@@ -49,7 +50,7 @@
 <header>
   <div>
     <h1>📄 Aiken → DOCX Converter</h1>
-    <p>Konversi soal format Aiken standar → Template MCQ Import (.docx)</p>
+    <p>Konversi soal format Aiken standar → Template Impor Pilihan Ganda</p>
   </div>
 </header>
 <div class="container">
@@ -63,24 +64,21 @@ B. Pilihan B<br>
 C. Pilihan C<br>
 D. Pilihan D &nbsp;<span style="color:#bbb">← bisa berhenti di sini (4 opsi)</span><br>
 E. Pilihan E &nbsp;<span style="color:#bbb">← atau sampai sini (5 opsi)</span><br>
-ANSWER: A<br>
-<br>
-Soal berikutnya (hanya 3 opsi)...<br>
-A. ...<br>
-B. ...<br>
-C. ...<br>
-ANSWER: B
+ANSWER: A
     </div>
     <p class="note">
-      ✅ Jumlah opsi <b>fleksibel</b> — 2 sampai 5 pilihan, setiap soal bisa berbeda.<br>
-      ✅ Output DOCX: numbering <b>a. b. c. ...</b> restart otomatis tiap soal, hanya opsi yang ada di Aiken yang ditulis.
+      ✅ Output DOCX otomatis menyesuaikan urutan: <b>No:, Kategori:, Soal:, Opsi:, Kunci Jawaban:, Poin:, Pembahasan:</b>.<br>
+      ✅ Opsi jawaban akan otomatis menggunakan <b>numbering Word (a. b. c. d.)</b> dan mereset setiap soal.
     </p>
   </div>
 
   <div class="card">
     <h2>✏️ Input Soal Aiken</h2>
+    <label for="kategori">Kategori Soal (Opsional):</label>
+    <input type="text" id="kategori" placeholder="misalnya IPA, Matematika, dll (akan diaplikasikan ke semua soal)">
+    
     <label for="inp">Paste soal format Aiken di bawah ini:</label>
-    <textarea id="inp" placeholder="What is the capital of Indonesia?&#10;A. Surabaya&#10;B. Bandung&#10;C. Jakarta&#10;D. Medan&#10;E. Makassar&#10;ANSWER: C&#10;&#10;True or False: The sun rises in the east.&#10;A. True&#10;B. False&#10;ANSWER: A"></textarea>
+    <textarea id="inp" placeholder="What is the capital of Indonesia?&#10;A. Surabaya&#10;B. Bandung&#10;C. Jakarta&#10;D. Medan&#10;E. Makassar&#10;ANSWER: C"></textarea>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="convert()">⚡ Konversi</button>
       <button class="btn btn-outline" onclick="loadSample()">📄 Contoh</button>
@@ -99,7 +97,7 @@ ANSWER: B
     </div>
   </div>
 </div>
-<div class="footer">Aiken Converter · by Bonaventura Estu</div>
+<div class="footer">Aiken Converter · Updated Format with Numbering</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
@@ -121,13 +119,7 @@ ANSWER: D
 True or False: Jakarta is the capital of Indonesia.
 A. True
 B. False
-ANSWER: A
-
-The text that aims to persuade the reader is called...
-A. Narrative text
-B. Descriptive text
-C. Analytical Exposition
-ANSWER: C`;
+ANSWER: A`;
 
 let parsed = [];
 
@@ -143,7 +135,7 @@ function parseAiken(text){
     if(q){
       qs.push({
         soal: q.trim(),
-        options: [...opts],   // array of {letter, text} in order
+        options: [...opts],
         jawaban: ans.toLowerCase()
       });
     }
@@ -155,15 +147,12 @@ function parseAiken(text){
     if(!line) continue;
 
     const aM = line.match(/^ANSWER\s*[:=]\s*([A-Ea-e])/i);
-    // Match any letter A-Z (not just A-E) for flexible options
     const oM = line.match(/^([A-Za-z])[.)]\s+(.*)/);
 
     if(aM){
       ans = aM[1];
       waitNew = true;
     } else if(oM){
-      // Only treat as option if it's a single letter option line
-      // and we're currently building a question
       waitNew = false;
       opts.push({ letter: oM[1].toLowerCase(), text: oM[2].trim() });
     } else {
@@ -223,8 +212,11 @@ function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repla
 async function downloadDocx(){
   if(!parsed.length) return;
   const n = parsed.length;
+  
+  const catInput = document.getElementById('kategori').value.trim();
+  const kategori = catInput ? catInput : 'wajib diisi (misalnya IPA, Matematika, dll)';
 
-  /* ── numbering.xml: one unique abstractNum + numId per question ── */
+  /* ── numbering.xml ── */
   let numXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">`;
 
@@ -255,30 +247,40 @@ async function downloadDocx(){
   /* ── document.xml ── */
   const boldRun = t => `<w:r><w:rPr><w:b/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
   const normRun = t => `<w:r><w:rPr><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
-  const labelPara = (label, val) =>
-    `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>${boldRun(label)}${val !== '' ? normRun(' ' + val) : ''}</w:p>`;
+  
+  const labelPara = (label, val) => {
+    let content = '';
+    if(label) content += boldRun(label);
+    if(val) content += normRun((label ? ' ' : '') + val);
+    return `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>${content}</w:p>`;
+  };
+  
+  // Fungsi khusus paragraf list (Opsi)
   const optPara = (text, numId) =>
     `<w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="${numId}"/></w:numPr></w:pPr>${normRun(text)}</w:p>`;
-  const blankPara = () =>
-    `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr></w:p>`;
 
   let docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>`;
 
   parsed.forEach((q, i) => {
+    docXml += labelPara('No:', (i + 1).toString());
+    docXml += labelPara('Kategori:', kategori);
     docXml += labelPara('Soal:', q.soal);
-    // Only write options that actually exist in the Aiken input
+    docXml += labelPara('Opsi:', '');
+    
+    // Setiap opsi dirender sebagai ListParagraph dengan ID penomoran milik soal ini
     q.options.forEach(o => {
       docXml += optPara(o.text, i + 1);
     });
+    
     docXml += labelPara('Kunci Jawaban:', q.jawaban.toLowerCase());
+    docXml += labelPara('Poin:', '1');
     docXml += labelPara('Pembahasan:', '');
-    if(i < n - 1) docXml += blankPara();
   });
 
   docXml += `<w:sectPr/></w:body></w:document>`;
 
-  /* ── styles, rels, content-types ── */
+  /* ── styles.xml ── */
   const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:style w:type="paragraph" w:styleId="Normal" w:default="1">
@@ -326,7 +328,7 @@ async function downloadDocx(){
   });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'aiken_converted.docx';
+  a.download = 'soal_import_pilihan_ganda.docx';
   a.click();
   URL.revokeObjectURL(a.href);
 }
