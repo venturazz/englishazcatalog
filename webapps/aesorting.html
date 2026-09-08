@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytical Exposition Sorting Activity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* SortableJS Ghost Class (item being dragged) */
+        .sortable-ghost { 
+            background-color: #f8fafc !important; 
+            border: 2px dashed #3b82f6 !important; 
+            opacity: 0.6; 
+        }
+        
+        /* Drag Handle Styling for both Desktop & Mobile */
+        .drag-handle { 
+            cursor: grab; 
+            touch-action: none; /* Prevents scrolling when touching the handle on mobile */
+        }
+        .drag-handle:active { 
+            cursor: grabbing; 
+        }
+
+        /* Prevent text selection while dragging to ensure smooth desktop UX */
+        .drag-item {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* PDF Exporting Overrides to make it highly compact and prevent cutoff */
+        .print-mode, .print-mode body {
+            height: auto !important;
+            min-height: auto !important;
+            overflow: visible !important;
+            background: white !important;
+            font-size: 11px !important;
+            line-height: 1.2 !important;
+        }
+        
+        .print-mode #main-wrapper {
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+        }
+
+        .print-mode .glass-card {
+            background: white !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+            margin-bottom: 10px !important;
+            padding: 10px !important;
+            border-radius: 0 !important;
+            page-break-inside: avoid;
+        }
+
+        /* Compact Typography & Spacing for Print */
+        .print-mode h1 { font-size: 16px !important; margin-bottom: 2px !important; }
+        .print-mode h2 { font-size: 14px !important; margin-bottom: 2px !important; }
+        .print-mode h3 { font-size: 12px !important; margin-bottom: 6px !important; padding-bottom: 2px !important; }
+        .print-mode p { font-size: 11px !important; line-height: 1.2 !important; margin: 0 !important; }
+        .print-mode .py-8 { padding-top: 10px !important; padding-bottom: 10px !important; }
+        .print-mode .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 10px !important; }
+        .print-mode .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 4px !important; }
+        .print-mode .grid { gap: 6px !important; margin-bottom: 6px !important; }
+        
+        .print-mode input { 
+            padding: 4px !important; 
+            font-size: 11px !important; 
+            height: auto !important; 
+            border-radius: 0 !important; 
+            border-color: #94a3b8 !important;
+        }
+        .print-mode label { margin-bottom: 2px !important; font-size: 10px !important; }
+
+        /* Crucial fix to ensure Score is visible in PDF and compact */
+        .print-mode #score-container { padding: 10px !important; border-top-width: 4px !important; }
+        .print-mode .pdf-score-text {
+            color: #1e3a8a !important; /* Solid dark blue */
+            -webkit-text-fill-color: #1e3a8a !important;
+            background: none !important;
+            font-size: 36px !important;
+            line-height: 1 !important;
+        }
+        .print-mode .text-4xl, .print-mode .text-5xl { font-size: 24px !important; }
+        
+        .print-mode .no-print { 
+            display: none !important; 
+        }
+        
+        .print-mode .drag-handle { 
+            display: none !important; 
+        }
+
+        .print-mode .drag-item {
+            border-width: 1px !important;
+            border-left-width: 4px !important;
+            border-color: #94a3b8 !important; /* Neutral border for print */
+            border-radius: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .print-mode .drag-item .p-4 {
+            padding: 6px 8px !important;
+        }
+
+        .print-mode .correct-item {
+            border-color: #10b981 !important;
+            background-color: #ecfdf5 !important;
+        }
+
+        .print-mode .incorrect-item {
+            border-color: #f43f5e !important;
+            background-color: #fff1f2 !important;
+        }
+
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen py-8 px-4 sm:px-6 lg:px-8 text-gray-900 transition-all duration-300">
+
+    <div id="main-wrapper" class="max-w-4xl mx-auto space-y-8">
+        
+        <!-- Header Section -->
+        <div id="pdf-header" class="text-center py-8 glass-card rounded-3xl mb-8">
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-gray-900 drop-shadow-sm mb-3 tracking-tight">
+                Analytical Exposition
+            </h1>
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-700">Sorting Activity</h2>
+            <p class="text-gray-600 mt-4 max-w-2xl mx-auto px-4 text-sm sm:text-base">
+                Read the paragraphs carefully. Use the grip icon (☰) to drag and drop them into the correct logical order to form a cohesive text.
+            </p>
+        </div>
+
+        <!-- Student Info Card -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-5 flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Student Information
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Student Name</label>
+                    <input type="text" id="student-name" class="w-full px-4 py-3 bg-white/90 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:text-gray-500 transition-colors font-medium text-gray-900" placeholder="Full Name">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Class</label>
+                    <input type="text" id="student-class" class="w-full px-4 py-3 bg-white/90 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:text-gray-500 transition-colors font-medium text-gray-900" placeholder="e.g. 11 Science 1">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Number</label>
+                    <input type="number" id="student-number" class="w-full px-4 py-3 bg-white/90 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100 disabled:text-gray-500 transition-colors font-medium text-gray-900" placeholder="Student No.">
+                </div>
+            </div>
+            <div class="flex items-center gap-4 border-t border-gray-200/60 pt-5">
+                <button id="save-btn" onclick="lockStudentInfo()" class="no-print px-6 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                    </svg>
+                    Lock Information
+                </button>
+                <div id="save-status" class="hidden flex items-center gap-2 text-sm text-emerald-700 font-bold bg-emerald-100/80 px-4 py-2.5 rounded-xl border border-emerald-300 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    Information Locked
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Exercises Container -->
+        <div id="exercises-container" class="space-y-8">
+            <!-- JS will inject the 2 selected texts here -->
+        </div>
+        
+        <!-- Score Container -->
+        <div id="score-container" class="hidden glass-card rounded-2xl p-8 sm:p-12 text-center border-t-8 border-t-indigo-600">
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-gray-800 mb-2">Final Assessment Score</h3>
+            <div class="mt-4 flex justify-center items-baseline gap-2">
+                <!-- Removed text-transparent / bg-clip-text so it renders in html2pdf correctly -->
+                <span id="score-display" class="pdf-score-text text-7xl sm:text-8xl font-black text-indigo-700">0</span>
+                <span class="text-4xl sm:text-5xl font-bold text-gray-500">/ 100</span>
+            </div>
+            <p class="text-gray-600 mt-6 text-base sm:text-lg font-medium">Auto-graded based on correct paragraph sequencing.</p>
+        </div>
+
+    </div> <!-- End Main Wrapper -->
+
+    <!-- Controls (Outside wrapper so they don't affect PDF layout, but still functional) -->
+    <div class="no-print max-w-4xl mx-auto flex flex-col sm:flex-row gap-4 justify-center items-center py-8">
+        <button id="check-btn" onclick="checkAnswers()" class="w-full sm:w-auto px-8 py-4 bg-emerald-500 text-white font-extrabold rounded-2xl shadow-xl hover:bg-emerald-600 hover:-translate-y-1 transition-all focus:outline-none flex items-center justify-center gap-3 text-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Check Answers
+        </button>
+        <button id="download-btn" onclick="downloadPDF()" class="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white font-extrabold rounded-2xl shadow-xl hover:bg-blue-700 hover:-translate-y-1 transition-all focus:outline-none flex items-center justify-center gap-3 text-lg hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download PDF
+        </button>
+    </div>
+
+    <script>
+        // Array of 10 Analytical Exposition texts. Each contains 5 to 7 paragraphs.
+        const allTexts = [
+            {
+                id: 1,
+                title: "The Critical Importance of Adequate Sleep",
+                paragraphs: [
+                    "Sleep plays a vital role in good health and well-being throughout an individual's life. Getting enough quality sleep at the right times can help protect mental health, physical health, and overall quality of life.",
+                    "Firstly, sleep helps the brain function properly. While sleeping, the brain is actively preparing for the next day by forming new pathways to help learn and remember information.",
+                    "Secondly, sleep heavily influences physical health, particularly in healing and repairing the heart and blood vessels. Ongoing sleep deficiency is severely linked to an increased risk of heart disease, kidney disease, high blood pressure, diabetes, and stroke.",
+                    "Furthermore, sufficient sleep is essential for maintaining a healthy immune system. People who do not get enough sleep are more prone to catching illnesses like the common cold, as their bodies lack the rest needed to fight off infections effectively.",
+                    "Therefore, it is undeniable that getting adequate sleep is essential for overall well-being. Individuals must prioritize a consistent sleep schedule to maintain both their cognitive functions and long-term health."
+                ]
+            },
+            {
+                id: 2,
+                title: "The Hidden Dangers of Junk Food",
+                paragraphs: [
+                    "Junk food has become a prominent and normalized part of modern diets worldwide. However, its frequent consumption poses significant, often overlooked risks to human health.",
+                    "First and foremost, junk food is heavily processed and loaded with empty calories, excessive sugar, and unhealthy trans fats. Regular consumption leads directly to weight gain and obesity, which is a gateway to numerous other severe health complications.",
+                    "Secondly, a diet high in junk food inherently lacks essential nutrients like vitamins, minerals, and dietary fiber. This nutritional deficiency can cause chronic fatigue, weaken the immune system, and significantly impair brain function, especially in developing children and adolescents.",
+                    "Moreover, the high sodium content found in most fast foods and processed snacks heavily contributes to cardiovascular issues. It forces the heart to work harder, leading to elevated blood pressure and an increased risk of sudden heart attacks.",
+                    "In summary, while junk food might be incredibly tasty, cheap, and convenient, the severe health risks associated with it are immense. We should make a conscious effort to avoid it and replace it with whole, nutritious foods."
+                ]
+            },
+            {
+                id: 3,
+                title: "Why We Should Prioritize Reading Books",
+                paragraphs: [
+                    "In an era dominated by quick digital media, reading books remains a fundamental skill that brings unparalleled benefits to individuals. It is not just a source of information, but a crucial way to improve various cognitive functions.",
+                    "To begin with, reading comprehensively expands our vocabulary and background knowledge. When we read, we continuously encounter new words and complex concepts, which enhances our ability to communicate articulately and understand the world better.",
+                    "Furthermore, reading actively stimulates the mind and helps delay cognitive decline. Just like any other muscle in the body, the brain requires vigorous exercise to keep it strong, and reading provides a great, complex workout for mental faculties.",
+                    "In addition to cognitive benefits, reading is a proven method for stress reduction. Losing oneself in a well-written book can lower heart rates and ease muscle tension, offering a healthy escape from daily anxieties.",
+                    "Additionally, reading fiction specifically enhances empathy. By experiencing the world through the eyes of diverse characters, readers develop a deeper understanding of human emotions and social situations.",
+                    "In conclusion, cultivating a lifelong habit of reading books is highly beneficial. It enriches our minds, improves our language skills, preserves brain health, and ultimately makes us more empathetic human beings."
+                ]
+            },
+            {
+                id: 4,
+                title: "The Double-Edged Sword of Social Media",
+                paragraphs: [
+                    "Social media has undeniably revolutionized the way society connects, communicates, and shares information. However, its excessive and unregulated use has brought about several negative consequences that urgently need to be addressed.",
+                    "The primary issue with social media is its profound impact on mental health. The constant exposure to idealized, heavily curated lives online frequently leads to intense feelings of inadequacy, low self-esteem, and heightened anxiety among users.",
+                    "Moreover, social media platforms are explicitly designed to be addictive, acting as a significant distraction that negatively affects productivity. Millions of people spend hours mindlessly scrolling through feeds, taking valuable time away from meaningful activities, studies, or professional work.",
+                    "Additionally, the rapid spread of misinformation is a dangerous byproduct of these platforms. False news and rumors can go viral in minutes, causing unnecessary panic, manipulating public opinion, and damaging the fabric of informed societies.",
+                    "Furthermore, cyberbullying has emerged as a severe threat, particularly for younger demographics. The anonymity provided by screens often emboldens individuals to harass others, leading to tragic psychological outcomes for victims.",
+                    "To conclude, while social media is a powerful tool for global connection, its potential to harm mental health, decrease productivity, and spread negativity is immense. Users must approach it mindfully and set strict personal boundaries."
+                ]
+            },
+            {
+                id: 5,
+                title: "Global Warming: A Crisis Demanding Action",
+                paragraphs: [
+                    "Global warming is not a distant myth or a political talking point; it is a scientifically proven, rapidly escalating reality that poses a severe threat to our entire planet. Immediate, collective action is required to mitigate its catastrophic effects.",
+                    "The most obvious and measurable evidence is the rising global average temperature. Decades of indisputable data show a clear upward trend, directly leading to the rapid melting of polar ice caps and dangerously shrinking glaciers.",
+                    "Furthermore, we are already witnessing the devastating impact through more extreme weather events. The statistically significant increase in the frequency and intensity of hurricanes, severe heatwaves, and prolonged droughts are direct consequences of a destabilized, warming climate.",
+                    "Additionally, global warming heavily disrupts vital ecosystems, threatening biodiversity. Rising ocean temperatures are causing massive coral reef bleaching, while shifting land climates are forcing numerous species toward extinction as their natural habitats disappear.",
+                    "From the overwhelming facts above, it is unequivocally clear that global warming is the most pressing issue of our time. We must immediately transition to renewable energy sources and drastically reduce our carbon footprint to preserve the planet for future generations."
+                ]
+            },
+            {
+                id: 6,
+                title: "The Necessity of Financial Literacy for Youth",
+                paragraphs: [
+                    "Financial literacy—the ability to understand and use various financial skills, including personal financial management, budgeting, and investing—is a critical life skill. Unfortunately, it is often overlooked in traditional educational curriculums.",
+                    "Firstly, early financial education empowers young adults to make informed, independent decisions. Understanding how to create a budget and track expenses prevents them from falling into the trap of reckless spending and unmanageable debt.",
+                    "Secondly, teaching financial literacy helps individuals understand the concept of credit and interest. Young people who comprehend how credit scores work are much less likely to accumulate crippling high-interest credit card debt early in their lives.",
+                    "Moreover, financial literacy introduces the crucial habit of saving and investing early. Understanding the power of compound interest encourages youth to start saving for emergencies and retirement as soon as they earn their first income.",
+                    "In summary, integrating financial literacy into education is absolutely essential. It equips the younger generation with the practical tools they need to secure financial stability and independence in adulthood."
+                ]
+            },
+            {
+                id: 7,
+                title: "Why Public Transportation is the Better Choice",
+                paragraphs: [
+                    "In heavily populated urban areas, the reliance on personal vehicles has caused numerous logistical and environmental problems. Shifting towards the use of public transportation is a far superior choice for both individuals and society.",
+                    "To begin with, using public transportation significantly reduces traffic congestion. If more people opt for buses and trains, there will be fewer cars on the road, leading to smoother, faster commutes for everyone involved.",
+                    "Furthermore, public transport is a much more environmentally friendly option. Mass transit systems move large numbers of people at once, dramatically lowering the per-capita carbon emissions and reducing dangerous air pollution in cities.",
+                    "Financially, relying on public transportation is considerably cheaper than owning a private vehicle. Commuters save massive amounts of money that would otherwise be spent on gas, parking, insurance, and routine car maintenance.",
+                    "Additionally, taking public transit is statistically safer than driving a car. Accident rates for buses and trains are exponentially lower than those for personal automobiles, ensuring a safer journey for passengers.",
+                    "Therefore, the benefits of utilizing public transportation are overwhelming. It offers an efficient, eco-friendly, cost-effective, and safe alternative to driving, and should be heavily promoted and funded by city planners."
+                ]
+            },
+            {
+                id: 8,
+                title: "The Lifelong Benefits of Learning a Second Language",
+                paragraphs: [
+                    "In an increasingly interconnected global society, mastering a second language is no longer just a hobby; it is a highly valuable asset. Bilingualism provides significant cognitive, cultural, and professional advantages.",
+                    "First, learning a new language fundamentally improves brain health. Studies show that bilingual individuals have better memory, enhanced problem-solving skills, and a delayed onset of dementia and Alzheimer's disease in old age.",
+                    "Second, speaking another language broadens career opportunities. In a globalized economy, multinational companies highly seek out employees who can communicate effectively with international clients and navigate diverse cultural markets.",
+                    "Moreover, understanding a second language fosters deep cultural empathy and open-mindedness. It allows individuals to connect with foreign cultures authentically, breaking down barriers of misunderstanding and prejudice.",
+                    "In conclusion, the effort required to learn a second language is entirely worthwhile. It not only boosts cognitive function and career prospects but also enriches one's personal understanding of the diverse world we live in."
+                ]
+            },
+            {
+                id: 9,
+                title: "The Immediate Need to Combat Plastic Pollution",
+                paragraphs: [
+                    "The convenience of modern life has led to an explosion in the production and consumption of single-use plastics. This unchecked habit has resulted in a massive environmental crisis that demands immediate, aggressive intervention.",
+                    "Foremost, plastic pollution is destroying our oceans at an alarming rate. Millions of tons of plastic waste end up in the sea every year, forming massive garbage patches and toxifying the water.",
+                    "Consequently, this oceanic pollution poses a lethal threat to marine wildlife. Sea turtles, birds, and fish frequently mistake plastic debris for food, which leads to starvation, internal injuries, and a devastating loss of biodiversity.",
+                    "Furthermore, plastics never truly biodegrade; they only break down into dangerous microplastics. These microscopic particles have infiltrated the soil, the water supply, and ultimately the human food chain, posing unknown long-term health risks to humanity.",
+                    "Economically, plastic pollution also heavily damages coastal communities. Beaches littered with trash suffer from declining tourism revenues, and local fisheries are disrupted by the contamination of their fishing grounds.",
+                    "In addition, the production of plastic is heavily tied to the fossil fuel industry. Manufacturing new plastics releases immense amounts of greenhouse gases, further exacerbating the global climate change crisis.",
+                    "In summary, the pervasive nature of plastic pollution is an ecological emergency. We must immediately enforce bans on single-use plastics, drastically improve recycling infrastructures, and shift to sustainable alternatives."
+                ]
+            },
+            {
+                id: 10,
+                title: "The Invaluable Merits of Physical Exercise",
+                paragraphs: [
+                    "Physical exercise is often viewed merely as a tool for weight loss, but its actual benefits extend far beyond aesthetics. Regular physical activity is critical for maintaining overall physical fitness and mental well-being.",
+                    "One of the primary benefits of exercise is that it drastically reduces the risk of chronic, life-threatening diseases. Consistent physical activity strengthens the heart, improves cardiovascular health, and significantly lowers the risk of type 2 diabetes.",
+                    "Additionally, exercise has a profoundly positive impact on mental health. Engaging in physical activity releases endorphins, the body's natural mood lifters, which are proven to effectively reduce stress, anxiety, and symptoms of depression.",
+                    "Moreover, regular exercise greatly improves sleep quality. People who are physically active tend to fall asleep faster and enjoy deeper, more restorative sleep compared to those who lead sedentary lifestyles.",
+                    "Therefore, incorporating regular exercise into our daily routines is absolutely essential. It provides an irreplaceable dual benefit by fortifying our physical health while simultaneously boosting our mental and emotional resilience."
+                ]
+            }
+        ];
+
+        let activeTexts = [];
+        let sortableInstances = [];
+
+        function init() {
+            // Pick 2 random texts for the session every refresh
+            let shuffledTexts = [...allTexts].sort(() => 0.5 - Math.random());
+            activeTexts = shuffledTexts.slice(0, 2);
+            renderExercises();
+        }
+
+        function lockStudentInfo() {
+            const name = document.getElementById('student-name');
+            const cls = document.getElementById('student-class');
+            const num = document.getElementById('student-number');
+            
+            if(!name.value.trim() || !cls.value.trim() || !num.value.trim()) {
+                alert("Please fill in all student information fields (Name, Class, Number) completely before saving.");
+                return;
+            }
+
+            name.disabled = true;
+            cls.disabled = true;
+            num.disabled = true;
+            
+            document.getElementById('save-btn').classList.add('hidden');
+            document.getElementById('save-status').classList.remove('hidden');
+        }
+
+        function renderExercises() {
+            const container = document.getElementById('exercises-container');
+            container.innerHTML = '';
+            sortableInstances = [];
+
+            activeTexts.forEach((text, textIndex) => {
+                // Map original index to track correct arrangement
+                let paragraphsData = text.paragraphs.map((p, index) => ({ text: p, originalIndex: index }));
+                
+                // Shuffle the paragraphs randomly
+                paragraphsData.sort(() => 0.5 - Math.random());
+
+                // Build HTML for this text block
+                const textSection = document.createElement('div');
+                textSection.className = 'glass-card rounded-2xl p-6 sm:p-8';
+                
+                const titleHtml = `<h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-indigo-100/50 flex items-center gap-3">
+                    <span class="bg-indigo-600 text-white w-8 h-8 rounded-full flex justify-center items-center text-sm">${textIndex + 1}</span>
+                    ${text.title}
+                </h3>`;
+                
+                let listHtml = `<ul id="sortable-list-${textIndex}" class="space-y-3">`;
+                
+                paragraphsData.forEach(item => {
+                    // H5P-styled drag item: thick left border, clear background, visible grip handle
+                    listHtml += `
+                        <li data-original-index="${item.originalIndex}" class="drag-item bg-white rounded-lg shadow-sm border border-gray-200 border-l-[6px] border-l-indigo-500 flex items-stretch hover:shadow-md transition-shadow group relative overflow-hidden">
+                            <div class="drag-handle w-12 flex items-center justify-center bg-gray-50 border-r border-gray-200 text-gray-400 group-hover:text-indigo-600 transition-colors group-hover:bg-indigo-50/50" title="Drag to reorder">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                                </svg>
+                            </div>
+                            <div class="p-4 flex-1">
+                                <p class="text-gray-700 text-[15px] sm:text-base leading-relaxed font-medium pointer-events-none">${item.text}</p>
+                            </div>
+                        </li>
+                    `;
+                });
+                
+                listHtml += `</ul>`;
+                textSection.innerHTML = titleHtml + listHtml;
+                container.appendChild(textSection);
+
+                // Initialize SortableJS
+                const el = document.getElementById(`sortable-list-${textIndex}`);
+                const sortable = new Sortable(el, {
+                    animation: 250,
+                    handle: '.drag-handle', // Grip handles explicitly used to allow smooth desktop/mobile interaction
+                    ghostClass: 'sortable-ghost',
+                    easing: "cubic-bezier(1, 0, 0, 1)",
+                    onStart: function() {
+                        // Reset colors immediately if user drags again after checking answers
+                        resetColors(el);
+                        document.getElementById('download-btn').classList.add('hidden');
+                    }
+                });
+                sortableInstances.push(sortable);
+            });
+        }
+
+        function resetColors(listElement) {
+            const items = listElement.querySelectorAll('li');
+            items.forEach(item => {
+                item.classList.remove('bg-emerald-50', 'border-l-emerald-500', 'bg-rose-50', 'border-l-rose-500', 'correct-item', 'incorrect-item');
+                item.classList.add('bg-white', 'border-l-indigo-500');
+                const handle = item.querySelector('.drag-handle');
+                handle.classList.remove('bg-emerald-100', 'bg-rose-100', 'text-emerald-700', 'text-rose-700');
+                handle.classList.add('bg-gray-50', 'text-gray-400');
+            });
+            document.getElementById('score-container').classList.add('hidden');
+        }
+
+        function checkAnswers() {
+            let totalParagraphs = 0;
+            let correctParagraphs = 0;
+
+            activeTexts.forEach((text, textIndex) => {
+                const listElement = document.getElementById(`sortable-list-${textIndex}`);
+                const items = listElement.querySelectorAll('li');
+                
+                items.forEach((item, currentIndex) => {
+                    const originalIndex = parseInt(item.getAttribute('data-original-index'));
+                    totalParagraphs++;
+                    const handle = item.querySelector('.drag-handle');
+                    
+                    // Clear base visual classes
+                    item.classList.remove('bg-white', 'border-l-indigo-500', 'bg-emerald-50', 'border-l-emerald-500', 'bg-rose-50', 'border-l-rose-500', 'correct-item', 'incorrect-item');
+                    handle.classList.remove('bg-gray-50', 'text-gray-400', 'bg-emerald-100', 'bg-rose-100', 'text-emerald-700', 'text-rose-700');
+                    
+                    // Evaluate order
+                    if (currentIndex === originalIndex) {
+                        item.classList.add('bg-emerald-50', 'border-l-emerald-500', 'correct-item');
+                        handle.classList.add('bg-emerald-100', 'text-emerald-700');
+                        correctParagraphs++;
+                    } else {
+                        item.classList.add('bg-rose-50', 'border-l-rose-500', 'incorrect-item');
+                        handle.classList.add('bg-rose-100', 'text-rose-700');
+                    }
+                });
+            });
+
+            // Update UI Score
+            const score = Math.round((correctParagraphs / totalParagraphs) * 100);
+            const scoreContainer = document.getElementById('score-container');
+            const scoreDisplay = document.getElementById('score-display');
+            
+            scoreContainer.classList.remove('hidden');
+            document.getElementById('download-btn').classList.remove('hidden');
+            scoreDisplay.textContent = score;
+            
+            // Adjust score color dynamically (uses solid colors to ensure they print well)
+            if (score >= 80) {
+                scoreDisplay.className = "pdf-score-text text-7xl sm:text-8xl font-black text-emerald-600";
+            } else if (score >= 50) {
+                scoreDisplay.className = "pdf-score-text text-7xl sm:text-8xl font-black text-yellow-600";
+            } else {
+                scoreDisplay.className = "pdf-score-text text-7xl sm:text-8xl font-black text-rose-600";
+            }
+                 
+            // Smooth scroll to results
+            setTimeout(() => {
+                scoreContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        function downloadPDF() {
+            const name = document.getElementById('student-name').value;
+            const cls = document.getElementById('student-class').value;
+            
+            if(!name || !document.getElementById('student-name').disabled) {
+                alert("Please fill out and Lock your Student Information before exporting to PDF.");
+                return;
+            }
+
+            const element = document.getElementById('main-wrapper');
+            
+            // Add classes to handle un-clipped printing and override UI backgrounds
+            document.body.classList.add('print-mode');
+            
+            // Configuration for html2pdf to ensure no height cutoff and correct rendering
+            const opt = {
+                margin:       [5, 5, 5, 5], // Very small margins (5mm) to save space
+                filename:     `Analytical_Exposition_${name.replace(/\s+/g, '_')}_${cls.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.95 },
+                html2canvas:  { 
+                    scale: 1.5, // Reduced scale to keep the PDF file size small while readable
+                    useCORS: true,
+                    windowWidth: document.body.scrollWidth,
+                    scrollY: 0,
+                    letterRendering: true,
+                    backgroundColor: "#ffffff" // Force white background for pdf capture
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate, then remove the override classes
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.body.classList.remove('print-mode');
+            }).catch(err => {
+                console.error("PDF generation error:", err);
+                document.body.classList.remove('print-mode');
+            });
+        }
+
+        // Initialize application on load
+        window.onload = init;
+
+    </script>
+</body>
+</html>
