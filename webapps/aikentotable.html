@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aiken to CBT Word Table Generator</title>
+    <!-- Mammoth.js for client-side .docx parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #1e40af;
+            --accent: #2563eb;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #cbd5e1;
+            --success: #15803d;
+            --font-family: Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-weight: normal;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 850px) {
+            .grid-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: normal;
+            color: var(--primary);
+        }
+
+        .badge {
+            background-color: #e0e7ff;
+            color: var(--primary);
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .settings-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+        }
+
+        .settings-bar label {
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .settings-bar select {
+            padding: 4px 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: #ffffff;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            text-align: center;
+            background-color: #f1f5f9;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            background-color: #e2e8f0;
+            border-color: var(--accent);
+        }
+
+        .drop-zone p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .drop-zone input[type="file"] {
+            display: none;
+        }
+
+        textarea {
+            width: 100%;
+            height: 340px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            font-size: 0.88rem;
+            resize: vertical;
+            background-color: #fafafa;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        .preview-box {
+            width: 100%;
+            height: 340px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: #ffffff;
+            overflow-y: auto;
+            font-size: 0.88rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .tab-btn {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #e2e8f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 110px;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: #ffffff;
+        }
+
+        .btn-success:hover {
+            background-color: #166534;
+        }
+
+        .status-msg {
+            font-size: 0.8rem;
+            margin-top: 8px;
+            color: var(--text-muted);
+        }
+
+        .status-msg.error {
+            color: #dc2626;
+        }
+
+        .status-msg.success {
+            color: var(--success);
+        }
+
+        footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Aiken to CBT Word Table Generator</h1>
+        <p>Fixed column width formatting strictly matching Microsoft Word CBT import requirements.</p>
+    </header>
+
+    <div class="grid-layout">
+        <!-- Input Section -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">1. Input Questions</span>
+                <span class="badge">Aiken Format</span>
+            </div>
+
+            <div class="drop-zone" id="dropZone">
+                <p>Click to upload or drag & drop file here</p>
+                <p style="font-size: 0.75rem; margin-top: 2px;">Supports .txt, .aiken, .docx files</p>
+                <input type="file" id="fileInput" accept=".txt,.aiken,.docx">
+            </div>
+
+            <textarea id="inputText" placeholder="Paste Aiken format questions here...&#10;&#10;Example:&#10;What is the capital of Indonesia?&#10;A. Jakarta&#10;B. Nusantara&#10;C. Bandung&#10;D. Surabaya&#10;ANSWER: B"></textarea>
+
+            <div class="btn-group">
+                <button class="btn-primary" id="btnConvert">Convert Format</button>
+                <button class="btn-secondary" id="btnSample">Load Sample</button>
+                <button class="btn-secondary" id="btnClear">Clear</button>
+            </div>
+            <div id="inputStatus" class="status-msg"></div>
+        </div>
+
+        <!-- Output Section -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">2. Matched Word Table Output</span>
+                <span class="badge" id="questionCounter">0 Questions</span>
+            </div>
+
+            <div class="settings-bar">
+                <label for="colWidthSelect">Col 1 Ratio Width:</label>
+                <select id="colWidthSelect">
+                    <option value="10">10% (Narrow Column 1)</option>
+                    <option value="12" selected>12% (Standard Word CBT)</option>
+                    <option value="15">15% (Wide Label)</option>
+                    <option value="20">20% (Extra Wide Label)</option>
+                </select>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" id="tabVisual">Table Preview</button>
+                <button class="tab-btn" id="tabCode">HTML Source</button>
+            </div>
+
+            <div id="previewVisual" class="preview-box">
+                <p style="color: #94a3b8; text-align: center; margin-top: 100px;">Converted Word table will appear here...</p>
+            </div>
+            
+            <textarea id="outputText" readonly style="display: none;" placeholder="Generated Table Code..."></textarea>
+
+            <div class="btn-group">
+                <button class="btn-secondary" id="btnCopy">Copy Table</button>
+                <button class="btn-success" id="btnDownloadDoc">Download .doc (Word Table)</button>
+            </div>
+            <div id="outputStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <footer>
+        CBT Question Import Generator &bull; Exact Column Width & Sequential Structure Match
+    </footer>
+</div>
+
+<script>
+    const inputText = document.getElementById('inputText');
+    const outputText = document.getElementById('outputText');
+    const previewVisual = document.getElementById('previewVisual');
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const btnConvert = document.getElementById('btnConvert');
+    const btnSample = document.getElementById('btnSample');
+    const btnClear = document.getElementById('btnClear');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnDownloadDoc = document.getElementById('btnDownloadDoc');
+    const questionCounter = document.getElementById('questionCounter');
+    const inputStatus = document.getElementById('inputStatus');
+    const outputStatus = document.getElementById('outputStatus');
+    const tabVisual = document.getElementById('tabVisual');
+    const tabCode = document.getElementById('tabCode');
+    const colWidthSelect = document.getElementById('colWidthSelect');
+
+    // Tab Navigation
+    tabVisual.addEventListener('click', () => {
+        tabVisual.classList.add('active');
+        tabCode.classList.remove('active');
+        previewVisual.style.display = 'block';
+        outputText.style.display = 'none';
+    });
+
+    tabCode.addEventListener('click', () => {
+        tabCode.classList.add('active');
+        tabVisual.classList.remove('active');
+        previewVisual.style.display = 'none';
+        outputText.style.display = 'block';
+    });
+
+    // Handle column width updates dynamically
+    colWidthSelect.addEventListener('change', convertFormat);
+
+    // Drag and Drop Uploads
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+        });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        inputStatus.textContent = `Loading ${file.name}...`;
+        inputStatus.className = 'status-msg';
+
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        if (ext === 'docx') {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                mammoth.extractRawText({ arrayBuffer: event.target.result })
+                    .then(function(result) {
+                        inputText.value = result.value;
+                        inputStatus.textContent = `Loaded ${file.name} successfully.`;
+                        inputStatus.className = 'status-msg success';
+                        convertFormat();
+                    })
+                    .catch(function(err) {
+                        inputStatus.textContent = 'Failed to read DOCX file: ' + err.message;
+                        inputStatus.className = 'status-msg error';
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                inputText.value = e.target.result;
+                inputStatus.textContent = `Loaded ${file.name} successfully.`;
+                inputStatus.className = 'status-msg success';
+                convertFormat();
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    // Parse Aiken Input
+    function parseAiken(text) {
+        const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+        const questions = [];
+        
+        let currentQ = { questionLines: [], options: {}, answer: '' };
+        let inOptions = false;
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+
+            const ansMatch = line.match(/^(?:ANSWER|KUNCI)\s*:\s*([A-Z])?/i);
+            if (ansMatch) {
+                currentQ.answer = ansMatch[1] ? ansMatch[1].toUpperCase() : '';
+                
+                const questionBody = currentQ.questionLines.join('<br>').trim();
+                if (questionBody || Object.keys(currentQ.options).length > 0) {
+                    questions.push({
+                        question: questionBody,
+                        options: currentQ.options,
+                        answer: currentQ.answer
+                    });
+                }
+                
+                currentQ = { questionLines: [], options: {}, answer: '' };
+                inOptions = false;
+                continue;
+            }
+
+            const optMatch = line.match(/^([A-E])[\.\)]\s*(.*)/i);
+            if (optMatch) {
+                inOptions = true;
+                const letter = optMatch[1].toUpperCase();
+                const optText = optMatch[2].trim();
+                currentQ.options[letter] = optText;
+                continue;
+            }
+
+            if (!inOptions) {
+                currentQ.questionLines.push(line);
+            }
+        }
+
+        return questions;
+    }
+
+    // Conversion with explicit fixed table layout & column width matching Word
+    function convertFormat() {
+        const rawText = inputText.value.trim();
+        if (!rawText) {
+            previewVisual.innerHTML = `<p style="color: #94a3b8; text-align: center; margin-top: 100px;">Converted Word table will appear here...</p>`;
+            outputText.value = '';
+            questionCounter.textContent = '0 Questions';
+            outputStatus.textContent = '';
+            return;
+        }
+
+        const parsedQuestions = parseAiken(rawText);
+        
+        if (parsedQuestions.length === 0) {
+            previewVisual.innerHTML = `<p style="color: #dc2626; text-align: center; margin-top: 100px;">No valid Aiken formatted questions found.<br>Ensure questions end with "ANSWER: X".</p>`;
+            outputText.value = '';
+            questionCounter.textContent = '0 Questions';
+            outputStatus.textContent = 'Parsing failed: Check Aiken format requirements.';
+            outputStatus.className = 'status-msg error';
+            return;
+        }
+
+        const c1Width = parseInt(colWidthSelect.value, 10);
+        const c2Width = 100 - c1Width;
+
+        const cellStyle1 = `border: 1px solid #000000; padding: 4px 8px; vertical-align: top; font-weight: normal; font-family: Arial, sans-serif; font-size: 11pt; color: #000000; width: ${c1Width}%;`;
+        const cellStyle2 = `border: 1px solid #000000; padding: 4px 8px; vertical-align: top; font-weight: normal; font-family: Arial, sans-serif; font-size: 11pt; color: #000000; width: ${c2Width}%;`;
+
+        let tableHtml = `<table border="1" cellspacing="0" cellpadding="4" class="cbt-table" style="border-collapse: collapse; width: 100%; table-layout: fixed; border: 1px solid #000000; font-family: Arial, sans-serif; font-size: 11pt; color: #000000; font-weight: normal;">\n`;
+        tableHtml += `  <colgroup>\n    <col style="width: ${c1Width}%;">\n    <col style="width: ${c2Width}%;">\n  </colgroup>\n`;
+
+        parsedQuestions.forEach((q, idx) => {
+            const num = idx + 1;
+
+            // Question row
+            tableHtml += `  <tr>\n    <td style="${cellStyle1}">Q:${num})</td>\n    <td style="${cellStyle2}">${q.question}</td>\n  </tr>\n`;
+
+            // Options rows (A to D/E)
+            const sortedKeys = Object.keys(q.options).length > 0 ? Object.keys(q.options).sort() : ['A', 'B', 'C', 'D'];
+            sortedKeys.forEach(key => {
+                const optVal = q.options[key] || '';
+                tableHtml += `  <tr>\n    <td style="${cellStyle1}">${key}:)</td>\n    <td style="${cellStyle2}">${optVal}</td>\n  </tr>\n`;
+            });
+
+            // TipeSoal row
+            tableHtml += `  <tr>\n    <td style="${cellStyle1}">TipeSoal:</td>\n    <td style="${cellStyle2}">PG</td>\n  </tr>\n`;
+
+            // Kunci row
+            tableHtml += `  <tr>\n    <td style="${cellStyle1}">Kunci:</td>\n    <td style="${cellStyle2}">${q.answer}</td>\n  </tr>\n`;
+        });
+
+        tableHtml += `</table>`;
+
+        previewVisual.innerHTML = tableHtml;
+        outputText.value = tableHtml;
+        questionCounter.textContent = `${parsedQuestions.length} Question${parsedQuestions.length > 1 ? 's' : ''}`;
+        outputStatus.textContent = `Successfully matched widths (${c1Width}% / ${c2Width}%) and structure!`;
+        outputStatus.className = 'status-msg success';
+    }
+
+    // Event Listeners
+    btnConvert.addEventListener('click', convertFormat);
+
+    btnSample.addEventListener('click', () => {
+        inputText.value = `What is the capital of Indonesia?
+A. Jakarta
+B. Nusantara
+C. Bandung
+D. Surabaya
+ANSWER: B
+
+Which element has the chemical symbol 'O'?
+A. Gold
+B. Oxygen
+C. Osmium
+D. Hydrogen
+ANSWER: B`;
+        inputStatus.textContent = 'Loaded sample Aiken questions.';
+        inputStatus.className = 'status-msg success';
+        convertFormat();
+    });
+
+    btnClear.addEventListener('click', () => {
+        inputText.value = '';
+        outputText.value = '';
+        previewVisual.innerHTML = `<p style="color: #94a3b8; text-align: center; margin-top: 100px;">Converted Word table will appear here...</p>`;
+        questionCounter.textContent = '0 Questions';
+        inputStatus.textContent = '';
+        outputStatus.textContent = '';
+        fileInput.value = '';
+    });
+
+    btnCopy.addEventListener('click', () => {
+        if (!outputText.value) return;
+
+        const type = "text/html";
+        const blob = new Blob([outputText.value], { type });
+        const data = [new ClipboardItem({ 
+            [type]: blob,
+            ["text/plain"]: new Blob([outputText.value], { type: "text/plain" })
+        })];
+
+        navigator.clipboard.write(data).then(() => {
+            outputStatus.textContent = 'Table copied with fixed widths! Paste directly into Microsoft Word.';
+            outputStatus.className = 'status-msg success';
+            setTimeout(() => { outputStatus.textContent = ''; }, 3000);
+        }).catch(() => {
+            navigator.clipboard.writeText(outputText.value).then(() => {
+                outputStatus.textContent = 'Table HTML copied to clipboard!';
+                outputStatus.className = 'status-msg success';
+            });
+        });
+    });
+
+    btnDownloadDoc.addEventListener('click', () => {
+        if (!outputText.value) return;
+
+        const c1Width = parseInt(colWidthSelect.value, 10);
+        const c2Width = 100 - c1Width;
+
+        const docHeader = `<html xmlns:o='urn:schemas-microsoft-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Soal CBT</title>
+<style>
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: Arial, sans-serif; font-size: 11pt; color: #000000; font-weight: normal; }
+  td { border: 1px solid #000000; padding: 4px 8px; vertical-align: top; font-weight: normal; }
+  td:nth-child(1) { width: ${c1Width}%; }
+  td:nth-child(2) { width: ${c2Width}%; }
+</style>
+</head><body>`;
+        const docFooter = `</body></html>`;
+        
+        const fullContent = docHeader + outputText.value + docFooter;
+        
+        const blob = new Blob(['\ufeff' + fullContent], { type: 'application/msword' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'soal_pg_cbt_table.doc';
+        link.click();
+        URL.revokeObjectURL(link.href);
+    });
+</script>
+
+</body>
+</html>
