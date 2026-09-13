@@ -29,7 +29,7 @@
   .stat-badge{background:#e8f0fe;color:#1a73e8;padding:6px 14px;border-radius:20px;font-size:.82rem;font-weight:600}
   .q-block{border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:14px;background:#fafafa}
   .q-num{font-size:.72rem;font-weight:700;color:#999;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
-  .q-soal{font-size:.92rem;margin-bottom:10px;line-height:1.55}
+  .q-soal{font-size:.92rem;margin-bottom:10px;line-height:1.55;color:#333}
   .q-opts{list-style:none;margin:0 0 10px 4px}
   .q-opts li{font-size:.88rem;padding:3px 0;display:flex;gap:8px}
   .q-opts li .letter{font-weight:700;min-width:22px;color:#555}
@@ -54,21 +54,27 @@
   </div>
 </header>
 <div class="container">
-
   <div class="card">
-    <h2>📋 Format Input — Aiken Standar</h2>
+    <h2>📋 Format Input — Aiken Standar & Separator Paragraf</h2>
     <div class="format-box">
-Teks pertanyaan di sini<br>
+Teks pertanyaan biasa di sini<br>
 A. Pilihan A<br>
 B. Pilihan B<br>
 C. Pilihan C<br>
-D. Pilihan D &nbsp;<span style="color:#bbb">← bisa berhenti di sini (4 opsi)</span><br>
-E. Pilihan E &nbsp;<span style="color:#bbb">← atau sampai sini (5 opsi)</span><br>
-ANSWER: A
+D. Pilihan D<br>
+ANSWER: A<br><br>
+<span style="color:#1a73e8;font-weight:bold;">// Untuk Banyak Paragraf Cerita/Stimulus gunakan pemisah #</span><br>
+Read the text below # Paragraf 1 cerita dimulai di sini. # Paragraf 2 cerita dilanjutkan di sini. # What did the character do?<br>
+A. Sleep all day<br>
+B. Explore the garden<br>
+C. Eat fish<br>
+D. Climb trees<br>
+ANSWER: B
     </div>
     <p class="note">
-      ✅ Output DOCX otomatis menyesuaikan urutan: <b>No:, Kategori:, Soal:, Opsi:, Kunci Jawaban:, Poin:, Pembahasan:</b>.<br>
-      ✅ Opsi jawaban akan otomatis menggunakan <b>numbering Word (a. b. c. d.)</b> dan mereset setiap soal.
+      ✅ Gunakan separator <b>#</b> untuk membagi teks.<br>
+      ✅ Format: <b>Judul # Paragraf 1 # Paragraf 2 # ... # Pertanyaan</b>.<br>
+      ✅ Output DOCX otomatis menyesuaikan urutan: <b>No:, Kategori:, Soal:, Opsi:, Kunci Jawaban:, Poin:, Pembahasan:</b>.
     </p>
   </div>
 
@@ -79,6 +85,7 @@ ANSWER: A
     
     <label for="inp">Paste soal format Aiken di bawah ini:</label>
     <textarea id="inp" placeholder="What is the capital of Indonesia?&#10;A. Surabaya&#10;B. Bandung&#10;C. Jakarta&#10;D. Medan&#10;E. Makassar&#10;ANSWER: C"></textarea>
+    
     <div class="btn-row">
       <button class="btn btn-primary" onclick="convert()">⚡ Konversi</button>
       <button class="btn btn-outline" onclick="loadSample()">📄 Contoh</button>
@@ -97,31 +104,29 @@ ANSWER: A
     </div>
   </div>
 </div>
-<div class="footer">Aiken Converter · Updated Format with Numbering</div>
+<div class="footer">Aiken Converter · Multi-Paragraph Separator Support</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-const SAMPLE = `What is the capital of Indonesia?
-A. Surabaya
-B. Bandung
-C. Jakarta
-D. Medan
-E. Makassar
-ANSWER: C
+const SAMPLE = `Read the story below # Once upon a time, there was a little cat named Miko who loved to explore the vast garden behind his house. Every day, he found new butterflies to chase. # One rainy day, Miko couldn't go outside. He sat by the window, watching the droplets fall, hoping the sun would come out soon so he could play again. # What did Miko do on a rainy day?
+A. He played in the mud
+B. He sat by the window
+C. He explored the garden
+D. He chased butterflies
+E. He climbed trees
+ANSWER: B
 
 Which tense is used to describe habits and routines?
 A. Past Simple
 B. Present Continuous
 C. Present Perfect
 D. Present Simple
-ANSWER: D
-
-True or False: Jakarta is the capital of Indonesia.
-A. True
-B. False
-ANSWER: A`;
+ANSWER: D`;
 
 let parsed = [];
+
+// Helper escape HTML
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function loadSample(){ document.getElementById('inp').value = SAMPLE; }
 function clearAll(){ document.getElementById('inp').value=''; document.getElementById('result-section').style.display='none'; parsed=[]; }
@@ -168,9 +173,9 @@ function parseAiken(text){
 function convert(){
   const raw = document.getElementById('inp').value.trim();
   const rs  = document.getElementById('result-section');
-  const err = document.getElementById('err');   err.innerHTML = '';
+  const err = document.getElementById('err'); err.innerHTML = '';
   const prev= document.getElementById('preview'); prev.innerHTML = '';
-  const st  = document.getElementById('stats');  st.innerHTML = '';
+  const st  = document.getElementById('stats'); st.innerHTML = '';
   const dl  = document.getElementById('dl-section'); dl.style.display = 'none';
   rs.style.display = 'block';
 
@@ -182,18 +187,38 @@ function convert(){
 
   let warnings = '';
   let html = '';
+  
   parsed.forEach((q, i) => {
     const optCount = q.options.length;
     if(optCount < 2) warnings += `<div class="alert alert-warn">⚠️ Soal ${i+1} hanya memiliki ${optCount} opsi.</div>`;
 
+    // Process Text Separator for HTML Preview
+    let soalHtml = "";
+    const parts = q.soal.split('#');
+    if (parts.length >= 3) {
+      const title = esc(parts[0].trim());
+      const question = esc(parts[parts.length - 1].trim());
+      
+      // Loop through all paragraphs between the first and last '#'
+      let parasHtml = "";
+      const paras = parts.slice(1, -1);
+      paras.forEach(p => {
+        parasHtml += `<div style="text-indent: 25px; margin: 8px 0; font-weight: normal; text-align: justify;">${esc(p.trim())}</div>`;
+      });
+      
+      soalHtml = `<b>${title}</b>${parasHtml}<b>${question}</b>`;
+    } else {
+      soalHtml = esc(q.soal);
+    }
+
     const optsHtml = q.options.map(o => {
       const c = q.jawaban === o.letter;
-      return `<li class="${c?'correct':''}"><span class="letter">${o.letter}.</span><span>${o.text}</span></li>`;
+      return `<li class="${c?'correct':''}"><span class="letter">${o.letter}.</span><span>${esc(o.text)}</span></li>`;
     }).join('');
 
     html += `<div class="q-block">
       <div class="q-num">Soal ${i+1} <span class="opt-count">${optCount} opsi</span></div>
-      <div class="q-soal">${q.soal}</div>
+      <div class="q-soal">${soalHtml}</div>
       <ul class="q-opts">${optsHtml}</ul>
       <div class="q-meta"><b>Kunci Jawaban:</b><span class="badge-ans">${q.jawaban.toUpperCase()}</span></div>
     </div>`;
@@ -207,7 +232,6 @@ function convert(){
 function randHex8(){
   return Math.floor(Math.random() * 0xFFFFFFFF).toString(16).toUpperCase().padStart(8,'0');
 }
-function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function downloadDocx(){
   if(!parsed.length) return;
@@ -217,9 +241,7 @@ async function downloadDocx(){
   const kategori = catInput ? catInput : 'wajib diisi (misalnya IPA, Matematika, dll)';
 
   /* ── numbering.xml ── */
-  let numXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">`;
-
+  let numXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">`;
   for(let i = 0; i < n; i++){
     numXml += `
   <w:abstractNum w:abstractNumId="${i}">
@@ -255,20 +277,38 @@ async function downloadDocx(){
     return `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>${content}</w:p>`;
   };
   
-  // Fungsi khusus paragraf list (Opsi)
   const optPara = (text, numId) =>
     `<w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="${numId}"/></w:numPr></w:pPr>${normRun(text)}</w:p>`;
 
-  let docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>`;
+  let docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>`;
 
   parsed.forEach((q, i) => {
     docXml += labelPara('No:', (i + 1).toString());
     docXml += labelPara('Kategori:', kategori);
-    docXml += labelPara('Soal:', q.soal);
-    docXml += labelPara('Opsi:', '');
     
-    // Setiap opsi dirender sebagai ListParagraph dengan ID penomoran milik soal ini
+    // Process Text Separator for DOCX
+    const parts = q.soal.split('#');
+    if (parts.length >= 3) {
+      const title = parts[0].trim();
+      const question = parts[parts.length - 1].trim();
+      const paras = parts.slice(1, -1);
+
+      // Line 1: "Soal: Title" (Bold)
+      docXml += `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>${boldRun('Soal: ')}${boldRun(title)}</w:p>`;
+      
+      // Paragraphs (Normal, Indent 720 = 0.5 inch)
+      paras.forEach(p => {
+        docXml += `<w:p><w:pPr><w:pStyle w:val="Normal"/><w:ind w:firstLine="720"/></w:pPr>${normRun(p.trim())}</w:p>`;
+      });
+
+      // Last Line: Actual Question (Bold)
+      docXml += `<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr>${boldRun(question)}</w:p>`;
+    } else {
+      docXml += labelPara('Soal:', q.soal);
+    }
+
+    // Opsi Jawaban
+    docXml += labelPara('Opsi:', '');
     q.options.forEach(o => {
       docXml += optPara(o.text, i + 1);
     });
@@ -281,8 +321,7 @@ async function downloadDocx(){
   docXml += `<w:sectPr/></w:body></w:document>`;
 
   /* ── styles.xml ── */
-  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:style w:type="paragraph" w:styleId="Normal" w:default="1">
     <w:name w:val="Normal"/>
     <w:rPr><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr>
@@ -294,8 +333,7 @@ async function downloadDocx(){
   </w:style>
 </w:styles>`;
 
-  const ctXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  const ctXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml"  ContentType="application/xml"/>
   <Override PartName="/word/document.xml"  ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
@@ -303,14 +341,12 @@ async function downloadDocx(){
   <Override PartName="/word/styles.xml"    ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
 </Types>`;
 
-  const rootRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  const rootRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
 </Relationships>`;
 
-  const wordRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"    Target="styles.xml"/>
+  const wordRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
   <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
 </Relationships>`;
 
@@ -326,6 +362,7 @@ async function downloadDocx(){
     type: 'blob',
     mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   });
+  
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'soal_import_pilihan_ganda.docx';
