@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athlete Descriptive Text Worksheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --page-width: 210mm;
+            --page-height: 290mm; /* Reduced slightly below 297mm to prevent html2pdf pixel rounding from creating page 2 */
+            --line-height: 24px;
+            --indent-width: 55px;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 1rem 1rem 2rem 1rem;
+        }
+
+        /* Top Toolbar Controls */
+        .control-panel {
+            width: var(--page-width);
+            max-width: 100%;
+            background: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Fixed 1-Page Container */
+        .a4-page {
+            width: var(--page-width);
+            height: var(--page-height);
+            max-height: var(--page-height);
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 8mm 12mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-box {
+            width: 32mm;
+            height: 38mm;
+            border: 2px dashed #94a3b8;
+            background-color: #f8fafc;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .photo-box.has-image {
+            border: 2px solid #334155;
+            background-color: transparent;
+        }
+
+        /* Lined Textarea with Cut First Line for Indentation */
+        .lined-textarea {
+            width: 100%;
+            height: 120px; /* 5 lines * 24px */
+            line-height: var(--line-height);
+            font-size: 11pt;
+            font-family: 'Georgia', serif;
+            background-image: 
+                linear-gradient(to right, transparent var(--indent-width), #94a3b8 var(--indent-width)),
+                linear-gradient(to bottom, transparent 23px, #94a3b8 23px, #94a3b8 24px);
+            background-position: 
+                0 23px,
+                0 24px;
+            background-size: 
+                100% 1px,
+                100% 24px;
+            background-repeat: 
+                no-repeat,
+                repeat-y;
+            border: none;
+            resize: none;
+            outline: none;
+            background-color: transparent;
+            padding: 0;
+            margin: 0;
+            display: block;
+            overflow: hidden;
+            text-indent: 60px;
+        }
+
+        .fillable-input {
+            border: none;
+            border-bottom: 1.5px solid #334155;
+            background: transparent;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 0 4px;
+        }
+
+        /* Blank Worksheet Mode */
+        body.mode-blank .lined-textarea {
+            color: transparent;
+        }
+
+        /* Print Media Overrides */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+            html, body {
+                height: 290mm;
+                overflow: hidden;
+            }
+            body {
+                background: none;
+                padding: 0;
+                align-items: flex-start;
+            }
+            .control-panel, .print-hidden {
+                display: none !important;
+            }
+            .a4-page {
+                box-shadow: none !important;
+                width: 210mm;
+                height: 290mm;
+                max-height: 290mm;
+                padding: 8mm 12mm;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            .photo-box {
+                border: 2px solid #000 !important;
+            }
+            .fillable-input {
+                border-bottom: 1px solid #000 !important;
+            }
+            .lined-textarea {
+                background-image: 
+                    linear-gradient(to right, transparent var(--indent-width), #334155 var(--indent-width)),
+                    linear-gradient(to bottom, transparent 23px, #334155 23px, #334155 24px) !important;
+                background-position: 
+                    0 23px,
+                    0 24px !important;
+                background-size: 
+                    100% 1px,
+                    100% 24px !important;
+                background-repeat: 
+                    no-repeat,
+                    repeat-y !important;
+                text-indent: 60px !important;
+            }
+            body.mode-blank .lined-textarea {
+                color: transparent !important;
+            }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body class="mode-digital">
+
+    <!-- Toolbar Controls -->
+    <div class="control-panel print-hidden">
+        <div class="flex items-center gap-4">
+            <span class="font-semibold text-gray-700 text-sm">Worksheet Mode:</span>
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button type="button" id="btnDigital" onclick="setMode('digital')" class="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-l-lg border border-blue-600 hover:bg-blue-700">
+                    Digital / Typed
+                </button>
+                <button type="button" id="btnBlank" onclick="setMode('blank')" class="px-4 py-1.5 text-sm font-medium bg-white text-gray-700 rounded-r-md border border-gray-300 hover:bg-gray-50">
+                    Print Blank (Handwriting)
+                </button>
+            </div>
+        </div>
+
+        <button onclick="downloadPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-1.5 px-5 rounded-lg shadow flex items-center gap-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Download PDF
+        </button>
+    </div>
+
+    <!-- Worksheet Container -->
+    <div class="a4-page" id="worksheetPage">
+        
+        <!-- Header Section -->
+        <div class="flex justify-between items-start">
+            <div class="flex flex-col gap-2 w-[65%] text-[10.5pt]">
+                <div class="flex items-end">
+                    <span class="font-bold w-14">Name:</span>
+                    <input type="text" class="fillable-input flex-1 ml-1 h-5" spellcheck="false">
+                </div>
+                <div class="flex items-end">
+                    <span class="font-bold w-14">Class:</span>
+                    <input type="text" class="fillable-input flex-1 ml-1 h-5" spellcheck="false">
+                </div>
+                <div class="flex items-end">
+                    <span class="font-bold w-14">Date:</span>
+                    <input type="text" class="fillable-input flex-1 ml-1 h-5" spellcheck="false">
+                </div>
+            </div>
+
+            <!-- Photo Upload Box -->
+            <div class="photo-box shrink-0" id="photoBox">
+                <input type="file" id="photoInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 print-hidden">
+                <div id="photoPrompt" class="text-[8pt] text-gray-500 px-1 leading-tight font-sans print-hidden pointer-events-none">
+                    Click to add photo
+                </div>
+                <img id="athletePhoto" src="" alt="Athlete" class="absolute inset-0 w-full h-full object-cover z-0 hidden">
+            </div>
+        </div>
+
+        <!-- Document Title -->
+        <div class="flex justify-center items-end my-1">
+            <span class="text-[12pt] font-bold mr-2">Title:</span>
+            <input type="text" class="fillable-input w-2/3 text-[11pt] text-center font-bold h-6" spellcheck="false" placeholder="e.g., My Favorite Athlete">
+        </div>
+
+        <!-- 5 Paragraph Sections -->
+        <div class="flex flex-col justify-between flex-1 gap-1">
+            
+            <!-- Paragraph 1 -->
+            <div class="flex flex-col">
+                <div class="flex justify-between items-baseline mb-0.5">
+                    <span class="font-bold text-[10.5pt] text-slate-800">Paragraph 1: Identification</span>
+                    <span class="italic text-[8.5pt] text-slate-600 font-sans">(Introduce the athlete, sport, and background)</span>
+                </div>
+                <textarea class="lined-textarea" spellcheck="false"></textarea>
+            </div>
+
+            <!-- Paragraph 2 -->
+            <div class="flex flex-col">
+                <div class="flex justify-between items-baseline mb-0.5">
+                    <span class="font-bold text-[10.5pt] text-slate-800">Paragraph 2: Physical Appearance</span>
+                    <span class="italic text-[8.5pt] text-slate-600 font-sans">(Describe physical features, height, build)</span>
+                </div>
+                <textarea class="lined-textarea" spellcheck="false"></textarea>
+            </div>
+
+            <!-- Paragraph 3 -->
+            <div class="flex flex-col">
+                <div class="flex justify-between items-baseline mb-0.5">
+                    <span class="font-bold text-[10.5pt] text-slate-800">Paragraph 3: Personality & Qualities</span>
+                    <span class="italic text-[8.5pt] text-slate-600 font-sans">(Describe character, mindset, attitude)</span>
+                </div>
+                <textarea class="lined-textarea" spellcheck="false"></textarea>
+            </div>
+
+            <!-- Paragraph 4 -->
+            <div class="flex flex-col">
+                <div class="flex justify-between items-baseline mb-0.5">
+                    <span class="font-bold text-[10.5pt] text-slate-800">Paragraph 4: Achievements & Skills</span>
+                    <span class="italic text-[8.5pt] text-slate-600 font-sans">(Key accomplishments, records, unique abilities)</span>
+                </div>
+                <textarea class="lined-textarea" spellcheck="false"></textarea>
+            </div>
+
+            <!-- Paragraph 5 -->
+            <div class="flex flex-col">
+                <div class="flex justify-between items-baseline mb-0.5">
+                    <span class="font-bold text-[10.5pt] text-slate-800">Paragraph 5: Conclusion</span>
+                    <span class="italic text-[8.5pt] text-slate-600 font-sans">(Final thoughts and why they inspire you)</span>
+                </div>
+                <textarea class="lined-textarea" spellcheck="false"></textarea>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const photoInput = document.getElementById('photoInput');
+        const athletePhoto = document.getElementById('athletePhoto');
+        const photoPrompt = document.getElementById('photoPrompt');
+        const photoBox = document.getElementById('photoBox');
+
+        photoInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    athletePhoto.src = e.target.result;
+                    athletePhoto.classList.remove('hidden');
+                    photoPrompt.classList.add('hidden');
+                    photoBox.classList.add('has-image');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function setMode(mode) {
+            const btnDigital = document.getElementById('btnDigital');
+            const btnBlank = document.getElementById('btnBlank');
+
+            if (mode === 'blank') {
+                document.body.classList.remove('mode-digital');
+                document.body.classList.add('mode-blank');
+                btnBlank.className = "px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-r-md border border-blue-600 hover:bg-blue-700";
+                btnDigital.className = "px-4 py-1.5 text-sm font-medium bg-white text-gray-700 rounded-l-lg border border-gray-300 hover:bg-gray-50";
+            } else {
+                document.body.classList.remove('mode-blank');
+                document.body.classList.add('mode-digital');
+                btnDigital.className = "px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-l-lg border border-blue-600 hover:bg-blue-700";
+                btnBlank.className = "px-4 py-1.5 text-sm font-medium bg-white text-gray-700 rounded-r-md border border-gray-300 hover:bg-gray-50";
+            }
+        }
+
+        // Direct PDF Download Engine
+        function downloadPDF() {
+            // Mirror typed text into DOM attributes for canvas snapshot
+            document.querySelectorAll('input').forEach(input => {
+                if (input.type === 'text') {
+                    input.setAttribute('value', input.value);
+                }
+            });
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.textContent = textarea.value;
+            });
+
+            const element = document.getElementById('worksheetPage');
+            const originalShadow = element.style.boxShadow;
+            element.style.boxShadow = 'none';
+
+            const opt = {
+                margin: 0,
+                filename: 'Athlete_Descriptive_Worksheet.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    scrollY: 0,
+                    logging: false
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Standard async promise execution
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.style.boxShadow = originalShadow;
+            }).catch(err => {
+                console.error('Download error:', err);
+                element.style.boxShadow = originalShadow;
+                // Native fallback print dialog if browser blocks canvas execution
+                window.print();
+            });
+        }
+    </script>
+</body>
+</html>
