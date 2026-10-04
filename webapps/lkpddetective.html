@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Mobile viewport meta tag -->
     <title>LKPD Digital - Detective Investigation Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -25,42 +25,49 @@
             break-inside: avoid;
         }
         
-        /* Temporary styles applied during PDF generation */
+        /* Temporary styles applied during PDF generation for flawless rendering */
         .pdf-replacement-element {
             white-space: pre-wrap;
             word-wrap: break-word;
-            border: 1px dashed #cbd5e1;
-            padding: 8px;
-            background-color: #f8fafc;
-            border-radius: 4px;
-            color: #1e293b;
+            border: 1px solid #d1d5db; /* Matches Tailwind border-gray-300 */
+            padding: 0.5rem 0.75rem; /* Matches Tailwind p-2/p-3 */
+            background-color: #ffffff;
+            border-radius: 0.375rem; /* Matches Tailwind rounded-md */
+            color: #1f2937; /* text-gray-800 */
+            width: 100%;
+            display: block;
+            box-sizing: border-box;
+        }
+        
+        .pdf-replacement-element.empty {
+            color: transparent;
         }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-4xl mx-auto relative">
         <!-- Floating Action Button for Export -->
         <div class="flex justify-end mb-4 sticky top-4 z-50">
-            <button onclick="exportToPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center gap-2 transition-colors border border-indigo-800">
+            <button onclick="exportToPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg shadow-lg flex items-center gap-2 transition-colors border border-indigo-800 text-sm md:text-base">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
-                Export / Print PDF
+                Export PDF
             </button>
         </div>
 
         <!-- Main LKPD Container -->
-        <div id="lkpd-container" class="bg-white p-6 md:p-12 rounded-xl shadow-xl border border-gray-200">
+        <div id="lkpd-container" class="bg-white p-4 sm:p-6 md:p-12 rounded-xl shadow-xl border border-gray-200">
             
             <!-- Header Section -->
-            <div class="border-b-4 border-gray-800 pb-6 mb-6 text-center prevent-break">
-                <h1 class="text-4xl font-bold detective-font text-gray-900 tracking-wider mb-2">DETECTIVE INVESTIGATION REPORT</h1>
-                <p class="text-gray-600 font-semibold">CONFIDENTIAL CASE FILE</p>
+            <div class="border-b-4 border-gray-800 pb-4 md:pb-6 mb-6 text-center prevent-break">
+                <h1 class="text-3xl md:text-5xl font-bold detective-font text-gray-900 tracking-wider mb-2 leading-tight">DETECTIVE INVESTIGATION REPORT</h1>
+                <p class="text-gray-600 font-semibold md:text-lg">CONFIDENTIAL CASE FILE</p>
             </div>
 
             <!-- Group Info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200 prevent-break">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200 prevent-break">
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Group Name:</label>
                     <input type="text" id="groupName" class="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter group name...">
@@ -74,34 +81,34 @@
             <!-- Mission Box -->
             <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 mb-8 prevent-break">
                 <h3 class="font-bold text-indigo-900 mb-1">MISSION:</h3>
-                <p class="text-indigo-800">Play the game <strong>"The Phantom Clock Thief"</strong>. Read the suspects' testimonies carefully (these are recount texts). Use this worksheet to organize your findings and solve the case!</p>
+                <p class="text-indigo-800 text-sm md:text-base">Play the game <strong>"The Phantom Clock Thief"</strong>. Read the suspects' testimonies carefully (these are recount texts). Use this worksheet to organize your findings and solve the case!</p>
             </div>
 
             <!-- PART A -->
             <div class="mb-10 prevent-break">
-                <h2 class="text-xl font-bold bg-gray-800 text-white p-2 rounded mb-4">PART A: ACQUISITION (Gathering the Facts)</h2>
-                <p class="text-gray-600 mb-4 italic">Based on the opening case file, fill in the Orientation details:</p>
+                <h2 class="text-lg md:text-xl font-bold bg-gray-800 text-white p-2 rounded mb-4">PART A: ACQUISITION (Gathering the Facts)</h2>
+                <p class="text-gray-600 mb-4 italic text-sm md:text-base">Based on the opening case file, fill in the Orientation details:</p>
                 
                 <div class="space-y-4">
                     <div class="flex flex-col md:flex-row md:items-center gap-2">
                         <label class="font-bold text-gray-700 md:w-1/3">What was stolen?</label>
-                        <input type="text" class="flex-1 border border-gray-300 rounded p-2 focus:ring-2 outline-none" placeholder="...">
+                        <input type="text" class="flex-1 border border-gray-300 rounded p-2 focus:ring-2 outline-none w-full" placeholder="...">
                     </div>
                     <div class="flex flex-col md:flex-row md:items-center gap-2">
                         <label class="font-bold text-gray-700 md:w-1/3">When did the crime occur (Estimated timeframe)?</label>
-                        <input type="text" class="flex-1 border border-gray-300 rounded p-2 focus:ring-2 outline-none" placeholder="...">
+                        <input type="text" class="flex-1 border border-gray-300 rounded p-2 focus:ring-2 outline-none w-full" placeholder="...">
                     </div>
                     <div class="flex flex-col md:flex-row md:items-center gap-2">
                         <label class="font-bold text-gray-700 md:w-1/3">Where did it happen?</label>
-                        <input type="text" class="flex-1 border border-gray-300 rounded p-2 focus:ring-2 outline-none" placeholder="...">
+                        <input type="text" class="flex-1 border border-gray-300 rounded p-2 focus:ring-2 outline-none w-full" placeholder="...">
                     </div>
                 </div>
             </div>
 
             <!-- PART B -->
             <div class="mb-10">
-                <h2 class="text-xl font-bold bg-gray-800 text-white p-2 rounded mb-4 prevent-break">PART B: MEANING MAKING (Analyzing the Events)</h2>
-                <p class="text-gray-600 mb-4 italic prevent-break">Read the recount texts from the suspects. Reconstruct their timeline. <br>
+                <h2 class="text-lg md:text-xl font-bold bg-gray-800 text-white p-2 rounded mb-4 prevent-break">PART B: MEANING MAKING (Analyzing the Events)</h2>
+                <p class="text-gray-600 mb-4 italic text-sm md:text-base prevent-break">Read the recount texts from the suspects. Reconstruct their timeline. <br>
                 (List main actions/events each suspect claimed they did. <u>Underline or CAPITALIZE the Past Tense Verbs you find in your notes</u>).</p>
                 
                 <!-- Dynamic Suspect Container -->
@@ -109,15 +116,15 @@
                     <!-- Suspects will be injected here by JS -->
                 </div>
 
-                <button onclick="addSuspect()" class="dynamic-btn mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded border border-gray-400 flex items-center gap-2">
+                <button onclick="addSuspect()" class="dynamic-btn mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded border border-gray-400 flex items-center gap-2 text-sm md:text-base w-full md:w-auto justify-center">
                     <span>+</span> Add Another Suspect
                 </button>
             </div>
 
             <!-- PART C -->
             <div class="mb-10">
-                <h2 class="text-xl font-bold bg-gray-800 text-white p-2 rounded mb-4 prevent-break">PART C: TRANSFER (Solving the Mystery - HOTS)</h2>
-                <p class="text-gray-600 mb-4 italic prevent-break">Discuss with your group and answer these critical questions:</p>
+                <h2 class="text-lg md:text-xl font-bold bg-gray-800 text-white p-2 rounded mb-4 prevent-break">PART C: TRANSFER (Solving the Mystery - HOTS)</h2>
+                <p class="text-gray-600 mb-4 italic text-sm md:text-base prevent-break">Discuss with your group and answer these critical questions:</p>
                 
                 <div class="space-y-6">
                     <div class="prevent-break">
@@ -137,18 +144,18 @@
 
             <!-- PART D -->
             <div class="mb-4 prevent-break">
-                <h2 class="text-xl font-bold bg-gray-800 text-white p-2 rounded mb-4">PART D: REFLECTION</h2>
+                <h2 class="text-lg md:text-xl font-bold bg-gray-800 text-white p-2 rounded mb-4">PART D: REFLECTION</h2>
                 
                 <!-- Matching Section -->
-                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6">
+                <div class="bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200 mb-6">
                     <h3 class="font-bold text-gray-800 mb-4 text-center">Match the Recount Text Structure with the Detective Investigation Stages</h3>
                     
-                    <div class="flex flex-col md:flex-row gap-6 justify-between items-center">
+                    <div class="flex flex-col md:flex-row gap-4 md:gap-6 justify-between items-center">
                         <!-- Recount Structure -->
-                        <div class="w-full md:w-5/12 space-y-4">
-                            <div class="bg-blue-100 border border-blue-300 p-3 rounded text-center font-bold text-blue-900 shadow-sm">1. Orientation</div>
-                            <div class="bg-blue-100 border border-blue-300 p-3 rounded text-center font-bold text-blue-900 shadow-sm">2. Events</div>
-                            <div class="bg-blue-100 border border-blue-300 p-3 rounded text-center font-bold text-blue-900 shadow-sm">3. Re-orientation</div>
+                        <div class="w-full md:w-5/12 space-y-2 md:space-y-4">
+                            <div class="bg-blue-100 border border-blue-300 p-3 rounded text-center font-bold text-blue-900 shadow-sm text-sm md:text-base">1. Orientation</div>
+                            <div class="bg-blue-100 border border-blue-300 p-3 rounded text-center font-bold text-blue-900 shadow-sm text-sm md:text-base">2. Events</div>
+                            <div class="bg-blue-100 border border-blue-300 p-3 rounded text-center font-bold text-blue-900 shadow-sm text-sm md:text-base">3. Re-orientation</div>
                         </div>
 
                         <!-- Connectors (Visual) -->
@@ -159,20 +166,20 @@
                         </div>
 
                         <!-- Investigation Stages -->
-                        <div class="w-full md:w-5/12 space-y-4">
-                            <select class="w-full p-3 border border-gray-400 rounded bg-white font-semibold text-gray-700 shadow-sm outline-none cursor-pointer">
+                        <div class="w-full md:w-5/12 space-y-2 md:space-y-4">
+                            <select class="w-full p-3 border border-gray-400 rounded bg-white font-semibold text-gray-700 shadow-sm outline-none cursor-pointer text-sm md:text-base">
                                 <option value="" disabled selected>-- Select Stage --</option>
                                 <option value="Intro to the Incident">Intro to the Incident</option>
                                 <option value="Investigation / Chronology">Investigation / Chronology</option>
                                 <option value="Conclusion of the Finding">Conclusion of the Finding</option>
                             </select>
-                            <select class="w-full p-3 border border-gray-400 rounded bg-white font-semibold text-gray-700 shadow-sm outline-none cursor-pointer">
+                            <select class="w-full p-3 border border-gray-400 rounded bg-white font-semibold text-gray-700 shadow-sm outline-none cursor-pointer text-sm md:text-base">
                                 <option value="" disabled selected>-- Select Stage --</option>
                                 <option value="Intro to the Incident">Intro to the Incident</option>
                                 <option value="Investigation / Chronology">Investigation / Chronology</option>
                                 <option value="Conclusion of the Finding">Conclusion of the Finding</option>
                             </select>
-                            <select class="w-full p-3 border border-gray-400 rounded bg-white font-semibold text-gray-700 shadow-sm outline-none cursor-pointer">
+                            <select class="w-full p-3 border border-gray-400 rounded bg-white font-semibold text-gray-700 shadow-sm outline-none cursor-pointer text-sm md:text-base">
                                 <option value="" disabled selected>-- Select Stage --</option>
                                 <option value="Intro to the Incident">Intro to the Incident</option>
                                 <option value="Investigation / Chronology">Investigation / Chronology</option>
@@ -182,7 +189,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div class="prevent-break">
                     <label class="block font-bold text-gray-800 mb-2">How the structure of recount text can help me solve the mystery?</label>
                     <textarea class="w-full border border-gray-300 rounded p-3 min-h-[120px] outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                 </div>
@@ -192,7 +199,6 @@
     </div>
 
     <script>
-        // --- DYNAMIC SUSPECT & EVENT LOGIC ---
         let suspectCounter = 0;
 
         function addSuspect() {
@@ -201,24 +207,25 @@
             const wrapper = document.getElementById('suspects-wrapper');
             
             const suspectDiv = document.createElement('div');
-            suspectDiv.className = 'prevent-break bg-gray-50 border border-gray-300 rounded-lg p-5 relative';
+            suspectDiv.className = 'prevent-break bg-gray-50 border border-gray-300 rounded-lg p-4 md:p-5 relative shadow-sm';
             suspectDiv.id = `suspect-box-${sId}`;
             
+            // Adjust layouts for mobile vs desktop within the dynamic block
             suspectDiv.innerHTML = `
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-3 w-full max-w-sm">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2 md:gap-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full md:max-w-md">
                         <label class="font-bold text-gray-800 whitespace-nowrap">Suspect ${sId}:</label>
                         <input type="text" class="w-full border border-gray-300 rounded p-2 focus:ring-2 outline-none" placeholder="Name / Role...">
                     </div>
-                    ${sId > 1 ? `<button onclick="this.parentElement.parentElement.remove()" class="dynamic-btn text-red-500 hover:text-red-700 font-bold p-2 bg-red-50 rounded">Remove Suspect</button>` : ''}
+                    ${sId > 1 ? `<button onclick="this.parentElement.parentElement.remove()" class="dynamic-btn text-red-500 hover:text-red-700 bg-red-50 px-3 py-1 rounded text-sm md:text-base font-semibold border border-red-200 self-end md:self-auto">Remove</button>` : ''}
                 </div>
                 
                 <div id="events-list-${sId}" class="space-y-3 pl-2 md:pl-6 border-l-2 border-indigo-200">
                     <!-- Events injected here -->
                 </div>
                 
-                <button onclick="addEvent(${sId})" class="dynamic-btn mt-4 text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 pl-2 md:pl-6">
-                    <span class="text-lg">+</span> Add Event
+                <button onclick="addEvent(${sId})" class="dynamic-btn mt-4 text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 pl-2 md:pl-6 text-sm md:text-base">
+                    <span class="text-lg leading-none">+</span> Add Event
                 </button>
             `;
             
@@ -234,16 +241,16 @@
         function addEvent(suspectId) {
             const list = document.getElementById(`events-list-${suspectId}`);
             const eventDiv = document.createElement('div');
-            eventDiv.className = 'flex items-start gap-2';
+            eventDiv.className = 'flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2 relative';
             
             // Calculate Event Number based on current children
             const evNum = list.children.length + 1;
             
             eventDiv.innerHTML = `
-                <label class="font-semibold text-gray-600 min-w-[70px] mt-2">Event ${evNum}:</label>
-                <div class="flex-1 flex gap-2">
-                    <input type="text" class="w-full border border-gray-300 rounded p-2 focus:ring-2 outline-none" placeholder="Action they did...">
-                    <button onclick="this.parentElement.parentElement.remove()" class="dynamic-btn text-gray-400 hover:text-red-500 px-2 py-1 font-bold" title="Delete event">✕</button>
+                <label class="font-semibold text-gray-600 min-w-[70px] sm:mt-2 text-sm md:text-base">Event ${evNum}:</label>
+                <div class="flex-1 flex gap-2 w-full">
+                    <input type="text" class="w-full border border-gray-300 rounded p-2 focus:ring-2 outline-none text-sm md:text-base" placeholder="Action they did...">
+                    <button onclick="this.parentElement.parentElement.remove()" class="dynamic-btn text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 px-2 py-1 font-bold rounded" title="Delete event">✕</button>
                 </div>
             `;
             list.appendChild(eventDiv);
@@ -254,7 +261,6 @@
             addSuspect();
         };
 
-        // --- FLAWLESS PDF EXPORT LOGIC ---
         function exportToPDF() {
             const container = document.getElementById('lkpd-container');
             const groupNameInput = document.getElementById('groupName').value.trim();
@@ -264,74 +270,78 @@
             const dynamicBtns = document.querySelectorAll('.dynamic-btn');
             dynamicBtns.forEach(btn => btn.style.display = 'none');
 
-            // 2. The Foolproof Replacement Method
-            // Browsers often cut off text inside <textarea> or <input> during canvas rendering.
-            // We temporarily replace them with pure text <div>s that look identical but stretch perfectly.
+            // 2. The Clone & Replace Method
+            // Prevents long text cutoff and broken layouts inside canvas
             const originalElements = [];
             
-            // Process Inputs and Textareas
+            // Text Inputs and Textareas
             const inputs = container.querySelectorAll('input[type="text"], textarea');
             inputs.forEach(el => {
                 const replica = document.createElement('div');
                 replica.className = `pdf-replacement-element ${el.className}`;
-                // Copy exact text, ensuring empty fields still retain box shape
-                replica.textContent = el.value || '\u00A0'; 
+                // Copy exact text, ensure empty fields still maintain their height
+                if(el.value.trim() !== '') {
+                     replica.textContent = el.value;
+                } else {
+                     replica.innerHTML = '&nbsp;';
+                     replica.classList.add('empty');
+                }
                 
-                // Retain specific height constraints if it was a textarea
+                // Inherit height for textareas so they don't collapse
                 if(el.tagName.toLowerCase() === 'textarea') {
-                    replica.style.minHeight = Math.max(el.offsetHeight, 80) + 'px';
+                    const computedHeight = window.getComputedStyle(el).height;
+                    replica.style.minHeight = Math.max(parseInt(computedHeight) || 0, 80) + 'px';
                 }
 
+                // Insert replica and hide original
                 el.parentNode.insertBefore(replica, el);
-                el.style.display = 'none'; // Hide original
-                
+                el.style.display = 'none';
                 originalElements.push({ original: el, replica: replica });
             });
 
-            // Process Select/Dropdowns
+            // Select/Dropdowns
             const selects = container.querySelectorAll('select');
             selects.forEach(el => {
                 const replica = document.createElement('div');
                 replica.className = `pdf-replacement-element ${el.className}`;
-                // Get the text of the selected option
-                replica.textContent = el.options[el.selectedIndex]?.text || '\u00A0';
+                
+                if (el.selectedIndex > 0) { // If an actual option is chosen
+                    replica.textContent = el.options[el.selectedIndex].text;
+                } else {
+                    replica.innerHTML = '&nbsp;'; // Maintain structure if unselected
+                    replica.classList.add('empty');
+                }
                 
                 el.parentNode.insertBefore(replica, el);
                 el.style.display = 'none';
-                
                 originalElements.push({ original: el, replica: replica });
             });
 
             // 3. Configure html2pdf API
             const opt = {
-                margin:       10, // 10mm margin
+                margin:       [15, 10, 15, 10], // top, right, bottom, left
                 filename:     `${fileName}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                // Use scale 2 for crisp text, disable logging to keep console clean
-                html2canvas:  { scale: 2, useCORS: true, logging: false }, 
-                // A4 Portrait, 'css' mode respects our .prevent-break classes!
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                // Use 'css' to respect our .prevent-break classes
                 pagebreak:    { mode: ['css', 'legacy'] } 
             };
 
-            // 4. Generate & Save
+            // 4. Generate & Save, then restore DOM
             html2pdf().set(opt).from(container).save().then(() => {
-                // 5. Restore DOM to original editable state
                 restoreDOM(originalElements, dynamicBtns);
             }).catch(err => {
-                console.error("PDF Export failed:", err);
-                // Ensure restoration even if user cancels or error occurs
+                console.error("PDF Export error:", err);
                 restoreDOM(originalElements, dynamicBtns);
             });
         }
 
         function restoreDOM(elementsArray, buttonsArray) {
-            // Remove text replicas and show original inputs
             elementsArray.forEach(item => {
                 item.replica.remove();
                 item.original.style.display = '';
             });
-            // Show buttons again
             buttonsArray.forEach(btn => btn.style.display = '');
         }
     </script>
