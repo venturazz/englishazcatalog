@@ -74,15 +74,12 @@ ANSWER: B
     <p class="note">
       ✅ Gunakan separator <b>#</b> untuk membagi teks.<br>
       ✅ Format: <b>Judul # Paragraf 1 # Paragraf 2 # ... # Pertanyaan</b>.<br>
-      ✅ Output DOCX otomatis menyesuaikan urutan: <b>No:, Kategori:, Soal:, Opsi:, Kunci Jawaban:, Poin:, Pembahasan:</b>.
+      ✅ Output DOCX otomatis menyesuaikan urutan: <b>No:, Soal:, Opsi:, Kunci Jawaban:, Poin:, Pembahasan:</b>.
     </p>
   </div>
 
   <div class="card">
     <h2>✏️ Input Soal Aiken</h2>
-    <label for="kategori">Kategori Soal (Opsional):</label>
-    <input type="text" id="kategori" placeholder="misalnya IPA, Matematika, dll (akan diaplikasikan ke semua soal)">
-    
     <label for="inp">Paste soal format Aiken di bawah ini:</label>
     <textarea id="inp" placeholder="What is the capital of Indonesia?&#10;A. Surabaya&#10;B. Bandung&#10;C. Jakarta&#10;D. Medan&#10;E. Makassar&#10;ANSWER: C"></textarea>
     
@@ -236,9 +233,6 @@ function randHex8(){
 async function downloadDocx(){
   if(!parsed.length) return;
   const n = parsed.length;
-  
-  const catInput = document.getElementById('kategori').value.trim();
-  const kategori = catInput ? catInput : 'wajib diisi (misalnya IPA, Matematika, dll)';
 
   /* ── numbering.xml ── */
   let numXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">`;
@@ -282,9 +276,8 @@ async function downloadDocx(){
 
   let docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>`;
 
-  //parsed.forEach((q, i) => {
-   //docXml += labelPara('No:', (i + 1).toString());
-    //docXml += labelPara('Kategori:', kategori);
+  parsed.forEach((q, i) => {
+    docXml += labelPara('No:', (i + 1).toString());
     
     // Process Text Separator for DOCX
     const parts = q.soal.split('#');
