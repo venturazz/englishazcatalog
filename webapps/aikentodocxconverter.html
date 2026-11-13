@@ -282,9 +282,9 @@ async function downloadDocx(){
 
   let docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>`;
 
-  parsed.forEach((q, i) => {
-    docXml += labelPara('No:', (i + 1).toString());
-    docXml += labelPara('Kategori:', kategori);
+  //parsed.forEach((q, i) => {
+   //docXml += labelPara('No:', (i + 1).toString());
+    //docXml += labelPara('Kategori:', kategori);
     
     // Process Text Separator for DOCX
     const parts = q.soal.split('#');
